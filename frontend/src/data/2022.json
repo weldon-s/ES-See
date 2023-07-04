@@ -1,0 +1,540 @@
+{
+    "year": 2022,
+    "host": "it",
+
+    "points": {
+        "semi1": ["jury", "tele"],
+        "semi2": ["jury", "tele"],
+        "final": ["jury", "tele"]
+    },
+
+    "songs": {
+        "al": {"title": "Sekret", "artist": "Ronela Hajati"},
+        "am": {"title": "Snap", "artist": "Rosa Linn"},
+        "at": {"title": "Halo", "artist": "Lumix feat. Pia Maria"},
+        "bg": {"title": "Intention", "artist": "Intelligent Music Project"},
+        "hr": {"title": "Guilty Pleasure", "artist": "Mia Dimšić"},
+        "dk": {"title": "The Show", "artist": "Reddi"},
+        "gr": {"title": "Die Together", "artist": "Amanda Georgiadi Tenfjord"},
+        "is": {"title": "Með hækkandi sól", "artist": "Systur"},
+        "lv": {"title": "Eat Your Salad", "artist": "Citi Zēni"},
+        "lt": {"title": "Sentimentai", "artist": "Monika Liu"},
+        "md": {"title": "Trenulețul", "artist": "Zdob și Zdub and Adahov Brothers"},
+        "nl": {"title": "De diepte", "artist": "S10"},
+        "no": {"title": "Give That Wolf a Banana", "artist": "Subwoolfer"},
+        "pt": {"title": "Saudade, saudade", "artist": "Maro"},
+        "si": {"title": "Disko", "artist": "LPS"},
+        "ch": {"title": "Boys Do Cry", "artist": "Marius Bear"},
+        "ua": {"title": "Stefania (Стефанія)", "artist": "Kalush Orchestra"},
+        "au": {"title": "Not the Same", "artist": "Sheldon Riley"},
+        "az": {"title": "Fade to Black", "artist": "Nadir Rustamli"},
+        "be": {"title": "Miss You", "artist": "Jérémie Makiese"},
+        "cy": {"title": "Ela (Έλα)", "artist": "Andromache"},
+        "cz": {"title": "Lights Off", "artist": "We Are Domi"},
+        "ee": {"title": "Hope", "artist": "Stefan"},
+        "fi": {"title": "Jezebel", "artist": "The Rasmus"},
+        "ge": {"title": "Lock Me In", "artist": "Circus Mircus"},
+        "ie": {"title": "That's Rich", "artist": "Brooke"},
+        "il": {"title": "I.M", "artist": "Michael Ben David"},
+        "mt": {"title": "I Am What I Am", "artist": "Emma Muscat"},
+        "me": {"title": "Breathe", "artist": "Vladana"},
+        "mk": {"title": "Circles", "artist": "Andrea"},
+        "pl": {"title": "River", "artist": "Ochman"},
+        "ro": {"title": "Llámame", "artist": "WRS"},
+        "sm": {"title": "Stripper", "artist": "Achille Lauro"},
+        "rs": {"title": "In Corpore Sano", "artist": "Konstrakta"},
+        "se": {"title": "Hold Me Closer", "artist": "Cornelia Jakobs"},
+        "fr": {"title": "Fulenn", "artist": "Alvan and Ahez"},
+        "de": {"title": "Rockstars", "artist": "Malik Harris"},
+        "it": {"title": "Brividi", "artist": "Mahmood and Blanco"},
+        "es": {"title": "SloMo", "artist": "Chanel"},
+        "gb": {"title": "Space Man", "artist": "Sam Ryder"}
+    },
+
+    "semi1": {
+        "al": {
+            "running": 1,
+            "jury": ["ua", "nl", "gr", "am", "ch", "is", "pt", "hr", "no", "bg", "dk", "si", "lv", "lt", "md", "at"],
+            "tele": ["bg", "gr", "ua", "am", "hr", "pt", "at", "nl", "no", "lt", "md", "dk", "ch", "is", "si", "lv"]
+        },
+
+        "lv": {
+            "running": 2,
+            "jury": ["ua", "gr", "is", "no", "dk", "pt", "ch", "nl", "am", "lt", "hr", "si", "at", "md", "bg", "al"],
+            "tele": ["ua", "lt", "md", "no", "pt", "is", "am", "nl", "dk", "at", "ch", "si", "gr", "hr", "bg", "al"]
+        },
+
+        "lt": {
+            "running": 3,
+            "jury": ["ua", "ch", "nl", "pt", "gr", "dk", "is", "no", "lv", "md", "am", "bg", "hr", "al", "si", "at"],
+            "tele": ["ua", "lv", "pt", "md", "nl", "no", "am", "ch", "is", "dk", "gr", "at", "hr", "si", "bg", "al"]
+        },
+
+        "ch": {
+            "running": 4,
+            "jury": ["nl", "gr", "ua", "no", "is", "dk", "pt", "lt", "lv", "am", "hr", "md", "si", "bg", "at", "al"],
+            "tele": ["pt", "ua", "al", "md", "hr", "am", "at", "lt", "nl", "is", "no", "gr", "dk", "lv", "bg", "si"]
+        },
+
+        "si": {
+            "running": 5,
+            "jury": ["lt", "nl", "hr", "ua", "pt", "gr", "ch", "lv", "no", "am", "md", "dk", "is", "at", "al", "bg"],
+            "tele": ["hr", "ua", "gr", "md", "al", "lt", "no", "nl", "pt", "dk", "am", "is", "at", "ch", "lv", "bg"]
+        },
+
+        "ua": {
+            "running": 6,
+            "jury": ["nl", "am", "pt", "gr", "ch", "dk", "is", "hr", "md", "no", "bg", "lv", "at", "lt", "si", "al"],
+            "tele": ["lt", "md", "is", "no", "nl", "lv", "pt", "at", "am", "gr", "dk", "ch", "hr", "bg", "si", "al"]
+        },
+
+        "bg": {
+            "running": 7,
+            "jury": ["ch", "gr", "am", "no", "hr", "pt", "nl", "lv", "dk", "md", "ua", "lt", "at", "is", "si", "al"],
+            "tele": ["ua", "am", "md", "gr", "pt", "lt", "no", "nl", "hr", "al", "at", "ch", "dk", "si", "is", "lv"]
+        },
+
+        "nl": {
+            "running": 8,
+            "jury": ["gr", "pt", "ua", "ch", "no", "is", "am", "hr", "lt", "si", "md", "dk", "at", "al", "bg", "lv"],
+            "tele": ["ua", "md", "am", "no", "pt", "lt", "is", "gr", "ch", "lv", "dk", "hr", "si", "al", "bg", "at"]
+        },
+
+        "md": {
+            "running": 9,
+            "jury": ["ua", "ch", "gr", "no", "am", "pt", "lv", "is", "nl", "si", "lt", "dk", "bg", "hr", "al", "at"],
+            "tele": ["ua", "no", "nl", "am", "lt", "bg", "pt", "dk", "at", "gr", "hr", "is", "si", "lv", "ch", "al"]
+        },
+
+        "pt": {
+            "running": 10,
+            "jury": ["lv", "is", "nl", "ua", "lt", "gr", "ch", "am", "no", "md", "at", "dk", "hr", "si", "bg", "al"],
+            "tele": ["ua", "md", "nl", "no", "lt", "am", "gr", "dk", "is", "hr", "ch", "lv", "si", "al", "at", "bg"]
+        },
+
+        "hr": {
+            "running": 11,
+            "jury": ["pt", "lt", "gr", "ua", "ch", "si", "is", "dk", "nl", "am", "lv", "no", "md", "al", "at", "bg"],
+            "tele": ["ua", "md", "si", "no", "lt", "am", "at", "nl", "al", "pt", "gr", "dk", "lv", "bg", "is", "ch"]
+        },
+        
+        "dk": {
+            "running": 12,
+            "jury": ["nl", "gr", "pt", "ua", "ch", "lt", "is", "no", "am", "lv", "md", "hr", "at", "si", "bg", "al"],
+            "tele": ["ua", "no", "lt", "is", "md", "am", "nl", "pt", "at", "ch", "gr", "lv", "hr", "bg", "al", "si"]
+        },
+
+        "at": {
+            "running": 13,
+            "jury": ["am", "pt", "nl", "ch", "gr", "dk", "no", "hr", "is", "lv", "ua", "lt", "bg", "md", "si", "al"],
+            "tele": ["ua", "md", "am", "no", "hr", "nl", "lt", "ch", "al", "pt", "is", "si", "gr", "dk", "bg", "lv"]
+        },
+
+        "is": {
+            "running": 14,
+            "jury": ["no", "ua", "lt", "nl", "pt", "ch", "lv", "am", "gr", "dk", "at", "hr", "bg", "al", "md", "si"],
+            "tele": ["ua", "no", "nl", "md", "dk", "lt", "at", "am", "pt", "ch", "lv", "bg", "gr", "hr", "si", "al"]
+        },
+
+        "gr": {
+            "running": 15,
+            "jury": ["al", "bg", "hr", "md", "nl", "pt", "lv", "ua", "at", "no", "am", "dk", "ch", "lt", "is", "si"],
+            "tele": ["al", "ua", "am", "no", "md", "lt", "nl", "pt", "at", "bg", "hr", "dk", "lv", "is", "ch", "si"]
+        },
+        
+        "no": {
+            "running": 16,
+            "jury": ["gr", "pt", "nl", "am", "ua", "lt", "ch", "dk", "is", "md", "at", "lv", "al", "si", "hr", "bg"],
+            "tele": ["gr", "ua", "lt", "is", "md", "am", "dk", "at", "pt", "nl", "ch", "lv", "al", "hr", "bg", "si"]
+        },
+
+        "am": {
+            "running": 17,
+            "jury": ["nl", "pt", "gr", "ua", "no", "ch", "hr", "is", "lv", "md", "at", "bg", "si", "lt", "dk", "al"],
+            "tele": ["ua", "gr", "pt", "lt", "md", "at", "nl", "no", "al", "ch", "hr", "is", "si", "bg", "dk", "lv"]
+        },
+
+        "fr": {
+            "running": -1,
+            "jury": ["gr", "ua", "nl", "am", "pt", "ch", "is", "no", "lt", "at", "hr", "dk", "md", "lv", "bg", "si", "al"],
+            "tele": ["am", "ua", "pt", "md", "lt", "al", "nl", "is", "no", "gr", "at", "lv", "si", "dk", "hr", "bg","ch"]
+        },
+        
+        "it": {
+            "running": -1,
+            "jury": ["gr", "nl", "am", "ua", "ch", "md", "hr", "at", "lt", "lv", "pt", "si", "no", "al", "bg", "is", "dk"],
+            "tele": ["ua", "md", "al", "am", "pt", "no", "nl", "gr", "at", "lt", "lv", "dk", "ch", "hr", "is", "bg", "si"]
+        }
+    },
+    
+    "semi2": {
+        "fi": {
+            "running": 1,
+            "jury": ["se", "au", "rs", "az", "cz", "sm", "ee", "cy", "mk", "pl", "be", "ie", "il", "mt", "ge", "me", "ro"],
+            "tele": ["ee", "se", "rs", "cz", "au", "pl", "sm", "ro", "ge", "be", "il", "cy", "ie", "az", "mk", "mt", "me"]
+        },
+
+        "il": {
+            "running": 2,
+            "jury": ["se", "au", "pl", "be", "cz", "fi", "ro", "ee", "mt", "rs", "mk", "az", "sm", "ge", "ie", "cy", "me"],
+            "tele": ["se", "cz", "rs", "pl", "au", "ge", "ee", "ie", "ro", "be", "fi", "cy", "sm", "mt", "az", "mk", "me"]
+        },
+
+        "rs": {
+            "running": 3,
+            "jury": ["se", "ee", "az", "me", "be", "fi", "cz", "pl", "au", "mk", "ro", "cy", "ge", "ie", "il", "mt", "sm"],
+            "tele": ["me", "cy", "mk", "cz", "ro", "se", "ee", "be", "mt", "fi", "au", "sm", "ge", "ie", "il", "pl", "az"]
+        },
+
+        "az": {
+            "running": 4,
+            "jury": ["se", "au", "pl", "ee", "cz", "be", "fi", "rs", "mt", "il", "ro", "mk", "ge", "ie", "me", "sm", "cy"],
+            "tele": ["cy", "il", "se", "au", "ro", "fi", "be", "mt", "cz", "pl", "rs", "ge", "me", "sm", "ie", "ee", "mk"]
+        },
+
+        "ge": {
+            "running": 5,
+            "jury": ["se", "au", "pl", "ee", "cz", "be", "az", "fi", "rs", "mt", "il", "ro", "mk", "ie", "me", "sm", "cy"],
+            "tele": ["rs", "il", "se", "ee", "fi", "ro", "cz", "pl", "au", "cy", "az", "be", "mt", "ie", "sm", "mk", "me"]
+        },
+
+        "mt": {
+            "running": 6,
+            "jury": ["se", "au", "ee", "cz", "pl", "mk", "az", "fi", "il", "ge", "rs", "ro", "me", "be", "cy", "ie", "sm"],
+            "tele": ["rs", "se", "sm", "au", "fi", "ro", "pl", "ie", "cz", "cy", "ee", "be", "mk", "il", "az", "ge", "me"]
+        },
+
+        "sm": {
+            "running": 7,
+            "jury": ["se", "au", "pl", "ee", "cz", "be", "az", "fi", "rs", "mt", "il", "ro", "mk", "ge", "ie", "me", "cy"],
+            "tele": ["rs", "se", "ro", "au", "cz", "pl", "cy", "fi", "il", "be", "mt", "ee", "ie", "ge", "az", "mk", "me"]
+        },
+
+        "au": {
+            "running": 8,
+            "jury": ["se", "il", "be", "mk", "ie", "ee", "rs", "az", "cz", "ge", "pl", "fi", "mt", "me", "sm", "ro", "cy"],
+            "tele": ["rs", "se", "ie", "cz", "pl", "sm", "ro", "ee", "fi", "ge", "il", "cy", "mk", "mt", "be", "az", "me"]
+        },
+
+        "cy": {
+            "running": 9,
+            "jury": ["se", "au", "pl", "ee", "az", "rs", "cz", "be", "fi", "ie", "il", "mt", "me", "ge", "sm", "ro", "mk"],
+            "tele": ["rs", "ro", "pl", "se", "be", "cz", "au", "ee", "fi", "mt", "il", "sm", "az", "ie", "mk", "ge", "me"]
+        },
+
+        "ie": {
+            "running": 10,
+            "jury": ["se", "cz", "ee", "rs", "mt", "au", "cy", "il", "be", "mk", "sm", "pl", "az", "ro", "ge", "fi", "me"],
+            "tele": ["pl", "se", "cz", "au", "ee", "ro", "rs", "mt", "be", "fi", "sm", "ge", "cy", "il", "az", "mk", "me"]
+        },
+
+        "mk": {
+            "running": 11,
+            "jury": ["rs", "be", "pl", "se", "mt", "au", "fi", "me", "ee", "az", "il", "cz", "ro", "sm", "ge", "ie", "cy"],
+            "tele": ["rs", "me", "fi", "se", "cz", "cy", "be", "mt", "pl", "ee", "ie", "ro", "il", "au", "sm", "az", "ge"]
+        },
+
+        "ee": {
+            "running": 12,
+            "jury": ["se", "au", "fi", "cz", "az", "be", "ie", "ge", "ro", "mt", "sm", "il", "cy", "mk", "pl", "me", "rs"],
+            "tele": ["fi", "se", "cz", "be", "pl", "au", "rs", "mt", "ro", "ge", "sm", "cy", "mk", "ie", "il", "az", "me"]
+        },
+
+        "ro": {
+            "running": 13,
+            "jury": ["se", "au", "cz", "ee", "be", "mk", "fi", "az", "sm", "il", "pl", "mt", "ge", "ie", "rs", "cy", "me"],
+            "tele": ["se", "rs", "ee", "cy", "cz", "be", "fi", "au", "sm", "pl", "ie", "mt", "il", "az", "mk", "me", "ge"]
+        },
+
+        "pl": {
+            "running": 14,
+            "jury": ["se", "au", "cz", "ee", "be", "mk", "fi", "az", "sm", "il", "mt", "ge", "ie", "rs", "cy", "ro", "me"],
+            "tele": ["se", "ee", "cz", "rs", "fi", "ro", "sm", "cy", "au", "be", "ie", "il", "mk", "ge", "mt", "az", "me"]
+        },
+
+        "me": {
+            "running": 15,
+            "jury": ["se", "au", "be", "rs", "ee", "az", "fi", "pl", "cz", "mk", "il", "mt", "ie", "cy", "ro", "sm", "ge"],
+            "tele": ["rs", "mk", "cy", "ee", "se", "be", "cz", "au", "pl", "mt", "az", "il", "ro", "ge", "sm", "fi", "ie"]
+        },
+
+        "be": {
+            "running": 16,
+            "jury": ["sm", "se", "au", "il", "pl", "fi", "cz", "az", "rs", "ie", "ge", "ee", "cy", "mt", "mk", "ro", "me"],
+            "tele": ["pl", "se", "ro", "ee", "rs", "cz", "fi", "au", "mt", "ie", "il", "cy", "sm", "az", "ge", "mk", "me"]
+        },
+
+        "se": {
+            "running": 17,
+            "jury": ["au", "ee", "be", "mt", "cz", "az", "fi", "il", "cy", "pl", "ro", "mk", "sm", "ie", "rs", "me", "ge"],
+            "tele": ["fi", "rs", "ee", "pl", "cz", "be", "au", "ro", "mt", "cy", "ie", "sm", "ge", "il", "mk", "az", "me"]
+        },
+
+        "cz": {
+            "running": 18,
+            "jury": ["se", "mk", "au", "ee", "be", "ge", "az", "pl", "fi", "mt", "ie", "il", "cy", "rs", "me", "ro", "sm"],
+            "tele": ["rs", "fi", "ee", "pl", "se", "au", "ro", "il", "mk", "ie", "ge", "cy", "be", "mt", "az", "sm", "me"]
+        },
+        
+        "de": {
+            "running": -1,
+            "jury": ["mk", "az", "ro", "se", "au", "be", "ee", "ge", "il", "fi", "pl", "sm", "cz", "mt", "cy", "me", "rs", "ie"],
+            "tele": ["pl", "rs", "se", "fi", "cz", "ro", "ee", "au", "il", "be", "sm", "cy", "ge", "ie", "mk", "az", "mt", "me"]
+        },
+
+        "es": {
+            "running": -1,
+            "jury": ["az", "au", "be", "pl", "se", "rs", "ro", "il", "fi", "me", "cz", "ee", "mk", "mt", "ge", "ie", "cy", "sm"],
+            "tele": ["ro", "cz", "se", "ie", "fi", "rs", "pl", "sm", "ee", "cy", "au", "be", "il", "mt", "ge", "az", "me", "mk"]
+        },
+        
+        "gb": {
+            "running": -1,
+            "jury": ["se", "cz", "az", "mk", "pl", "rs", "ee", "au", "be", "il", "ie", "ge", "sm", "ro", "me", "mt", "fi", "cy"],
+            "tele": ["ie", "pl", "cz", "ro", "rs", "se", "fi", "sm", "ee", "cy", "au", "ge", "mt", "il", "be", "mk", "az", "me"]
+        }
+    },
+
+    "final": {
+        "cz": {
+            "running": 1,
+            "jury": ["gb", "se", "ee", "es", "ch", "pt", "ua", "gr", "no", "au", "nl", "az", "be", "it", "am", "de", "pl", "fi", "rs", "is", "lt", "ro", "fr", "md"],
+            "tele": ["ua", "rs", "md", "pl", "es", "se", "ee", "no", "gb", "fi", "am", "nl", "lt", "fr", "it", "au", "de", "az", "gr", "pt", "ro", "be", "is", "ch"]
+        },
+
+        "ro": {
+            
+            "running": 2,
+            "jury": ["ua", "se", "gb", "pt", "au", "ch", "it", "nl", "gr", "es", "ee", "no", "az", "lt", "be", "fi", "am", "is", "de", "cz", "pl", "fr", "rs", "md"],
+            "tele": ["md", "ua", "es", "rs", "se", "ee", "it", "gb", "no", "fr", "pl", "lt", "au", "gr", "fi", "be", "nl", "am", "pt", "de", "ch", "cz", "az", "is"]
+        },
+
+        "pt": {
+            "running": 3,
+            "jury": ["es", "gb", "ua", "nl", "is", "lt", "gr", "rs", "ch", "am", "md", "se", "no", "az", "it", "cz", "pl", "be", "fr", "ee", "de", "au", "ro", "fi"],
+            "tele": ["ua", "es", "md", "se", "gb", "rs", "nl", "it", "no", "lt", "pl", "ee", "ro", "de", "am", "fi", "ch", "gr", "fr", "be", "au", "cz", "is", "az"]
+        },
+
+        "fi": {
+            "running": 4,
+            "jury": ["se", "gb", "au", "rs", "gr", "nl", "no", "az", "it", "am", "es", "cz", "ua", "ch", "pl", "pt", "be", "ee", "fr", "md", "lt", "is", "ro", "de"],
+            "tele": ["ua", "ee", "se", "rs", "no", "md", "gb", "es", "lt", "fr", "au", "nl", "pl", "ro", "cz", "it", "pt", "be", "is", "de", "ch", "az", "gr", "am"]
+        },
+        
+        "ch": {
+            "running": 5,
+            "jury": ["gr", "nl", "es", "se", "gb", "pt", "au", "ua", "it", "no", "cz", "az", "lt", "am", "is", "rs", "ee", "pl", "be", "fr", "fi", "de", "md", "ro"],
+            "tele": ["rs", "ua", "it", "pt", "es", "gb", "md", "se", "de", "pl", "ee", "no", "nl", "fi", "lt", "am", "ro", "au", "gr", "fr", "be", "az", "is", "cz"]
+        },
+
+        "fr": {
+            "running": 6,
+            "jury": ["gb", "ua", "pl", "am", "be", "es", "nl", "gr", "cz", "pt", "se", "is", "rs", "no", "au", "ch", "ee", "fi", "it", "lt", "de", "md", "ro", "az"],
+            "tele": ["ua", "md", "rs", "es", "pt", "am", "pl", "it", "gb", "ro", "se", "lt", "ee", "nl", "no", "be", "fi", "au", "is", "de", "gr", "cz", "az", "ch"]
+        },
+
+        "no": {
+            "running": 7,
+            "jury": ["gr", "pt", "se", "es", "gb", "nl", "am", "ua", "lt", "ch", "ee", "cz", "au", "fr", "pl", "az", "it", "be", "ro", "md", "de", "is", "rs", "fi"],
+            "tele": ["ua", "lt", "se", "gr", "gb", "pl", "md", "rs", "ee", "es", "cz", "is", "ch", "fr", "am", "nl", "fi", "de", "ro", "pt", "au", "be", "it", "az"]
+        },
+
+        "am": {
+            "running": 8,
+            "jury": ["es", "it", "pt", "fr", "ua", "se", "nl", "ee", "gr", "md", "no", "ro", "rs", "cz", "gb", "ch", "be", "de", "pl", "lt", "is", "au", "fi", "az"],
+            "tele": ["ee", "ua", "es", "se", "rs", "md", "pt", "gr", "lt", "gb", "fi", "fr", "de", "it", "nl", "be", "no", "pl", "ro", "ch", "au", "cz", "is", "az"]
+        },
+
+        "it": {
+            "running": 9,
+            "jury": ["nl", "gr", "am", "be", "gb", "md", "rs", "ch", "au", "fi", "ua", "pt", "se", "lt", "cz", "no", "de", "es", "pl", "fr", "is", "az", "ee", "ro"],
+            "tele": ["ua", "md", "ro", "rs", "gb", "se", "no", "pl", "nl", "pt", "am", "es", "lt", "gr", "fi", "az", "be", "de", "ee", "ch", "au", "fr", "cz", "is"]
+        },
+
+        "es": {
+            "running": 10,
+            "jury": ["az", "it", "au", "se", "rs", "be", "ro", "gb", "gr", "ch", "pl", "pt", "lt", "de", "ee", "nl", "fi", "cz", "am", "ua", "no", "fr", "is", "md"],
+            "tele": ["ua", "ro", "gb", "md", "se", "it", "pt", "no", "rs", "pl", "am", "lt", "fr", "fi", "ee", "de", "nl", "be", "cz", "au", "gr", "ch", "az", "is"]
+        },
+
+        "nl": {
+            "running": 11,
+            "jury": ["gr", "ch", "pt", "au", "be", "es", "gb", "no", "md", "se", "is", "ua", "lt", "az", "pl", "de", "am", "it", "ee", "rs", "cz", "fi", "ro", "fr"],
+            "tele": ["ua", "md", "gb", "es", "pl", "no", "be", "rs", "se", "ee", "pt", "am", "lt", "au", "it", "ch", "ro", "de", "az", "fi", "gr", "fr", "is", "cz"]
+        },
+
+        "ua": {
+            "running": 12,
+            "jury": ["gb", "pt", "nl", "gr", "ch", "az", "se", "au", "am", "cz", "pl", "it", "is", "fr", "ee", "no", "md", "de", "be", "fi", "lt", "ro", "es", "rs"],
+            "tele": ["pl", "lt", "is", "gb", "md", "ee", "fi", "nl", "no", "es", "se", "de", "pt", "fr", "rs", "cz", "ro", "be", "az", "au", "it", "ch", "am", "gr"]
+        },
+
+        "de": {
+            "running": 13,
+            "jury": ["gb", "ua", "es", "se", "az", "au", "nl", "no", "ch", "ro", "be", "ee", "rs", "pl", "md", "pt", "gr", "it", "lt", "am", "fi", "fr", "cz", "is"],
+            "tele": ["ua", "md", "pl", "rs", "gb", "se", "nl", "it", "es", "no", "pt", "fi", "lt", "am", "ee", "ch", "ro", "fr", "gr", "au", "be", "cz", "az", "is"]
+        },
+
+        "lt": {
+            "running": 14,
+            "jury": ["ua", "gb", "pt", "ch", "nl", "es", "it", "se", "is", "rs", "gr", "au", "az", "ee", "no", "de", "be", "am", "pl", "cz", "md", "fr", "fi", "ro"],
+            "tele": ["ua", "se", "ee", "pt", "es", "md", "gb", "it", "no", "nl", "pl", "rs", "fi", "de", "ro", "fr", "be", "ch", "am", "is", "au", "cz", "gr", "az"]
+        },
+        
+        "az": {
+            "running": 15,
+            "jury": ["gb", "it", "se", "pt", "ua", "es", "nl", "gr", "pl", "fr", "ch", "au", "ee", "cz", "be", "no", "am", "md", "fi", "de", "ro", "is", "rs", "lt"],
+            "tele": ["ua", "es", "gb", "no", "rs", "it", "se", "gr", "au", "pl", "md", "fi", "nl", "lt", "ro", "be", "fr", "de", "pt", "ee", "cz", "ch", "is", "am"]
+        },
+
+        "be": {
+            "running": 16,
+            "jury": ["gb", "es", "it", "se", "ua", "pt", "rs", "az", "cz", "au", "lt", "ch", "gr", "fi", "nl", "ee", "no", "pl", "fr", "md", "de", "am", "ro", "is"],
+            "tele": ["ua", "nl", "md", "pl", "es", "se", "it", "gb", "rs", "pt", "ro", "ee", "am", "no", "lt", "fr", "au", "fi", "gr", "de", "ch", "az", "cz", "is"]
+        },
+
+        "gr": {
+            "running": 17,
+            "jury": ["az", "pl", "au", "ro", "md", "es", "nl", "pt", "cz", "it", "fi", "ch", "fr", "no", "am", "ua", "de", "lt", "be", "is", "se", "gb", "rs", "ee"],
+            "tele": ["es", "ua", "rs", "it", "no", "gb", "se", "md", "ro", "fr", "fi", "nl", "au", "pl", "am", "lt", "ee", "be", "de", "pt", "cz", "az", "ch", "is"]
+        },
+
+        "is": {
+            "running": 18,
+            "jury": ["se", "ua", "no", "gb", "it", "pt", "nl", "es", "cz", "lt", "au", "pl", "gr", "ch", "am", "be", "rs", "fr", "ee", "fi", "ro", "de", "az", "md"],
+            "tele": ["ua", "no", "se", "gb", "md", "nl", "pl", "es", "lt", "rs", "ee", "it", "be", "pt", "ch", "fi", "au", "ro", "de", "cz", "fr", "am", "gr", "az"]
+        },
+
+        "md": {
+            "running": 19,
+            "jury": ["ua", "gb", "se", "ch", "au", "ee", "be", "es", "pt", "az", "no", "ro", "nl", "am", "fi", "gr", "pl", "it", "de", "lt", "cz", "is", "rs", "fr"],
+            "tele": ["ua", "ro", "es", "ee", "no", "se", "lt", "gb", "fr", "be", "pt", "rs", "am", "nl", "fi", "de", "gr", "it", "az", "ch", "cz", "pl", "au", "is"]
+        },
+        
+        "se": {
+            "running": 20,
+            "jury": ["es", "au", "gb", "az", "ee", "cz", "rs", "no", "am", "be", "gr", "it", "fi", "pt", "ua", "ro", "de", "lt", "nl", "md", "is", "ch", "pl", "fr"],
+            "tele": ["ua", "no", "rs", "fi", "gb", "pl", "ee", "lt", "es", "nl", "md", "am", "be", "ro", "au", "it", "de", "is", "pt", "cz", "fr", "ch", "gr", "az"]
+        },
+
+        "au": {
+            "running": 21,
+            "jury": ["es", "se", "rs", "ua", "pt", "be", "cz", "it", "az", "ee", "de", "ch", "md", "lt", "gb", "ro", "is", "no", "fi", "gr", "am", "pl", "nl", "fr"],
+            "tele": ["ua", "no", "rs", "gb", "es", "se", "md", "pl", "lt", "it", "gr", "nl", "fr", "ee", "fi", "pt", "ro", "cz", "is", "am", "be", "de", "az", "ch"]
+        },
+        
+        "gb": {
+            "running": 22,
+            "jury": ["se", "es", "pl", "az", "au", "ee", "gr", "pt", "ch", "rs", "it", "cz", "lt", "fi", "ua", "no", "ro", "is", "md", "nl", "be", "am", "de", "fr"],
+            "tele": ["ua", "pl", "md", "lt", "no", "es", "se", "ro", "ee", "rs", "fi", "it", "gr", "pt", "de", "nl", "fr", "cz", "au", "am", "be", "az", "is", "ch"]
+        },
+
+        "pl": {
+            "running": 23,
+            "jury": ["ua", "se", "gb", "pt", "au", "ch", "it", "nl", "gr", "es", "ee", "no", "az", "lt", "be", "fi", "am", "is", "de", "cz", "ro", "fr", "rs", "md"],
+            "tele": ["ua", "se", "ee", "md", "es", "rs", "no", "gb", "lt", "pt", "fi", "nl", "it", "de", "ro", "cz", "am", "fr", "ch", "is", "az", "be", "gr", "au"]
+        },
+        
+        "rs": {
+            "running": 24,
+            "jury": ["az", "ee", "be", "pt", "fi", "se", "es", "cz", "lt", "gb", "nl", "am", "ro", "au", "gr", "is", "de", "pl", "it", "ua", "ch", "no", "md", "fr"],
+            "tele": ["md", "es", "no", "ua", "ee", "ro", "it", "lt", "fr", "se", "pt", "fi", "nl", "be", "gr", "gb", "cz", "pl", "am", "au", "de", "az", "is", "ch"]
+        },
+
+        "ee": {
+            "running": 25,
+            "jury": ["se", "it", "au", "pt", "gr", "fi", "gb", "az", "lt", "nl", "es", "ch", "am", "ua", "fr", "is", "be", "pl", "de", "no", "cz", "ro", "md", "rs"],
+            "tele": ["ua", "se", "fi", "lt", "md", "gb", "no", "nl", "de", "es", "pt", "rs", "pl", "am", "it", "is", "ch", "ro", "be", "cz", "fr", "au", "gr", "az"]
+        },
+
+        "hr": {
+            "running": -1,
+            "jury": ["rs", "pt", "ua", "lt", "es", "se", "it", "gr", "nl", "ch", "no", "de", "az", "pl", "cz", "ro", "am", "is", "gb", "au", "ee", "fr", "be", "md", "fi"],
+            "tele": ["rs", "ua", "md", "es", "it", "no", "se", "lt", "ee", "fr", "nl", "pt", "pl", "gb", "ro", "fi", "de", "be", "am", "cz", "gr", "au", "ch", "is", "az"]
+        },
+
+        "al": {
+            "running": -1,   
+            "jury": ["it", "gb", "se", "ua", "nl", "es", "am", "az", "be", "pt", "gr", "ee", "au", "is", "lt", "fi", "de", "ch", "pl", "no", "cz", "rs", "md", "fr", "ro"],
+            "tele": ["gr", "ua", "it", "es", "nl", "ee", "gb", "rs", "fi", "md", "se", "ro", "pl", "be", "pt", "no", "am", "az", "lt", "de", "au", "fr", "ch", "cz", "is"]
+        },
+
+        "dk": {
+            "running": -1,   
+            "jury": ["gr", "nl", "pt", "se", "gb", "ua", "es", "lt", "ch", "is", "it", "no", "md", "am", "az", "be", "ee", "cz", "au", "ro", "rs", "pl", "de", "fi", "fr"],
+            "tele": ["ua", "se", "no", "lt", "gb", "md", "pl", "ee", "is", "es", "rs", "nl", "fi", "pt", "ro", "ch", "au", "it", "am", "de", "gr", "fr", "be", "cz", "az"]
+        },
+
+        "lv": {
+            "running": -1,   
+            "jury": ["ua", "se", "gb", "gr", "pt", "no", "nl", "ch", "au", "lt", "it", "es", "am", "de", "is", "cz", "az", "ee", "be", "fr", "pl", "fi", "md", "rs", "ro"],
+            "tele": ["ua", "lt", "ee", "md", "se", "no", "es", "gb", "rs", "fi", "pt", "nl", "it", "fr", "pl", "am", "is", "au", "de", "ro", "ch", "az", "be", "cz", "gr"]
+        },
+
+        "at": {
+            "running": -1,   
+            "jury": ["gb", "pt", "nl", "se", "am", "no", "gr", "it", "es", "ch", "de", "is", "ee", "ua", "cz", "az", "lt", "au", "pl", "be", "md", "fi", "rs", "fr", "ro"],
+            "tele": ["ua", "rs", "gb", "md", "se", "no", "pl", "it", "de", "es", "ro", "nl", "fi", "fr", "am", "ch", "ee", "lt", "pt", "au", "cz", "gr", "be", "is", "az"]
+        },
+
+        "bg": {
+            "running": -1,   
+            "jury": ["gr", "gb", "es", "ch", "be", "am", "pt", "az", "no", "it", "se", "au", "cz", "nl", "fi", "de", "lt", "ee", "md", "rs", "ro", "pl", "ua", "fr", "is"],
+            "tele": ["ua", "rs", "es", "md", "gr", "am", "ro", "gb", "it", "no", "ee", "se", "pt", "fi", "lt", "pl", "fr", "au", "nl", "be", "de", "is", "az", "cz", "ch"]
+        },
+
+        "si": {
+            "running": -1,   
+            "jury": ["it", "lt", "ua", "nl", "rs", "ch", "gr", "pt", "gb", "es", "se", "no", "be", "az", "au", "am", "cz", "ee", "de", "fr", "is", "pl", "md", "fi", "ro"],
+            "tele": ["rs", "ua", "gr", "md", "it", "se", "es", "no", "lt", "nl", "fi", "ee", "pt", "gb", "de", "ch", "ro", "pl", "be", "fr", "am", "cz", "au", "is", "az"]
+        },
+        
+        "mk": {
+            "running": -1,   
+            "jury": ["es", "rs", "gb", "it", "se", "au", "az", "be", "pl", "ch", "gr", "ua", "de", "ee", "pt", "md", "lt", "fi", "ro", "nl", "am", "cz", "no", "fr", "is"],
+            "tele": ["rs", "es", "ua", "md", "it", "cz", "se", "ee", "no", "lt", "pl", "gb", "ro", "nl", "fi", "be", "pt", "ch", "fr", "de", "am", "gr", "au", "az", "is"]
+        },
+
+        "cy": {
+            "running": -1,   
+            "jury": ["gr", "az", "au", "ua", "es", "se", "rs", "gb", "be", "it", "no", "pl", "cz", "fi", "fr", "ee", "ch", "de", "md", "nl", "ro", "am", "lt", "is", "pt"],
+            "tele": ["ua", "gr", "es", "rs", "gb", "it", "ro", "pl", "lt", "am", "md", "se", "no", "fi", "de", "au", "ee", "nl", "be", "fr", "pt", "az", "ch", "cz", "is"]
+        },
+
+        "il": {
+            "running": -1,   
+            "jury": ["se", "gb", "it", "ua", "pl", "au", "be", "es", "cz", "nl", "fi", "pt", "no", "de", "gr", "az", "fr", "ee", "ro", "rs", "ch", "am", "lt", "md", "is"],
+            "tele": ["ua", "gb", "es", "rs", "md", "se", "no", "it", "nl", "pl", "lt", "ee", "fi", "pt", "fr", "am", "ro", "au", "cz", "gr", "de", "be", "az", "is", "ch"]
+        },
+        
+        "sm": {
+            "running": -1,   
+            "jury": ["es", "gr", "gb", "az", "au", "se", "pl", "it", "ua", "ch"],   
+            "tele": ["ua", "es", "rs", "gr", "gb", "it", "md", "se", "no", "ro"]  
+        },
+
+        "ie": {
+            "running": -1,   
+            "jury": ["es", "se", "gb", "cz", "it", "rs", "pt", "ua", "au", "is", "pl", "no", "ee", "ro", "gr", "az", "am", "nl", "de", "ch", "fr", "lt", "be", "md", "fi"],
+            "tele": ["ua", "pl", "lt", "md", "gb", "es", "no", "se", "ro", "rs", "ee", "nl", "it", "pt", "de", "fi", "au", "fr", "gr", "cz", "is", "be", "am", "ch", "az"]
+        },
+        
+        "mt": {
+            "running": -1,   
+            "jury": ["es", "se", "gb", "it", "au", "ee", "pl", "cz", "az", "gr", "ro", "rs", "ua", "ch", "fi", "pt", "nl", "lt", "be", "am", "is", "no", "md", "de", "fr"],
+            "tele": ["gb", "it", "ua", "es", "rs", "se", "no", "ro", "pl", "fi", "md", "au", "ee", "gr", "lt", "nl", "pt", "be", "de", "cz", "fr", "am", "ch", "az", "is"]
+        },
+
+        "me": {
+            "running": -1,   
+            "jury": ["rs", "it", "es", "se", "ua", "gb", "pt", "nl", "lt", "az"],
+            "tele": ["rs", "ua", "es", "md", "it", "pt", "pl", "ee", "no", "se"]
+        },
+
+        "ge": {
+            "running": -1,   
+            "jury": ["gb", "it", "se", "pt", "ua", "es", "nl", "gr", "pl", "fr"],
+            "tele": ["ua", "am", "md", "rs", "es", "lt", "gb", "az", "fi", "gr"]
+        }
+    }
+}
