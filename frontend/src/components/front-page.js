@@ -1,5 +1,5 @@
-import { MenuItem, Select } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { Container, MenuItem, Select, Skeleton, Typography, styled, useTheme } from "@mui/material";
+import { DataGrid, gridClasses } from "@mui/x-data-grid";
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,8 @@ import { CountryContext, EditionContext } from "../app";
 import Client from "../api/client"
 
 const FrontPage = ({ year = 1 }) => {
+    const theme = useTheme();
+
     const [currentYear, setCurrentYear] = useState(year);
     const [showType, setShowType] = useState(3);
 
@@ -47,14 +49,33 @@ const FrontPage = ({ year = 1 }) => {
             })
     }, [currentYear])
 
+    const getRowClass = (place) => {
+        //if we are in a final and we place 1st, we win
+        if (showType === 3 && place === 1) {
+            return "won";
+        }
+
+        //if we are NOT in a final and we place in the top 10, we qualify for the final
+        if (showType !== 3 && place <= 10) {
+            return "qualified";
+        }
+
+        //otherwise, nothing special
+        return "";
+    }
+
     const navigate = useNavigate();
 
     return (
-        <>
+        <Container>
+            <Typography variant="h3" textAlign="center">Eurovision Song Contest {years.find(elem => elem.id === currentYear).year}</Typography>
 
             <Select
                 value={showType}
-                onChange={(e) => setShowType(e.target.value)}
+                onChange={(e) => {
+                    setShowType(e.target.value);
+                    setPlacings(undefined);
+                }}
                 label="Show"
                 variant="standard"
             >
@@ -70,21 +91,26 @@ const FrontPage = ({ year = 1 }) => {
                 onChange={(e) => {
                     navigate(`../${e.target.value}`);
                     setCurrentYear(e.target.value);
+                    setPlacings(undefined);
                 }}
             >
                 {years && years.map(elem => <MenuItem key={elem.id} value={elem.id}>{elem.city} {elem.year}</MenuItem>)}
 
             </Select >
-            {placings &&
-                <DataGrid
-                    hideFooter
-                    density="compact"
-                    rows={placings}
-                    columns={columns}
-                >
-                </DataGrid>
+
+            {
+                placings ?
+                    <ResultDataGrid
+                        hideFooter
+                        density="compact"
+                        rows={placings}
+                        columns={columns}
+                        getRowClassName={(params) => getRowClass(params.row.place)}
+                    ></ResultDataGrid>
+                    :
+                    <Skeleton height="300px"></Skeleton>
             }
-        </>
+        </Container>
     );
 }
 
@@ -108,13 +134,9 @@ const getColumns = (voteTypes, countries) => {
             flex: 1,
         },
 
-        {
-            field: "running_order",
-            headerName: "Running Order",
-            flex: 1,
-        }
     ];
 
+    //if we have more than one voting type, add a column for total points
     if (voteTypes?.length > 1) {
         columns.push({
             field: "combined",
@@ -124,7 +146,7 @@ const getColumns = (voteTypes, countries) => {
     }
 
     if (voteTypes) {
-
+        //add column for each voting type
         voteTypes.forEach(voteType => {
             let header = voteTypes.length > 1 ? voteType : "points";
             header = header.charAt(0).toUpperCase() + header.slice(1);
@@ -138,6 +160,12 @@ const getColumns = (voteTypes, countries) => {
         })
     }
 
+    columns.push({
+        field: "running_order",
+        headerName: "Running Order",
+        flex: 1,
+    });
+
     return columns
 };
 
@@ -147,3 +175,19 @@ const CountryRenderCell = ({ country }) => {
         style={{ borderRadius: '50%', marginRight: '5px' }}
     ></span> {country?.name}</>
 }
+
+const ResultDataGrid = styled(DataGrid)(({ theme }) => ({
+    '& .qualified': {
+        backgroundColor: theme.palette.success.main,
+        '&:hover': {
+            backgroundColor: theme.palette.success.dark,
+        }
+    },
+
+    '& .won': {
+        backgroundColor: theme.palette.warning.main,
+        '&:hover': {
+            backgroundColor: theme.palette.warning.dark,
+        }
+    }
+}));

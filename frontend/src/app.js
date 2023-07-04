@@ -1,8 +1,9 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Routes, Route, Switch } from "react-router-dom";
+import { ThemeProvider, createTheme } from "@mui/material";
+
 import FrontPage from "./components/front-page";
 
-import { ThemeProvider, createTheme } from "@mui/material";
 import Client from "../src/api/client"
 
 export const EditionContext = React.createContext();
@@ -15,6 +16,8 @@ function App() {
         }
     });
 
+    console.log(theme)
+
     const [years, setYears] = useState(undefined);
     const [countries, setCountries] = useState(undefined);
 
@@ -26,10 +29,11 @@ function App() {
 
         Client.post("countries/get_all/")
             .then(res => {
-                console.log(res.data)
                 setCountries(res.data);
             });
     }, [])
+
+    //return <G />
 
     return (
         <>
