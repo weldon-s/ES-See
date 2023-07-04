@@ -2,10 +2,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Routes, Route, Switch } from "react-router-dom";
 import FrontPage from "./components/front-page";
 
-import { getYear, YEARS } from "./data";
 import { ThemeProvider, createTheme } from "@mui/material";
-import EntryInfo from "./components/entry-info";
-import { getCountryData } from "./analysis";
 import Client from "../src/api/client"
 
 export const EditionContext = React.createContext();

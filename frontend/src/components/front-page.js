@@ -1,11 +1,8 @@
-import { IconButton, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from "@mui/material";
+import { MenuItem, Select } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { getCountryData, getResult } from "../analysis";
-import { fromIso, getYear, YEARS } from "../data";
 
 import { CountryContext, EditionContext } from "../app";
 import Client from "../api/client"
