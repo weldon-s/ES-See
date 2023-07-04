@@ -18,13 +18,12 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from rest.entries.viewset import EntryViewSet
 from rest.shows.viewset import ShowViewSet
 from rest.countries.viewset import CountryViewSet
 from rest.editions.viewset import EditionViewSet
 
 router = DefaultRouter()
-router.register(r'entries', EntryViewSet, 'data-entries')
+
 router.register(r'shows', ShowViewSet, 'data-shows')
 router.register(r'countries', CountryViewSet, 'data-countries')
 router.register(r'editions', EditionViewSet, 'data-editions')

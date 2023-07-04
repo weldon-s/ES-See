@@ -1,4 +1,4 @@
-import { Container, MenuItem, Select, Skeleton, Typography, styled, useTheme } from "@mui/material";
+import { Container, MenuItem, Select, Skeleton, Tooltip, Typography, styled, useTheme } from "@mui/material";
 import { DataGrid, gridClasses } from "@mui/x-data-grid";
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 import { CountryContext, EditionContext } from "../app";
 import Client from "../api/client"
+
+const SongContext = React.createContext(undefined);
 
 const FrontPage = ({ year = 1 }) => {
     const theme = useTheme();
@@ -41,9 +43,7 @@ const FrontPage = ({ year = 1 }) => {
     }, [show])
 
     useEffect(() => {
-        Client.post("entries/get_all/", {
-            year: currentYear
-        })
+        Client.post(`editions/${currentYear}/get_entries/`)
             .then(res => {
                 setSongs(res.data)
             })
@@ -100,13 +100,15 @@ const FrontPage = ({ year = 1 }) => {
 
             {
                 placings ?
-                    <ResultDataGrid
-                        hideFooter
-                        density="compact"
-                        rows={placings}
-                        columns={columns}
-                        getRowClassName={(params) => getRowClass(params.row.place)}
-                    ></ResultDataGrid>
+                    <SongContext.Provider value={songs}>
+                        <ResultDataGrid
+                            hideFooter
+                            density="compact"
+                            rows={placings}
+                            columns={columns}
+                            getRowClassName={(params) => getRowClass(params.row.place)}
+                        ></ResultDataGrid>
+                    </SongContext.Provider>
                     :
                     <Skeleton height="300px"></Skeleton>
             }
@@ -130,7 +132,10 @@ const getColumns = (voteTypes, countries) => {
             field: "country",
             headerName: "Country",
             valueGetter: params => countries.find(elem => elem.id === params.row.country).name,
-            renderCell: params => <CountryRenderCell country={countries?.find(elem => elem.id === params.row.country)} />,
+            renderCell: params =>
+                <CountryRenderCell
+                    country={countries?.find(elem => elem.id === params.row.country)}
+                />,
             flex: 1,
         },
 
@@ -170,10 +175,22 @@ const getColumns = (voteTypes, countries) => {
 };
 
 const CountryRenderCell = ({ country }) => {
-    return <><span
-        className={`fi fi-${country?.code} fis`}
-        style={{ borderRadius: '50%', marginRight: '5px' }}
-    ></span> {country?.name}</>
+    const songs = useContext(SongContext);
+    const song = songs.find(elem => elem.country === country.id);
+
+    const title = <><em>{song.title}</em> by {song.artist}</>;
+
+    return (
+        <Tooltip title={title} placement="right">
+            <div>
+                <span
+                    className={`fi fi-${country?.code} fis`}
+                    style={{ borderRadius: '50%', marginRight: '5px' }}
+                />
+                {country?.name}
+            </div>
+        </Tooltip>
+    );
 }
 
 const ResultDataGrid = styled(DataGrid)(({ theme }) => ({

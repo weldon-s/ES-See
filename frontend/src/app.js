@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { BrowserRouter, Navigate, Routes, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material";
 
 import FrontPage from "./components/front-page";
@@ -15,8 +15,6 @@ function App() {
             fontFamily: 'Inter'
         }
     });
-
-    console.log(theme)
 
     const [years, setYears] = useState(undefined);
     const [countries, setCountries] = useState(undefined);
