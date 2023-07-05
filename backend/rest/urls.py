@@ -21,12 +21,14 @@ from rest_framework.routers import DefaultRouter
 from rest.shows.viewset import ShowViewSet
 from rest.countries.viewset import CountryViewSet
 from rest.editions.viewset import EditionViewSet
+from rest.entries.viewset import EntryViewSet
 
 router = DefaultRouter()
 
 router.register(r'shows', ShowViewSet, 'data-shows')
 router.register(r'countries', CountryViewSet, 'data-countries')
 router.register(r'editions', EditionViewSet, 'data-editions')
+router.register(r'entries', EntryViewSet, 'data-entries')
 
 #urlpatterns = [
  #   path('', include('data.urls')),

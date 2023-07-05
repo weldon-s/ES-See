@@ -1,5 +1,5 @@
-import { Container, MenuItem, Select, Skeleton, Tooltip, Typography, styled, useTheme } from "@mui/material";
-import { DataGrid, gridClasses } from "@mui/x-data-grid";
+import { Container, MenuItem, Select, Skeleton, Tooltip, Typography, styled } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,19 +9,17 @@ import Client from "../api/client"
 
 const SongContext = React.createContext(undefined);
 
-const FrontPage = ({ year = 1 }) => {
-    const theme = useTheme();
-
+const FrontPage = ({ year }) => {
     const [currentYear, setCurrentYear] = useState(year);
     const [showType, setShowType] = useState(3);
-
     const [show, setShow] = useState(undefined);
     const [songs, setSongs] = useState(undefined);
     const [placings, setPlacings] = useState(undefined);
-    const countries = useContext(CountryContext);
-    const years = useContext(EditionContext)
 
-    const columns = useMemo(() => getColumns(show?.vote_types, countries), [show, countries]);
+    const countries = useContext(CountryContext);
+    const years = useContext(EditionContext);
+
+    const columns = useMemo(() => getColumns(show?.vote_types), [show]);
 
     useEffect(() => {
         Client.post("shows/get_show/", {
@@ -107,6 +105,10 @@ const FrontPage = ({ year = 1 }) => {
                             rows={placings}
                             columns={columns}
                             getRowClassName={(params) => getRowClass(params.row.place)}
+                            onRowClick={(params) => {
+                                const country = countries?.find(elem => elem.id === params.row.country);
+                                navigate(country.code);
+                            }}
                         ></ResultDataGrid>
                     </SongContext.Provider>
                     :
@@ -118,7 +120,8 @@ const FrontPage = ({ year = 1 }) => {
 
 export default FrontPage
 
-const getColumns = (voteTypes, countries) => {
+const getColumns = (voteTypes) => {
+    const countries = useContext(CountryContext);
 
     let columns = [
         {
@@ -181,7 +184,10 @@ const CountryRenderCell = ({ country }) => {
     const title = <><em>{song.title}</em> by {song.artist}</>;
 
     return (
-        <Tooltip title={title} placement="right">
+        <Tooltip
+            title={title}
+            placement="right"
+        >
             <div>
                 <span
                     className={`fi fi-${country?.code} fis`}

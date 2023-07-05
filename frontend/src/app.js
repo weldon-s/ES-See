@@ -5,6 +5,7 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import FrontPage from "./components/front-page";
 
 import Client from "../src/api/client"
+import EntryInfo from "./components/entry-info";
 
 export const EditionContext = React.createContext();
 export const CountryContext = React.createContext();
@@ -12,7 +13,7 @@ export const CountryContext = React.createContext();
 function App() {
     const theme = createTheme({
         typography: {
-            fontFamily: 'Inter'
+            fontFamily: 'Inter, sans-serif'
         }
     });
 
@@ -47,7 +48,17 @@ function App() {
                                             <Fragment key={year}>
                                                 <Route path={`/${year.id}`} element={<FrontPage year={year.id} />} />
 
-                                                {/*{Object.keys(yearData.songs).map(country =>
+                                                {countries && countries.map(country => (
+                                                    <Route
+                                                        key={country.code}
+                                                        path={`/${year.id}/${country.code}`}
+                                                        element={
+                                                            <EntryInfo country={country} year={year.id} />
+                                                        }
+                                                    />
+                                                ))
+
+                                                /*{Object.keys(yearData.songs).map(country =>
                                                     <Route key={country}
                                                         path={`/${year}/${country}`}
                                                         element={
