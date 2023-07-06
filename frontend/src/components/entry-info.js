@@ -82,23 +82,27 @@ const EntryInfo = ({ country, year }) => {
 
             <Typography variant="h6" align="center">Points Received by {country.name}</Typography>
 
-            {/*TODO add something for 0 points*/}
             {points ?
                 <Grid container justifyContent="center">
                     {Object.keys(points).map(show => (
                         <Grid item xs={6} key={show}>
                             <Typography align="center" textTransform="capitalize">{show}</Typography>
 
+
                             <Grid container justifyContent="center">
                                 {Object.keys(points[show]).sort().map(voteType => (
                                     <Grid item xs={6} key={voteType} sx={{ padding: "5px" }}>
                                         <Typography align="center" textTransform="capitalize">{voteType}</Typography>
 
-                                        {Object.keys(points[show][voteType])
-                                            .sort((a, b) => parseInt(b) - parseInt(a))
-                                            .map(score =>
-                                                <PointView key={score} score={score} countriesWithScore={points[show][voteType][score]} />
-                                            )}
+                                        {Object.keys(points[show][voteType]).length > 0 ?
+                                            Object.keys(points[show][voteType])
+                                                .sort((a, b) => parseInt(b) - parseInt(a))
+                                                .map(score =>
+                                                    <PointView key={score} score={score} countriesWithScore={points[show][voteType][score]} />
+                                                )
+                                            :
+                                            <Typography align="center" fontSize="0.8em" fontStyle="italic">No points</Typography>
+                                        }
                                     </Grid>
                                 ))}
                             </Grid>

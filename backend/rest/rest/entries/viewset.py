@@ -4,7 +4,7 @@ from json import loads
 from rest_framework import serializers, viewsets
 from rest_framework.decorators import action
 
-from models import Entry, POINTS_PER_PLACE, ShowType, Vote, VoteType
+from models import Entry, Performance, POINTS_PER_PLACE, ShowType, Vote, VoteType
 
 class EntrySerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,21 +35,37 @@ class EntryViewSet(viewsets.ModelViewSet):
         #third is keys being point totals and values being countries ranking at that index
         ret = {}
 
-        for vote in votes:
-            #find show type and initialize dict if not already there
-            show_type_index = vote.performance.show.show_type
-            print(type(show_type_index))
-            show_type = ShowType.choices[show_type_index - 1][1].lower()
+        performances = Performance.objects.filter(country=self.get_object().country)
+        performances = performances.filter(running_order__gt=0)
+        performances = performances.filter(show__edition=self.get_object().year)
 
+        print(performances)
+
+        #populate all shows and their vote types
+        #this way, we know if an entry got no points for a specific show and vote type
+        for performance in performances:
+            show_type = performance.show.show_type
+            show_type = ShowType.choices[show_type - 1][1].lower()
 
             if show_type not in ret:
                 ret[show_type] = {}
-            
-            #find vote type and initialize dict if not already there
-            vote_type = VoteType.choices[vote.vote_type - 1][1].lower()
 
-            if vote_type not in ret[show_type]:
-                ret[show_type][vote_type] = {}
+            vote_types = performance.show.voting_system
+
+            for vote_type in vote_types:
+                vote_type = VoteType.choices[vote_type - 1][1].lower()
+
+                if vote_type not in ret[show_type]:
+                    ret[show_type][vote_type] = {}
+
+
+        for vote in votes:
+            #find show type
+            show_type_index = vote.performance.show.show_type
+            show_type = ShowType.choices[show_type_index - 1][1].lower()
+
+            #find vote type
+            vote_type = VoteType.choices[vote.vote_type - 1][1].lower()
 
             #find points and initialize dict if not already there
             index = vote.ranking.index(self.get_object().country.code)
