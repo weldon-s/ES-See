@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 import { CountryContext, EditionContext } from "../app";
 import Client from "../api/client"
+import CountryFlagCell from "./country-flag-cell";
 
 const SongContext = React.createContext(undefined);
 
@@ -19,7 +20,7 @@ const FrontPage = ({ year }) => {
     const countries = useContext(CountryContext);
     const years = useContext(EditionContext);
 
-    const columns = useMemo(() => getColumns(show?.vote_types), [show]);
+    const columns = useMemo(() => getColumns(show?.vote_types, countries), [show]);
 
     useEffect(() => {
         Client.post("shows/get_show/", {
@@ -120,9 +121,7 @@ const FrontPage = ({ year }) => {
 
 export default FrontPage
 
-const getColumns = (voteTypes) => {
-    const countries = useContext(CountryContext);
-
+const getColumns = (voteTypes, countries) => {
     let columns = [
         {
             field: "place",
@@ -134,7 +133,7 @@ const getColumns = (voteTypes) => {
 
             field: "country",
             headerName: "Country",
-            valueGetter: params => countries.find(elem => elem.id === params.row.country).name,
+            valueGetter: params => countries.find(elem => elem.id === params.row.country)?.name,
             renderCell: params =>
                 <CountryRenderCell
                     country={countries?.find(elem => elem.id === params.row.country)}
@@ -188,13 +187,7 @@ const CountryRenderCell = ({ country }) => {
             title={title}
             placement="right"
         >
-            <div>
-                <span
-                    className={`fi fi-${country?.code} fis`}
-                    style={{ borderRadius: '50%', marginRight: '5px' }}
-                />
-                {country?.name}
-            </div>
+            <CountryFlagCell country={country} />
         </Tooltip>
     );
 }

@@ -1,10 +1,11 @@
-import { Button, Container, Skeleton, Typography } from "@mui/material";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import { Box, Button, Container, Grid, Skeleton, Typography } from "@mui/material";
+import React, { Fragment, useContext, useEffect, useMemo, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { EditionContext } from "../app";
+import { CountryContext, EditionContext } from "../app";
 import Client from "../api/client";
+import CountryFlagCell from "./country-flag-cell";
 
 const getShowName = (show) =>
     show === "semi1" ? "first semi-final" :
@@ -20,7 +21,10 @@ const getOrdinal = num =>
 
 const EntryInfo = ({ country, year }) => {
     const navigate = useNavigate();
+    const location = useLocation();
+
     const editions = useContext(EditionContext);
+    const countries = useContext(CountryContext);
     const [entry, setEntry] = useState(undefined);
     const [points, setPoints] = useState(undefined);
 
@@ -76,7 +80,35 @@ const EntryInfo = ({ country, year }) => {
                     <Skeleton height="50px"></Skeleton>
             }
 
-            <Button onClick={() => navigate(-1)}>Go Back</Button>
+            <Typography variant="h6" align="center">Points Received by {country.name}</Typography>
+
+            {/*TODO add something for 0 points*/}
+            {points ?
+                <Grid container justifyContent="center">
+                    {Object.keys(points).map(show => (
+                        <Grid item xs={6} key={show}>
+                            <Typography align="center" textTransform="capitalize">{show}</Typography>
+
+                            <Grid container justifyContent="center">
+                                {Object.keys(points[show]).sort().map(voteType => (
+                                    <Grid item xs={6} key={voteType} sx={{ padding: "5px" }}>
+                                        <Typography align="center" textTransform="capitalize">{voteType}</Typography>
+
+                                        {Object.keys(points[show][voteType])
+                                            .sort((a, b) => parseInt(b) - parseInt(a))
+                                            .map(score =>
+                                                <PointView key={score} score={score} countriesWithScore={points[show][voteType][score]} />
+                                            )}
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Grid>
+                    ))}
+                </Grid>
+                :
+                <Skeleton height="50px"></Skeleton>}
+
+            <Button onClick={() => navigate(`${location.pathname} + /..`)}>Back to {edition.year}</Button>
             {/*
             <Typography variant="h2">
                 {longName} in ESC {data.year}
@@ -105,3 +137,60 @@ const EntryInfo = ({ country, year }) => {
 }
 
 export default EntryInfo;
+
+const PointView = ({ score, countriesWithScore }) => {
+    const countries = useContext(CountryContext);
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    return (
+        <Grid
+            container
+            sx={{
+                backgroundColor: "#eee",
+                borderRadius: "5px",
+                marginTop: "10px",
+                marginBottom: "10px",
+                padding: "5px",
+
+                "&:hover": {
+                    backgroundColor: "#ddd"
+                }
+            }}
+        >
+            <Grid
+                item
+                xs={4} sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                    paddingRight: "10px"
+                }}>
+                <Typography >{score} {score === "1" ? "point" : "points"}</Typography>
+            </Grid>
+            <Grid
+                item
+                xs={8}
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                }}
+
+            >
+                {countriesWithScore?.map(countryId => {
+                    const country = countries.find(elem => elem.id === countryId);
+                    return (
+                        <Box key={country.id} onClick={() => navigate(`${location.pathname}/../${country.code}`)}>
+                            <CountryFlagCell
+                                fontSize="0.8em"
+                                country={country}
+                            />
+                        </Box>
+                    );
+                })}
+            </Grid>
+        </Grid>
+    )
+}
+    ;

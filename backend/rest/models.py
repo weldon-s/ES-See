@@ -8,7 +8,7 @@ class BaseModel(models.Model):
         app_label = 'data'
 
 #Enum for show type
-ShowType = models.IntegerChoices("ShowType", "SEMIFINAL_1 SEMIFINAL_2 GRAND_FINAL")
+ShowType = models.IntegerChoices("ShowType", "SEMI-FINAL_1 SEMI-FINAL_2 GRAND_FINAL")
 
 #Enum for vote type
 VoteType = models.IntegerChoices("VoteType", "JURY TELEVOTE COMBINED")
@@ -34,7 +34,7 @@ class Edition(BaseModel):
 #They are associated with a given voting system, which is an array of the types of points given out in said show.
 class Show(BaseModel):
     edition = models.ForeignKey(Edition, on_delete=models.CASCADE)
-    show_type = models.CharField(choices=ShowType.choices, default=ShowType.GRAND_FINAL)
+    show_type = models.IntegerField(choices=ShowType.choices, default=ShowType.GRAND_FINAL)
     voting_system = ArrayField(models.IntegerField(choices=VoteType.choices, default=VoteType.COMBINED))
 
 #Entries represent a song sent by a country in a given year
