@@ -33,6 +33,8 @@ const EntryInfo = ({ country, year }) => {
     }, [year, editions]);
 
     useEffect(() => {
+        setEntry(undefined);
+
         Client.post("entries/get_entry/", {
             edition: year,
             country: country.id
@@ -43,10 +45,11 @@ const EntryInfo = ({ country, year }) => {
     }, [country, year])
 
     useEffect(() => {
+        setPoints(undefined);
+
         if (entry) {
             Client.post(`entries/${entry.id}/get_points_to/`)
                 .then(res => {
-                    console.log(res.data)
                     setPoints(res.data);
                 })
         }
@@ -81,6 +84,7 @@ const EntryInfo = ({ country, year }) => {
             }
 
             <Typography variant="h6" align="center">Points Received by {country.name}</Typography>
+            {/* TODO add placings with result */}
 
             {points ?
                 <Grid container justifyContent="center">
@@ -182,17 +186,19 @@ const PointView = ({ score, countriesWithScore }) => {
                 }}
 
             >
-                {countriesWithScore?.map(countryId => {
-                    const country = countries.find(elem => elem.id === countryId);
-                    return (
-                        <Box key={country.id} onClick={() => navigate(`${location.pathname}/../${country.code}`)}>
-                            <CountryFlagCell
-                                fontSize="0.8em"
-                                country={country}
-                            />
-                        </Box>
-                    );
-                })}
+                {countriesWithScore
+                    ?.map(countryId => countries.find(elem => elem.id === countryId))
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map(country => {
+                        return (
+                            <Box key={country.id} onClick={() => navigate(`${location.pathname}/../${country.code}`)}>
+                                <CountryFlagCell
+                                    fontSize="0.8em"
+                                    country={country}
+                                />
+                            </Box>
+                        );
+                    })}
             </Grid>
         </Grid>
     )

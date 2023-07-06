@@ -63,3 +63,13 @@ class Vote(BaseModel):
     vote_type = models.IntegerField(choices=VoteType.choices, default=VoteType.COMBINED)
     performance = models.ForeignKey(Performance, on_delete=models.CASCADE)
     ranking = ArrayField(models.CharField(max_length=2))
+
+#Results are the results of a performance in a given show
+#They are used to prevent the need to calculate the results every time they are requested
+class Result(BaseModel):
+    performance=models.ForeignKey(Performance, on_delete=models.CASCADE)
+    place = models.IntegerField()
+    combined = models.IntegerField(null=True, blank=True)
+    jury = models.IntegerField(null=True, blank=True)
+    televote = models.IntegerField(null=True, blank=True)
+    running_order = models.IntegerField()

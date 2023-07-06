@@ -1,8 +1,10 @@
 from django.http import HttpResponse, JsonResponse
 from json import loads
-from models import Country, Performance, POINTS_PER_PLACE, Show, ShowType, Vote, VoteType
+from models import Country, Performance, POINTS_PER_PLACE, Result, Show, ShowType, Vote, VoteType
 from rest_framework import serializers, viewsets
 from rest_framework.decorators import action
+
+from rest.results.viewset import ResultSerializer
 
 
 class ShowSerializer(serializers.ModelSerializer):
@@ -34,7 +36,7 @@ class ShowViewSet(viewsets.ModelViewSet):
         return JsonResponse(ShowSerializer(show).data, safe=False)
     
     @action(detail=True, methods=['POST'])
-    def get_results(self, request, pk=None):
+    def calculate_results(self, request, pk=None):
         show = self.get_object()
 
         #add entries for each performing country and vote type
@@ -92,4 +94,28 @@ class ShowViewSet(viewsets.ModelViewSet):
         for i in range(len(lst)):
             lst[i]["place"] = i + 1
 
+            Result.objects.get_or_create(
+                performance = Performance.objects.get(show=self.get_object(), country__id=lst[i]["country"]),
+                place = lst[i]["place"],
+                total_points = lst[i].get("combined", None),
+                jury_points = lst[i].get("jury", None),
+                televote_points = lst[i].get("televote", None),
+                running_order = lst[i]["running_order"]
+            )
+
         return JsonResponse(lst, safe=False)
+
+    @action(detail=True, methods=['POST'])
+    def get_results(self, request, pk=None):
+        show = self.get_object()
+        performances = Performance.objects.filter(show=show, running_order__gt=0)
+        
+        lst = []
+
+        for performance in performances:
+            result = Result.objects.get(performance=performance)
+            lst.append(result)
+
+        lst.sort(key=lambda x: x.place)
+            
+        return JsonResponse(ResultSerializer(lst, many=True).data, safe=False)
