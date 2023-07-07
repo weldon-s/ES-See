@@ -69,6 +69,8 @@ class Vote(BaseModel):
 class Result(BaseModel):
     performance=models.ForeignKey(Performance, on_delete=models.CASCADE)
     place = models.IntegerField()
+    jury_place = models.IntegerField(null=True, blank=True)
+    televote_place = models.IntegerField(null=True, blank=True)
     combined = models.IntegerField(null=True, blank=True)
     jury = models.IntegerField(null=True, blank=True)
     televote = models.IntegerField(null=True, blank=True)

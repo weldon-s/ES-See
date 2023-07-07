@@ -84,11 +84,25 @@ class ShowViewSet(viewsets.ModelViewSet):
 
             lst.append(obj)
 
+        #sort the list by the appropriate vote type to add place data
+        if "jury" in lst[0]:
+            lst.sort(key=lambda x: x["jury"], reverse=True)
+
+            for i in range(len(lst)):
+                lst[i]["jury_place"] = i + 1
+
+        if "televote" in lst[0]:
+            lst.sort(key=lambda x: x["televote"], reverse=True)
+
+            for i in range(len(lst)):
+                lst[i]["televote_place"] = i + 1
+
         #sort the list by the appropriate vote type
         #combined if there are multiple vote types, otherwise the only vote type
         index = VoteType.COMBINED if len(vote_types) > 1 else vote_types[0]
         index -= 1
         key = VoteType.choices[index][1].lower()
+
         lst.sort(key=lambda x: x[key], reverse=True)
 
         for i in range(len(lst)):
@@ -97,6 +111,8 @@ class ShowViewSet(viewsets.ModelViewSet):
             Result.objects.get_or_create(
                 performance = Performance.objects.get(show=self.get_object(), country__id=lst[i]["country"]),
                 place = lst[i]["place"],
+                jury_place = lst[i].get("jury_place", None),
+                televote_place = lst[i].get("televote_place", None),
                 total_points = lst[i].get("combined", None),
                 jury_points = lst[i].get("jury", None),
                 televote_points = lst[i].get("televote", None),

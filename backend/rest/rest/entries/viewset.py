@@ -39,8 +39,6 @@ class EntryViewSet(viewsets.ModelViewSet):
         performances = performances.filter(running_order__gt=0)
         performances = performances.filter(show__edition=self.get_object().year)
 
-        print(performances)
-
         #populate all shows and their vote types
         #this way, we know if an entry got no points for a specific show and vote type
         for performance in performances:

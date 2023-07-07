@@ -24,9 +24,10 @@ const EntryInfo = ({ country, year }) => {
     const location = useLocation();
 
     const editions = useContext(EditionContext);
-    const countries = useContext(CountryContext);
     const [entry, setEntry] = useState(undefined);
     const [points, setPoints] = useState(undefined);
+
+    const [results, setResults] = useState(undefined);
 
     const edition = useMemo(() => {
         return editions.find(elem => elem.id === year);
@@ -55,9 +56,19 @@ const EntryInfo = ({ country, year }) => {
         }
     }, [entry])
 
+    useEffect(() => {
+        Client.post("results/get_results/", {
+            edition: year,
+            country: country.id
+        })
+            .then(res => {
+                setResults(res.data);
+            })
+    }, [country, year])
+
 
     /*const getShowBlurb = (showData, show) => {
-
+    
         return `They performed in the ${getShowName(show)} in position ${showData.runningOrder}, placing ${getOrdinal(showData.place)}
         with ${showData.points} points (${showData.jury} from the national juries and ${showData.tele} from the televote).`
     }*/
@@ -98,14 +109,16 @@ const EntryInfo = ({ country, year }) => {
                                     <Grid item xs={6} key={voteType} sx={{ padding: "5px" }}>
                                         <Typography align="center" textTransform="capitalize">{voteType}</Typography>
 
-                                        {Object.keys(points[show][voteType]).length > 0 ?
-                                            Object.keys(points[show][voteType])
-                                                .sort((a, b) => parseInt(b) - parseInt(a))
-                                                .map(score =>
-                                                    <PointView key={score} score={score} countriesWithScore={points[show][voteType][score]} />
-                                                )
-                                            :
-                                            <Typography align="center" fontSize="0.8em" fontStyle="italic">No points</Typography>
+                                        <Typography fontSize="0.8em" align="center" fontStyle="italic">
+                                            {results[show][voteType]} {results[show][voteType] === 1 ? "point " : "points "}
+                                            ({getOrdinal(results[show][`${voteType}_place`])} place)
+                                        </Typography>
+
+                                        {Object.keys(points[show][voteType])
+                                            .sort((a, b) => parseInt(b) - parseInt(a))
+                                            .map(score =>
+                                                <PointView key={score} score={score} countriesWithScore={points[show][voteType][score]} />
+                                            )
                                         }
                                     </Grid>
                                 ))}
