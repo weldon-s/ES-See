@@ -4,7 +4,7 @@ from json import loads
 from rest_framework import serializers, viewsets
 from rest_framework.decorators import action
 
-from models import Entry, Performance, POINTS_PER_PLACE, ShowType, Vote, VoteType
+from models import Country, Entry, Performance, POINTS_PER_PLACE, ShowType, Vote, VoteType
 
 class EntrySerializer(serializers.ModelSerializer):
     class Meta:
@@ -74,5 +74,39 @@ class EntryViewSet(viewsets.ModelViewSet):
 
             #add country to appropriate list
             ret[show_type][vote_type][points].append(vote.performance.country.id)
+
+        return JsonResponse(ret, safe=False)
+    
+    @action(detail=True, methods=['POST'])
+    def get_points_from(self, request, pk=None):
+        votes = Vote.objects.filter(performance__show__edition=self.get_object().year)
+        votes = votes.filter(performance__country=self.get_object().country)
+
+        #we make a dict to return
+        #first layer of keys is show type
+        #second layer of keys is vote type
+        #third is keys being point totals and values being countries ranking at that index
+        ret = {}
+
+        for vote in votes:
+            #find show type
+            show_type_index = vote.performance.show.show_type
+            show_type = ShowType.choices[show_type_index - 1][1].lower()
+
+            if show_type not in ret:
+                ret[show_type] = {}
+
+            #find vote type
+            vote_type = VoteType.choices[vote.vote_type - 1][1].lower()
+
+            if vote_type not in ret[show_type]:
+                ret[show_type][vote_type] = {}
+
+            #find points and add to dict
+            for i in range(len(POINTS_PER_PLACE)):
+                points = POINTS_PER_PLACE[i]
+                code = vote.ranking[i]
+                country = Country.objects.get(code=code)
+                ret[show_type][vote_type][points] = [country.id]
 
         return JsonResponse(ret, safe=False)

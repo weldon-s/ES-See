@@ -7,12 +7,6 @@ import { CountryContext, EditionContext } from "../app";
 import Client from "../api/client";
 import CountryFlagCell from "./country-flag-cell";
 
-const getShowName = (show) =>
-    show === "semi1" ? "first semi-final" :
-        show === "semi2" ? "second semi-final" :
-            show === "final" ? "final" :
-                "";
-
 const getOrdinal = num =>
     num % 10 === 1 && num !== 11 ? `${num}st` :
         num % 10 === 2 && num !== 12 ? `${num}nd` :
@@ -25,7 +19,8 @@ const EntryInfo = ({ country, year }) => {
 
     const editions = useContext(EditionContext);
     const [entry, setEntry] = useState(undefined);
-    const [points, setPoints] = useState(undefined);
+    const [pointsFrom, setPointsFrom] = useState(undefined);
+    const [pointsTo, setPointsTo] = useState(undefined);
 
     const [results, setResults] = useState(undefined);
 
@@ -46,12 +41,21 @@ const EntryInfo = ({ country, year }) => {
     }, [country, year])
 
     useEffect(() => {
-        setPoints(undefined);
+        setPointsTo(undefined);
 
         if (entry) {
             Client.post(`entries/${entry.id}/get_points_to/`)
                 .then(res => {
-                    setPoints(res.data);
+                    setPointsTo(res.data);
+                })
+        }
+    }, [entry])
+
+    useEffect(() => {
+        if (entry) {
+            Client.post(`entries/${entry.id}/get_points_from/`)
+                .then(res => {
+                    setPointsFrom(res.data);
                 })
         }
     }, [entry])
@@ -94,42 +98,30 @@ const EntryInfo = ({ country, year }) => {
                     <Skeleton height="50px"></Skeleton>
             }
 
+            <Typography variant="h6" align="center">Points Given by {country.name}</Typography>
+            {pointsFrom ?
+                <EntryPointView
+                    points={pointsFrom}
+                />
+                :
+                <Skeleton height="50px"></Skeleton>
+            }
+
             <Typography variant="h6" align="center">Points Received by {country.name}</Typography>
             {/* TODO add placings with result */}
 
-            {points ?
-                <Grid container justifyContent="center">
-                    {Object.keys(points).map(show => (
-                        <Grid item xs={6} key={show}>
-                            <Typography align="center" textTransform="capitalize">{show}</Typography>
-
-
-                            <Grid container justifyContent="center">
-                                {Object.keys(points[show]).sort().map(voteType => (
-                                    <Grid item xs={6} key={voteType} sx={{ padding: "5px" }}>
-                                        <Typography align="center" textTransform="capitalize">{voteType}</Typography>
-
-                                        <Typography fontSize="0.8em" align="center" fontStyle="italic">
-                                            {results[show][voteType]} {results[show][voteType] === 1 ? "point " : "points "}
-                                            ({getOrdinal(results[show][`${voteType}_place`])} place)
-                                        </Typography>
-
-                                        {Object.keys(points[show][voteType])
-                                            .sort((a, b) => parseInt(b) - parseInt(a))
-                                            .map(score =>
-                                                <PointView key={score} score={score} countriesWithScore={points[show][voteType][score]} />
-                                            )
-                                        }
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        </Grid>
-                    ))}
-                </Grid>
-                :
-                <Skeleton height="50px"></Skeleton>}
+            {
+                pointsTo ?
+                    <EntryPointView
+                        points={pointsTo}
+                        results={results}
+                    />
+                    :
+                    <Skeleton height="50px"></Skeleton>
+            }
 
             <Button onClick={() => navigate(`${location.pathname} + /..`)}>Back to {edition.year}</Button>
+
             {/*
             <Typography variant="h2">
                 {longName} in ESC {data.year}
@@ -157,7 +149,60 @@ const EntryInfo = ({ country, year }) => {
     );
 }
 
+//points = pointsTo[show]
+//results = results[show]
+
 export default EntryInfo;
+
+const EntryPointView = ({ points, results }) => (
+    <Grid container justifyContent="center">
+        {Object.keys(points).map(show => (
+            <ShowView
+                key={show}
+                show={show}
+                points={points[show]}
+                results={results?.[show]}
+            />
+        ))}
+    </Grid>
+);
+
+const ShowView = ({ show, points, results }) => (
+    <Grid item xs={6} key={show}>
+        <Typography align="center" textTransform="capitalize">{show}</Typography>
+        <Grid container justifyContent="center">
+            {Object.keys(points).sort().map(voteType => (
+                <VoteTypeView
+                    key={voteType}
+                    voteType={voteType}
+                    showResults={results}
+                    points={points[voteType]}
+                />
+
+            ))}
+        </Grid>
+    </Grid>
+);
+
+const VoteTypeView = ({ voteType, showResults, points }) => (
+    <Grid item xs={6} sx={{ padding: "5px" }}>
+        <Typography align="center" textTransform="capitalize">{voteType}</Typography>
+
+        {showResults &&
+            <Typography fontSize="0.8em" align="center" fontStyle="italic">
+                {showResults[voteType]} {showResults[voteType] === 1 ? "point " : "points "}
+                ({getOrdinal(showResults[`${voteType}_place`])} place)
+            </Typography>
+        }
+
+        {Object.keys(points)
+            .sort((a, b) => parseInt(b) - parseInt(a))
+            .map(score =>
+                <PointView key={score} score={score} countriesWithScore={points[score]} />
+            )
+        }
+    </Grid>
+);
 
 const PointView = ({ score, countriesWithScore }) => {
     const countries = useContext(CountryContext);
@@ -202,9 +247,9 @@ const PointView = ({ score, countriesWithScore }) => {
                 {countriesWithScore
                     ?.map(countryId => countries.find(elem => elem.id === countryId))
                     .sort((a, b) => a.name.localeCompare(b.name))
-                    .map(country => {
+                    .map((country, index) => {
                         return (
-                            <Box key={country.id} onClick={() => navigate(`${location.pathname}/../${country.code}`)}>
+                            <Box key={index} onClick={() => navigate(`${location.pathname}/../${country.code}`)}>
                                 <CountryFlagCell
                                     fontSize="0.8em"
                                     country={country}
@@ -215,5 +260,24 @@ const PointView = ({ score, countriesWithScore }) => {
             </Grid>
         </Grid>
     )
-}
-    ;
+};
+
+
+/**
+ *                         <Grid item xs={6} key={show}>
+                            <Typography align="center" textTransform="capitalize">{show}</Typography>
+
+
+                            <Grid container justifyContent="center">
+                                {Object.keys(pointsTo[show]).sort().map(voteType => (
+                                    <VoteTypeView
+                                        key={voteType}
+                                        voteType={voteType}
+                                        showResults={results[show]}
+                                        points={pointsTo[show][voteType]}
+                                    />
+
+                                ))}
+                            </Grid>
+                        </Grid>
+ */
