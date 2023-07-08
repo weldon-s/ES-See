@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 import { CountryContext, EditionContext } from "../app";
 import Client from "../api/client"
-import CountryFlagCell from "./country-flag-cell";
+import CountryFlagCell from "../components/country-flag-cell";
 
 const SongContext = React.createContext(undefined);
 

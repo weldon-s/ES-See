@@ -5,13 +5,18 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { CountryContext, EditionContext } from "../app";
 import Client from "../api/client";
-import CountryFlagCell from "./country-flag-cell";
+import CountryFlagCell from "../components/country-flag-cell";
 
 const getOrdinal = num =>
     num % 10 === 1 && num !== 11 ? `${num}st` :
         num % 10 === 2 && num !== 12 ? `${num}nd` :
             num % 10 === 3 && num !== 13 ? `${num}rd` :
                 `${num}th`;
+
+const getShowName = show =>
+    show === "semi-final 1" ? "first semi-final" :
+        show === "semi-final 2" ? "second semi-final" :
+            show === "grand final" ? "Grand Final" : ""
 
 const EntryInfo = ({ country, year }) => {
     const navigate = useNavigate();
@@ -52,6 +57,8 @@ const EntryInfo = ({ country, year }) => {
     }, [entry])
 
     useEffect(() => {
+        setPointsFrom(undefined);
+
         if (entry) {
             Client.post(`entries/${entry.id}/get_points_from/`)
                 .then(res => {
@@ -61,6 +68,8 @@ const EntryInfo = ({ country, year }) => {
     }, [entry])
 
     useEffect(() => {
+        setResults(undefined);
+
         Client.post("results/get_results/", {
             edition: year,
             country: country.id
@@ -70,12 +79,21 @@ const EntryInfo = ({ country, year }) => {
             })
     }, [country, year])
 
+    const getShowBlurb = (show) => {
+        //we get the key for the points from the results object based on what vote types we have
+        let pointsKey = results[show].jury && results[show].televote ? "combined" : results[show].jury ? "jury" : "televote";
 
-    /*const getShowBlurb = (showData, show) => {
-    
-        return `They performed in the ${getShowName(show)} in position ${showData.runningOrder}, placing ${getOrdinal(showData.place)}
-        with ${showData.points} points (${showData.jury} from the national juries and ${showData.tele} from the televote).`
-    }*/
+        //add general info about the performance
+        let str = `They performed ${getOrdinal(results[show].running_order)} in the ${getShowName(show)}, placing 
+        ${getOrdinal(results[show].place)} with ${results[show][pointsKey]} ${results[show][pointsKey] === 1 ? "point" : "points"}. `;
+
+        //include info about the qualification status if it's a semi-final
+        if (show !== "grand final") {
+            str += results[show].place <= 10 ? `${country.name} therefore qualified for the ${getShowName("grand final")}.` : `${country.name} therefore failed to qualify for the ${getShowName("grand final")}.`;
+        }
+
+        return str;
+    }
 
     return (
         <Container>
@@ -98,6 +116,12 @@ const EntryInfo = ({ country, year }) => {
                     <Skeleton height="50px"></Skeleton>
             }
 
+            {
+                results && Object.keys(results).map(show => (
+                    <Typography key={show}>{getShowBlurb(show)}</Typography>
+                ))
+            }
+
             <Typography variant="h6" align="center">Points Given by {country.name}</Typography>
             {pointsFrom ?
                 <EntryPointView
@@ -108,8 +132,6 @@ const EntryInfo = ({ country, year }) => {
             }
 
             <Typography variant="h6" align="center">Points Received by {country.name}</Typography>
-            {/* TODO add placings with result */}
-
             {
                 pointsTo ?
                     <EntryPointView
@@ -121,36 +143,9 @@ const EntryInfo = ({ country, year }) => {
             }
 
             <Button onClick={() => navigate(`${location.pathname} + /..`)}>Back to {edition.year}</Button>
-
-            {/*
-            <Typography variant="h2">
-                {longName} in ESC {data.year}
-                <div className={`fib fi-${data.country}`} style={{ display: 'inline-block', height: ".75em", width: "1em" }}></div>
-            </Typography>
-
-            <Typography variant="body1">
-                {longName} participated in the {data.year} edition of Eurovision with the song "{data.song.title}" by {data.song.artist}.
-            </Typography>
-
-            <Typography>{Object.hasOwn(data, "semi1") && getShowBlurb(data.semi1, "semi1")}</Typography>
-            <Typography>{Object.hasOwn(data, "semi2") && getShowBlurb(data.semi2, "semi2")}</Typography>
-
-            {!data.inFinal &&
-                <Typography>
-                    {`${longName} did not reach the top 10 in the semi-final and therefore failed to qualify for the grand final`}
-                </Typography>
-            }
-
-            <Typography>{Object.hasOwn(data, "final") && getShowBlurb(data.final, "final")}</Typography>
-
-            <Button onClick={() => navigate(-1)}>Go Back</Button>
-        */}
         </Container>
     );
 }
-
-//points = pointsTo[show]
-//results = results[show]
 
 export default EntryInfo;
 
@@ -261,23 +256,3 @@ const PointView = ({ score, countriesWithScore }) => {
         </Grid>
     )
 };
-
-
-/**
- *                         <Grid item xs={6} key={show}>
-                            <Typography align="center" textTransform="capitalize">{show}</Typography>
-
-
-                            <Grid container justifyContent="center">
-                                {Object.keys(pointsTo[show]).sort().map(voteType => (
-                                    <VoteTypeView
-                                        key={voteType}
-                                        voteType={voteType}
-                                        showResults={results[show]}
-                                        points={pointsTo[show][voteType]}
-                                    />
-
-                                ))}
-                            </Grid>
-                        </Grid>
- */
