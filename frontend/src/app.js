@@ -32,8 +32,6 @@ function App() {
             });
     }, [])
 
-    //return <G />
-
     return (
         <>
             <ThemeProvider theme={theme}>
@@ -47,31 +45,21 @@ function App() {
                                         return (
                                             <Fragment key={year}>
                                                 <Route path={`/${year.id}`} element={<FrontPage year={year.id} />} />
-
-                                                {countries && countries.map(country => (
-                                                    <Route
-                                                        key={country.code}
-                                                        path={`/${year.id}/${country.code}`}
-                                                        element={
-                                                            <EntryInfo country={country} year={year.id} />
-                                                        }
-                                                    />
-                                                ))
-
-                                                /*{Object.keys(yearData.songs).map(country =>
-                                                    <Route key={country}
-                                                        path={`/${year}/${country}`}
-                                                        element={
-                                                            <EntryInfo data={getCountryData(yearData, country)} />
-                                                        } />
-
-                                                    )}*/}
+                                                {
+                                                    countries && countries.map(country => (
+                                                        <Route
+                                                            key={country.code}
+                                                            path={`/${year.id}/${country.code}`}
+                                                            element={
+                                                                <EntryInfo country={country} year={year.id} />
+                                                            }
+                                                        />
+                                                    ))
+                                                }
                                             </Fragment>
                                         )
                                     })
                                 }
-
-
                             </Routes>
                         </BrowserRouter>
                     </CountryContext.Provider>

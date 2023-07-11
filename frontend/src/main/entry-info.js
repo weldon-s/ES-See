@@ -117,7 +117,7 @@ const EntryInfo = ({ country, year }) => {
             }
 
             {
-                results && Object.keys(results).map(show => (
+                results && Object.keys(results).sort().reverse().map(show => (
                     <Typography key={show}>{getShowBlurb(show)}</Typography>
                 ))
             }
@@ -151,7 +151,11 @@ export default EntryInfo;
 
 const EntryPointView = ({ points, results }) => (
     <Grid container justifyContent="center">
-        {Object.keys(points).map(show => (
+        {/*
+        We sort and reverse because "grand final" is lexicographically before "semi-final" so this way we get the semi followed 
+        by the final. This isn't the most intuitive way of achieving this but it didn't involve writing extra sorting code
+        */}
+        {Object.keys(points).sort().reverse().map(show => (
             <ShowView
                 key={show}
                 show={show}

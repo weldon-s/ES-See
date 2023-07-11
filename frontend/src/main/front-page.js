@@ -1,4 +1,23 @@
-import { Container, MenuItem, Select, Skeleton, Tooltip, Typography, styled } from "@mui/material";
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Container,
+    CssBaseline,
+    Drawer,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText,
+    MenuItem,
+    Select,
+    Skeleton,
+    Tooltip,
+    Typography,
+    styled
+} from "@mui/material";
+import { LibraryMusic } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
@@ -8,10 +27,12 @@ import { CountryContext, EditionContext } from "../app";
 import Client from "../api/client"
 import CountryFlagCell from "../components/country-flag-cell";
 
+const DRAWER_WIDTH = 250;
+
 const SongContext = React.createContext(undefined);
 
 const FrontPage = ({ year }) => {
-    const [currentYear, setCurrentYear] = useState(year);
+    const [yearId, setYearId] = useState(year);
     const [showType, setShowType] = useState(3);
     const [show, setShow] = useState(undefined);
     const [songs, setSongs] = useState(undefined);
@@ -20,17 +41,20 @@ const FrontPage = ({ year }) => {
     const countries = useContext(CountryContext);
     const years = useContext(EditionContext);
 
+    const edition = useMemo(() => years.find(elem => elem.id === yearId), [yearId, years]);
     const columns = useMemo(() => getColumns(show?.vote_types, countries), [show]);
+
+    const [showSidebar, setShowSidebar] = useState(true);
 
     useEffect(() => {
         Client.post("shows/get_show/", {
-            year: currentYear,
+            year: yearId,
             show_type: showType
         })
             .then(res => {
                 setShow(res.data);
             })
-    }, [currentYear, showType])
+    }, [yearId, showType])
 
     useEffect(() => {
         if (show) {
@@ -42,11 +66,11 @@ const FrontPage = ({ year }) => {
     }, [show])
 
     useEffect(() => {
-        Client.post(`editions/${currentYear}/get_entries/`)
+        Client.post(`editions/${yearId}/get_entries/`)
             .then(res => {
                 setSongs(res.data)
             })
-    }, [currentYear])
+    }, [yearId])
 
     const getRowClass = (place) => {
         //if we are in a final and we place 1st, we win
@@ -66,56 +90,130 @@ const FrontPage = ({ year }) => {
     const navigate = useNavigate();
 
     return (
-        <Container>
-            <Typography variant="h3" textAlign="center">Eurovision Song Contest {years.find(elem => elem.id === currentYear).year}</Typography>
-
-            <Select
-                value={showType}
-                onChange={(e) => {
-                    setShowType(e.target.value);
-                    setPlacings(undefined);
-                }}
-                label="Show"
-                variant="standard"
-            >
-                <MenuItem value={1}>Semi-Final 1</MenuItem>
-                <MenuItem value={2}>Semi-Final 2</MenuItem>
-                <MenuItem value={3}>Final</MenuItem>
-            </Select>
-
-            <Select
-                value={currentYear}
-                label="Edition"
-                variant="standard"
-                onChange={(e) => {
-                    navigate(`../${e.target.value}`);
-                    setCurrentYear(e.target.value);
-                    setPlacings(undefined);
+        <Box sx={{ display: "flex" }}>
+            <CssBaseline />
+            <Drawer
+                variant="permanent"
+                anchor="left"
+                sx={{
+                    width: DRAWER_WIDTH,
+                    flexShrink: 0,
+                    [`& .MuiDrawer-paper`]: { width: DRAWER_WIDTH, boxSizing: 'border-box' },
                 }}
             >
-                {years && years.map(elem => <MenuItem key={elem.id} value={elem.id}>{elem.city} {elem.year}</MenuItem>)}
+                <Accordion elevation={0} disableGutters>
+                    <AccordionSummary expandIcon={<LibraryMusic />}>
+                        <Typography textAlign="center" sx={{ m: 0, p: 0 }}>{edition.year} Entries</Typography>
+                    </AccordionSummary>
 
-            </Select >
+                    <AccordionDetails
+                        sx={{
+                            m: 0,
+                            p: 0,
+                        }}
+                    >
+                        <List disablePadding sx={{ m: 0 }}>
+                            {(!!songs && !!countries) ?
+                                songs
+                                    .map(song => countries.find(elem => elem.id === song.country))
+                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                    .map(country => (
+                                        <ListItem key={country.id} disablePadding sx={{ m: 0 }}>
+                                            <ListItemButton
+                                                onClick={() => navigate(`${country.code}`)}
+                                                sx={{ p: "0px" }}
+                                            >
+                                                <CountryFlagCell
+                                                    country={country}
+                                                    fontSize="0.8em"
+                                                    sx={{
+                                                        opacity: 0.8,
+                                                        width: "100%",
+                                                        pl: 1,
+                                                        "&:hover": {
+                                                            opacity: 1
+                                                        }
+                                                    }} />
+                                            </ListItemButton>
+                                        </ListItem>
+                                    ))
+                                : <Skeleton height="50px"></Skeleton>
+                            }
+                        </List>
+                    </AccordionDetails>
+                </Accordion>
 
-            {
-                placings ?
-                    <SongContext.Provider value={songs}>
-                        <ResultDataGrid
-                            hideFooter
-                            density="compact"
-                            rows={placings}
-                            columns={columns}
-                            getRowClassName={(params) => getRowClass(params.row.place)}
-                            onRowClick={(params) => {
-                                const country = countries?.find(elem => elem.id === params.row.country);
-                                navigate(country.code);
-                            }}
-                        ></ResultDataGrid>
-                    </SongContext.Provider>
-                    :
-                    <Skeleton height="300px"></Skeleton>
-            }
-        </Container>
+            </Drawer>
+            <Container sx={{ flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+
+                <Typography variant="h3" textAlign="center">Eurovision Song Contest {edition?.year}</Typography>
+
+                <Box sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}>
+                    <Select
+                        value={showType}
+                        onChange={(e) => {
+                            setShowType(e.target.value);
+                            setPlacings(undefined);
+                        }}
+                        label="Show"
+                        variant="standard"
+                        sx={{
+                            m: 1
+                        }}
+                    >
+                        <MenuItem value={1}>Semi-Final 1</MenuItem>
+                        <MenuItem value={2}>Semi-Final 2</MenuItem>
+                        <MenuItem value={3}>Final</MenuItem>
+                    </Select>
+
+                    <Select
+                        value={yearId}
+                        label="Edition"
+                        variant="standard"
+                        onChange={(e) => {
+                            navigate(`../${e.target.value}`);
+                            setYearId(e.target.value);
+                            setPlacings(undefined);
+                        }}
+
+                        sx={{
+                            m: 1
+                        }}
+                    >
+                        {years && years.map(elem => <MenuItem key={elem.id} value={elem.id}>{elem.city} {elem.year}</MenuItem>)}
+                    </Select >
+                </Box>
+
+                {
+                    placings ?
+                        <SongContext.Provider value={songs}>
+                            <ResultDataGrid
+                                autoHeight
+                                hideFooter
+                                density="compact"
+                                rows={placings}
+                                columns={columns}
+                                getRowClassName={(params) => getRowClass(params.row.place)}
+                                onRowClick={(params) => {
+                                    const country = countries?.find(elem => elem.id === params.row.country);
+                                    navigate(country.code);
+                                }}
+                                sx={{
+                                    width: "80%",
+                                    maxWidth: "80%",
+                                    mb: 1
+                                }}
+                            ></ResultDataGrid>
+                        </SongContext.Provider>
+                        :
+                        <Skeleton height="300px"></Skeleton>
+                }
+            </Container >
+        </Box>
     );
 }
 
@@ -135,10 +233,11 @@ const getColumns = (voteTypes, countries) => {
             headerName: "Country",
             valueGetter: params => countries.find(elem => elem.id === params.row.country)?.name,
             renderCell: params =>
-                <CountryRenderCell
-                    country={countries?.find(elem => elem.id === params.row.country)}
-                />,
-            flex: 1,
+                countries ?
+                    <CountryRenderCell
+                        country={countries.find(elem => elem.id === params.row.country)}
+                    /> : <></>,
+            flex: 2,
         },
 
     ];
@@ -178,9 +277,9 @@ const getColumns = (voteTypes, countries) => {
 
 const CountryRenderCell = ({ country }) => {
     const songs = useContext(SongContext);
-    const song = songs.find(elem => elem.country === country.id);
+    const song = songs ? songs.find(elem => elem.country === country.id) : undefined;
 
-    const title = <><em>{song.title}</em> by {song.artist}</>;
+    const title = song ? <><em>{song.title}</em> by {song.artist}</> : "";
 
     return (
         <Tooltip
