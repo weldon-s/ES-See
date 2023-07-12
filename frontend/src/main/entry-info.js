@@ -99,7 +99,7 @@ const EntryInfo = ({ country, year }) => {
         <Container>
             {
                 edition ?
-                    <Typography variant="h3">
+                    <Typography variant="h3" align="center">
                         {country.name} in Eurovision {edition.year}
                     </Typography>
                     :

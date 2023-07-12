@@ -6,6 +6,7 @@ import FrontPage from "./main/front-page";
 
 import Client from "../src/api/client"
 import EntryInfo from "./main/entry-info";
+import CountryInfo from "./main/country-info";
 
 export const EditionContext = React.createContext();
 export const CountryContext = React.createContext();
@@ -59,6 +60,18 @@ function App() {
                                             </Fragment>
                                         )
                                     })
+                                }
+
+                                {
+                                    countries && countries.map(country => (
+                                        <Route
+                                            key={country.code}
+                                            path={`${country.code}`}
+                                            element={
+                                                <CountryInfo country={country} />
+                                            }
+                                        />
+                                    ))
                                 }
                             </Routes>
                         </BrowserRouter>
