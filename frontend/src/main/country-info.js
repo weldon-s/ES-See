@@ -3,12 +3,16 @@ import { Container, Skeleton, Typography } from '@mui/material';
 
 import Client from '../api/client';
 import { EditionContext } from '../app';
+import { getOrdinal, getPointsKey } from '../utils';
+import { DataGrid } from '@mui/x-data-grid';
 
 const CountryInfo = ({ country }) => {
     const [rawEntries, setRawEntries] = useState(undefined);
     const [entries, setEntries] = useState(undefined);
     const [updated, setUpdated] = useState(false);
     const [finals, setFinals] = useState(undefined);
+    const [bestPlace, setBestPlace] = useState(undefined);
+    const [bestYears, setBestYears] = useState(undefined);
 
     const years = useContext(EditionContext);
 
@@ -32,7 +36,7 @@ const CountryInfo = ({ country }) => {
                     edition: entry.year,
                     country: country.id
                 })
-            )
+            );
 
             //then, we wait for all of them to resolve
             Promise.all(promises)
@@ -44,26 +48,54 @@ const CountryInfo = ({ country }) => {
 
                                 //add results and edition data for ease of use
                                 ret.results = elem;
+
+                                if ("semi-final 1" in elem) {
+                                    ret.results["semi-final"] = elem["semi-final 1"];
+                                    delete ret.results["semi-final 1"];
+                                }
+                                if ("semi-final 2" in elem) {
+                                    ret.results["semi-final"] = elem["semi-final 2"];
+                                    delete ret.results["semi-final 2"];
+                                }
+
                                 ret.edition = years.find(elem => elem.id === ret.year);
                                 return ret;
                             })
                             //sort chronologically
-                            .sort((a, b) => b.edition.year - a.edition.year);
+                            .sort((a, b) => a.edition.year - b.edition.year);
 
                     setEntries(newEntries);
-                })
+                });
         }
-    }, [rawEntries])
+    }, [rawEntries]);
 
     useEffect(() => {
         setUpdated(entries && entries.every(elem => elem !== undefined));
-    }, [entries])
+    }, [entries]);
 
     useEffect(() => {
         if (updated) {
             setFinals(entries.filter(elem => "grand final" in elem.results).length);
         }
+    }, [updated]);
+
+    useEffect(() => {
+        if (updated) {
+            setBestPlace(entries
+                .map(elem => "grand final" in elem.results ? elem.results["grand final"].place : 30)
+                .reduce((a, b) => Math.min(a, b))
+            );
+        }
     }, [updated])
+
+    useEffect(() => {
+        if (bestPlace) {
+            setBestYears(entries
+                .filter(elem => "grand final" in elem.results && elem.results["grand final"].place === bestPlace)
+                .map(elem => elem.edition.year)
+            );
+        }
+    }, [bestPlace])
 
     return (
         <Container>
@@ -72,7 +104,7 @@ const CountryInfo = ({ country }) => {
             </Typography>
 
             {
-                updated ?
+                (updated && bestYears) ?
                     <>
                         <Typography>
                             {country.name} has participated in the Eurovision Song Contest {entries.length} times, debuting in {entries[0].edition.year}.
@@ -80,6 +112,27 @@ const CountryInfo = ({ country }) => {
                         <Typography>
                             They have participated in {finals} {finals === 1 ? "final" : "finals"}.
                         </Typography>
+
+                        <Typography>
+                            Their best result was {getOrdinal(bestPlace)} place, which they achieved in {" "}
+                            {bestYears.map((elem, index) => <span key={index}>{elem}
+                                {index === bestYears.length - 1 ? "" : index === bestYears.length - 2 ? " and " : ", "}</span>)}
+                        </Typography>
+
+                        <Typography variant="h4">
+                            Entries
+                        </Typography>
+                        {
+                            updated ?
+                                <DataGrid
+                                    rows={entries}
+                                    columns={COLUMNS}
+                                    hideFooter
+                                />
+                                :
+                                <Skeleton height="50px"></Skeleton>
+                        }
+
                     </>
                     :
                     <Skeleton height="50px"></Skeleton>
@@ -89,3 +142,68 @@ const CountryInfo = ({ country }) => {
 }
 
 export default CountryInfo;
+
+const COLUMNS = [
+    {
+        field: "year",
+        headerName: "Year",
+        valueGetter: params => params.row.edition.year,
+        flex: 1
+    },
+
+    {
+        field: "artist",
+        headerName: "Artist",
+        flex: 1
+    },
+
+    {
+        field: "title",
+        headerName: "Title",
+        flex: 1
+    },
+
+    {
+        field: "place",
+        headerName: "Final Place",
+        valueGetter: params => "grand final" in params.row.results ? params.row.results["grand final"].place : "N/A",
+        flex: 1
+    },
+
+    {
+        field: "points",
+        headerName: "Final Points",
+        valueGetter: params => {
+            let results = params.row.results;
+
+            if (!results["grand final"]) {
+                return "N/A";
+            }
+            let pointsKey = getPointsKey(results["grand final"]);
+            return results["grand final"][pointsKey];
+        },
+        flex: 1
+    },
+
+    {
+        field: "semi",
+        headerName: "Semi-Final Place",
+        valueGetter: params => "semi-final" in params.row.results ? params.row.results["semi-final"].place : "N/A",
+        flex: 1
+    },
+
+    {
+        field: "semiPoints",
+        headerName: "Semi-Final Points",
+        valueGetter: params => {
+            let results = params.row.results;
+
+            if (!results["semi-final"]) {
+                return "N/A";
+            }
+            let pointsKey = getPointsKey(results["semi-final"]);
+            return results["semi-final"][pointsKey];
+        },
+        flex: 1
+    }
+]

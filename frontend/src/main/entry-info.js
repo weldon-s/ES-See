@@ -6,17 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { CountryContext, EditionContext } from "../app";
 import Client from "../api/client";
 import CountryFlagCell from "../components/country-flag-cell";
-
-const getOrdinal = num =>
-    num % 10 === 1 && num !== 11 ? `${num}st` :
-        num % 10 === 2 && num !== 12 ? `${num}nd` :
-            num % 10 === 3 && num !== 13 ? `${num}rd` :
-                `${num}th`;
-
-const getShowName = show =>
-    show === "semi-final 1" ? "first semi-final" :
-        show === "semi-final 2" ? "second semi-final" :
-            show === "grand final" ? "Grand Final" : ""
+import { getOrdinal, getPointsKey, getShowName } from "../utils";
 
 const EntryInfo = ({ country, year }) => {
     const navigate = useNavigate();
@@ -81,7 +71,7 @@ const EntryInfo = ({ country, year }) => {
 
     const getShowBlurb = (show) => {
         //we get the key for the points from the results object based on what vote types we have
-        let pointsKey = results[show].jury && results[show].televote ? "combined" : results[show].jury ? "jury" : "televote";
+        let pointsKey = getPointsKey(results[show]);
 
         //add general info about the performance
         let str = `They performed ${getOrdinal(results[show].running_order)} in the ${getShowName(show)}, placing 
