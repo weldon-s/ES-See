@@ -16,10 +16,11 @@ VoteType = models.IntegerChoices("VoteType", "JURY TELEVOTE COMBINED")
 #Points per place (place not in array means no points for that place)
 POINTS_PER_PLACE = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1]
 
-#Has ISO 3166-1 alpha-2 country codes and full country names
+# Model for countries that have participated in Eurovision
 class Country(BaseModel):
     name = models.CharField(max_length=50)
-    code = models.CharField(max_length=2)
+    adjective = models.CharField(max_length=50)
+    code = models.CharField(max_length=2) # ISO 3166-1 alpha-2 country code
     
     def _str_(self):
         return self.name

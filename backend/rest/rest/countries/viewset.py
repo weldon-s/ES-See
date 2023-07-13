@@ -10,7 +10,7 @@ from rest.entries.viewset import EntrySerializer
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
-        fields = ['id', 'name', 'code']
+        fields = ['id', 'name', 'code', 'adjective']
 
 class CountryViewSet(viewsets.ModelViewSet):
     serializer_class = CountrySerializer

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Container, Skeleton, Typography } from '@mui/material';
+import { Box, Container, Skeleton, Typography } from '@mui/material';
 
 import Client from '../api/client';
 import { EditionContext } from '../app';
@@ -106,29 +106,32 @@ const CountryInfo = ({ country }) => {
             {
                 (updated && bestYears) ?
                     <>
-                        <Typography>
+                        <Typography variant="body1">
                             {country.name} has participated in the Eurovision Song Contest {entries.length} times, debuting in {entries[0].edition.year}.
                         </Typography>
-                        <Typography>
+                        <Typography variant="body1">
                             They have participated in {finals} {finals === 1 ? "final" : "finals"}.
                         </Typography>
 
-                        <Typography>
+                        <Typography variant="body1">
                             Their best result was {getOrdinal(bestPlace)} place, which they achieved in {" "}
                             {bestYears.map((elem, index) => <span key={index}>{elem}
                                 {index === bestYears.length - 1 ? "" : index === bestYears.length - 2 ? " and " : ", "}</span>)}
                         </Typography>
 
-                        <Typography variant="h4">
-                            Entries
+                        <Typography variant="h4" align="center" sx={{ mb: 1 }}>
+                            {country.adjective} Entries
                         </Typography>
                         {
                             updated ?
                                 <DataGrid
                                     rows={entries}
                                     columns={COLUMNS}
+                                    autoHeight
+                                    density="compact"
                                     hideFooter
                                 />
+
                                 :
                                 <Skeleton height="50px"></Skeleton>
                         }
@@ -137,7 +140,7 @@ const CountryInfo = ({ country }) => {
                     :
                     <Skeleton height="50px"></Skeleton>
             }
-        </Container>
+        </Container >
     )
 }
 
@@ -154,20 +157,20 @@ const COLUMNS = [
     {
         field: "artist",
         headerName: "Artist",
-        flex: 1
+        flex: 3
     },
 
     {
         field: "title",
         headerName: "Title",
-        flex: 1
+        flex: 2
     },
 
     {
         field: "place",
         headerName: "Final Place",
         valueGetter: params => "grand final" in params.row.results ? params.row.results["grand final"].place : "N/A",
-        flex: 1
+        flex: 2
     },
 
     {
@@ -182,14 +185,14 @@ const COLUMNS = [
             let pointsKey = getPointsKey(results["grand final"]);
             return results["grand final"][pointsKey];
         },
-        flex: 1
+        flex: 2
     },
 
     {
         field: "semi",
         headerName: "Semi-Final Place",
         valueGetter: params => "semi-final" in params.row.results ? params.row.results["semi-final"].place : "N/A",
-        flex: 1
+        flex: 2
     },
 
     {
@@ -204,6 +207,6 @@ const COLUMNS = [
             let pointsKey = getPointsKey(results["semi-final"]);
             return results["semi-final"][pointsKey];
         },
-        flex: 1
+        flex: 2
     }
 ]
