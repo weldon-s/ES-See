@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from functools import reduce
 
 #Base model class to put all models in data app
 class BaseModel(models.Model):
@@ -20,7 +21,12 @@ POINTS_PER_PLACE = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1]
 class Country(BaseModel):
     name = models.CharField(max_length=50)
     adjective = models.CharField(max_length=50)
-    code = models.CharField(max_length=2) # ISO 3166-1 alpha-2 country code
+
+    # ISO 3166-1 alpha-2 country code
+    code = models.CharField(max_length=2) 
+
+    # True if country is a member of the Big Five (France, Germany, Italy, Spain, United Kingdom)
+    is_big_five = models.BooleanField(default=False) 
     
     def _str_(self):
         return self.name
@@ -28,7 +34,7 @@ class Country(BaseModel):
 #Represents an edition of the contest
 class Edition(BaseModel):
     year = models.IntegerField()
-    host = models.ForeignKey(Country, on_delete=models.CASCADE)
+    host = models.ForeignKey(Country, on_delete=models.CASCADE) #TODO make separate field for last year's winner?
     city = models.CharField(max_length=25)
 
 #Shows represent a specific semi-final or final in an edition.

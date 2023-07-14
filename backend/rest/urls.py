@@ -23,6 +23,7 @@ from rest.countries.viewset import CountryViewSet
 from rest.editions.viewset import EditionViewSet
 from rest.entries.viewset import EntryViewSet
 from rest.results.viewset import ResultViewSet
+from rest.average.viewset import AverageViewset
 
 router = DefaultRouter()
 
@@ -31,6 +32,7 @@ router.register(r'countries', CountryViewSet, 'data-countries')
 router.register(r'editions', EditionViewSet, 'data-editions')
 router.register(r'entries', EntryViewSet, 'data-entries')
 router.register(r'results', ResultViewSet, 'data-results')
+router.register(r'average', AverageViewset, 'data-average')
 
 #urlpatterns = [
  #   path('', include('data.urls')),

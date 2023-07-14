@@ -5,6 +5,7 @@ import Client from '../api/client';
 import { EditionContext } from '../app';
 import { getOrdinal, getPointsKey } from '../utils';
 import { DataGrid } from '@mui/x-data-grid';
+import { useNavigate } from 'react-router-dom';
 
 const CountryInfo = ({ country }) => {
     const [rawEntries, setRawEntries] = useState(undefined);
@@ -15,6 +16,7 @@ const CountryInfo = ({ country }) => {
     const [bestYears, setBestYears] = useState(undefined);
 
     const years = useContext(EditionContext);
+    const navigate = useNavigate();
 
     useEffect(() => {
         //these don't have any results data so we need to fetch this separately
@@ -130,6 +132,7 @@ const CountryInfo = ({ country }) => {
                                     autoHeight
                                     density="compact"
                                     hideFooter
+                                    onRowClick={(params) => navigate(`/${params.row.year}/${country.code}`)}
                                 />
 
                                 :

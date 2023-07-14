@@ -112,6 +112,7 @@ const FrontPage = ({ year }) => {
                             p: 0,
                         }}
                     >
+                        {/*TODO add Rest of World */}
                         <List disablePadding sx={{ m: 0 }}>
                             {(!!songs && !!countries) ?
                                 songs
@@ -210,7 +211,7 @@ const FrontPage = ({ year }) => {
                             ></ResultDataGrid>
                         </SongContext.Provider>
                         :
-                        <Skeleton height="300px"></Skeleton>
+                        <Skeleton height="300px" width="80%"></Skeleton>
                 }
             </Container >
         </Box>

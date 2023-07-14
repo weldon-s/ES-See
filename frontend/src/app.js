@@ -7,9 +7,20 @@ import FrontPage from "./main/front-page";
 import Client from "../src/api/client"
 import EntryInfo from "./main/entry-info";
 import CountryInfo from "./main/country-info";
+import AnalysisMenu from "./analysis";
+import AveragePerformanceView from "./analysis/average-performance";
 
 export const EditionContext = React.createContext();
 export const CountryContext = React.createContext();
+
+const CARDS = [
+    {
+        title: "Average Performance",
+        description: "See various metrics relating to how a country has performed on average in Eurovision",
+        link: "average-performance",
+        element: <AveragePerformanceView />
+    }
+]
 
 function App() {
     const theme = createTheme({
@@ -24,7 +35,7 @@ function App() {
     useEffect(() => {
         Client.post("editions/get_all/")
             .then(res => {
-                setYears(res.data);
+                setYears(res.data.sort((a, b) => b.year - a.year));
             });
 
         Client.post("countries/get_all/")
@@ -73,6 +84,13 @@ function App() {
                                         />
                                     ))
                                 }
+
+                                <Route path="/analysis" element={<AnalysisMenu cards={CARDS} />} />
+
+                                {
+                                    CARDS.map(card => <Route key={card.link} path={`/analysis/${card.link}`} element={card.element} />)
+                                }
+
                             </Routes>
                         </BrowserRouter>
                     </CountryContext.Provider>

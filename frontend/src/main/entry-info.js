@@ -65,6 +65,7 @@ const EntryInfo = ({ country, year }) => {
             country: country.id
         })
             .then(res => {
+                console.log(res.data)
                 setResults(res.data);
             })
     }, [country, year])
@@ -133,6 +134,8 @@ const EntryInfo = ({ country, year }) => {
             }
 
             <Button onClick={() => navigate(`${location.pathname} + /..`)}>Back to {edition.year}</Button>
+            <Button onClick={() => navigate(`/${country.code}`)}>View Profile of {country.name}</Button>
+
         </Container>
     );
 }
