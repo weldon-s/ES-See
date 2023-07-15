@@ -7,13 +7,11 @@ from rest_framework.decorators import action
 from models import (
     Country,
     Entry,
-    get_primary_vote_type,
     get_vote_key,
     Performance,
     POINTS_PER_PLACE,
     ShowType,
     Vote,
-    VoteType,
 )
 
 
@@ -54,8 +52,7 @@ class EntryViewSet(viewsets.ModelViewSet):
         # populate all shows and their vote types
         # this way, we know if an entry got no points for a specific show and vote type
         for performance in performances:
-            show_type = performance.show.show_type
-            show_type = ShowType.choices[show_type - 1][1].lower()
+            show_type = performance.show.get_show_key()
 
             if show_type not in ret:
                 ret[show_type] = {}
@@ -63,17 +60,14 @@ class EntryViewSet(viewsets.ModelViewSet):
             vote_types = performance.show.voting_system
 
             for vote_type in vote_types:
-                vote_key = get_vote_key(
-                    get_primary_vote_type(performance.show.voting_system)
-                )
+                vote_key = get_vote_key(vote_type)
 
                 if vote_key not in ret[show_type]:
                     ret[show_type][vote_key] = {}
 
         for vote in votes:
             # find show type
-            show_type_index = vote.performance.show.show_type
-            show_type = ShowType.choices[show_type_index - 1][1].lower()
+            show_type = vote.performance.show.get_show_key()
 
             # find vote type
             vote_type = get_vote_key(vote.vote_type)
@@ -103,8 +97,7 @@ class EntryViewSet(viewsets.ModelViewSet):
 
         for vote in votes:
             # find show type
-            show_type_index = vote.performance.show.show_type
-            show_type = ShowType.choices[show_type_index - 1][1].lower()
+            show_type = vote.performance.show.get_show_key()
 
             if show_type not in ret:
                 ret[show_type] = {}

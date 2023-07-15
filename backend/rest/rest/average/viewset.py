@@ -5,7 +5,6 @@ from rest_framework.decorators import action
 
 from models import (
     Edition,
-    get_primary_vote_type,
     get_vote_key,
     Performance,
     Result,
@@ -61,7 +60,7 @@ class AverageViewset(viewsets.GenericViewSet):
 
                     # find the key for the points given the voting system
                     if vote_type is None:
-                        key = get_vote_key(get_primary_vote_type(final.voting_system))
+                        key = get_vote_key(final.get_primary_vote_type())
                     else:
                         key = vote_type
 
@@ -141,9 +140,7 @@ class AverageViewset(viewsets.GenericViewSet):
                         getattr(
                             result,
                             get_vote_key(
-                                get_primary_vote_type(
-                                    result.performance.show.voting_system
-                                )
+                                result.performance.show.get_primary_vote_type()
                             ),
                         )
                         / result.get_maximum_possible(),

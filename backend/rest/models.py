@@ -13,12 +13,9 @@ class BaseModel(models.Model):
 # Enum for show type
 ShowType = models.IntegerChoices("ShowType", "SEMI-FINAL_1 SEMI-FINAL_2 GRAND_FINAL")
 
+
 # Enum for vote type
 VoteType = models.IntegerChoices("VoteType", "JURY TELEVOTE COMBINED")
-
-
-def get_primary_vote_type(voting_system):
-    return VoteType.COMBINED if len(voting_system) > 1 else voting_system[0]
 
 
 def get_vote_key(vote_type):
@@ -60,9 +57,18 @@ class Show(BaseModel):
     show_type = models.IntegerField(
         choices=ShowType.choices, default=ShowType.GRAND_FINAL
     )
+
     voting_system = ArrayField(
         models.IntegerField(choices=VoteType.choices, default=VoteType.COMBINED)
     )
+
+    def get_show_key(self):
+        return ShowType.choices[self.show_type - 1][1].lower()
+
+    def get_primary_vote_type(self):
+        return (
+            VoteType.COMBINED if len(self.voting_system) > 1 else self.voting_system[0]
+        )
 
 
 # Entries represent a song sent by a country in a given year

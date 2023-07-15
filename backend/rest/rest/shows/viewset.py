@@ -2,7 +2,6 @@ from django.http import HttpResponse, JsonResponse
 from json import loads
 from models import (
     Country,
-    get_primary_vote_type,
     get_vote_key,
     Performance,
     POINTS_PER_PLACE,
@@ -30,9 +29,7 @@ class ShowSerializer(serializers.ModelSerializer):
         return obj.show_type
 
     def get_vote_types(self, obj: Show):
-        return list(
-            map(lambda x: VoteType.choices[x - 1][1].lower(), obj.voting_system)
-        )
+        return list(map(lambda x: get_vote_key(x), obj.voting_system))
 
 
 class ShowViewSet(viewsets.ModelViewSet):
@@ -113,7 +110,7 @@ class ShowViewSet(viewsets.ModelViewSet):
 
         # sort the list by the appropriate vote type
         # combined if there are multiple vote types, otherwise the only vote type
-        key = get_vote_key(get_primary_vote_type(show.voting_system))
+        key = get_vote_key(show.get_primary_vote_type())
 
         lst.sort(key=lambda x: x[key], reverse=True)
 

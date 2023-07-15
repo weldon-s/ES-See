@@ -65,7 +65,7 @@ class ResultViewSet(viewsets.ModelViewSet):
         ret = {}
 
         for performance in performances:
-            key = ShowType.choices[performance.show.show_type - 1][1].lower()
+            key = performance.show.get_show_key()
 
             # get corresponding result
             result = Result.objects.get(performance=performance)
