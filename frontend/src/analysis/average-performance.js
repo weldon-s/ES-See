@@ -7,12 +7,14 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } 
 import { CountryContext, EditionContext } from '../app';
 import Client from '../api/client';
 import CountryFlagCell from '../components/country-flag-cell';
+import Metric from './metrics';
 
 const AveragePerformanceView = () => {
     const [startYear, setStartYear] = useState(2023);
     const [endYear, setEndYear] = useState(2023);
     const [includeNQ, setIncludeNQ] = useState(true);
     const [metric, setMetric] = useState(METRICS[0]);
+    const [choices, setChoices] = useState(METRICS[0].getDefaultValueObject());
 
     const [data, setData] = useState(undefined);
     const [columnLabel, setColumnLabel] = useState(METRICS[0].label);
@@ -31,7 +33,7 @@ const AveragePerformanceView = () => {
             Client.post(metric.url, {
                 start_year: startYear,
                 end_year: endYear,
-                include_nq: includeNQ
+                ...choices
             })
                 .then(res => {
                     let data = res.data.map((elem, index) => {
@@ -65,13 +67,16 @@ const AveragePerformanceView = () => {
         }}>
             <Typography variant="h3" align="center">Average Performance</Typography>
 
-            <Grid container sx={{
-                width: "50%",
-                backgroundColor: "#eee",
-                p: 1,
-                m: 1,
-                borderRadius: "10px",
-            }}>
+            <Grid
+                container
+                borderRadius="10px"
+                width="50%"
+                p={1}
+                m={1}
+                justifyContent="center"
+                sx={{
+                    backgroundColor: "#eee",
+                }}>
                 <Grid item xs={12}>
                     <Typography variant="h6" align="center" mb={1}>Settings</Typography>
                 </Grid>
@@ -83,7 +88,10 @@ const AveragePerformanceView = () => {
                             labelId="metric-label"
                             label="Metric"
                             value={metric}
-                            onChange={(e) => setMetric(e.target.value)}
+                            onChange={(e) => {
+                                setChoices(e.target.value.getDefaultValueObject());
+                                setMetric(e.target.value);
+                            }}
                         >
                             {METRICS.map(metric => (
                                 <MenuItem key={metric.url} value={metric}>{metric.label}</MenuItem>
@@ -92,7 +100,7 @@ const AveragePerformanceView = () => {
                     </FormControl>
                 </Grid>
 
-                <Grid item xs={4} display="flex" justifyContent="center">
+                <Grid item xs={6} display="flex" justifyContent="center">
                     <FormControl>
                         <InputLabel id="start-label">Start Year</InputLabel>
                         <Select
@@ -108,7 +116,7 @@ const AveragePerformanceView = () => {
                     </FormControl>
                 </Grid>
 
-                <Grid item xs={4} display="flex" justifyContent="center">
+                <Grid item xs={6} display="flex" justifyContent="center">
                     <FormControl>
                         <InputLabel id="end-label">End Year</InputLabel>
                         <Select
@@ -123,14 +131,65 @@ const AveragePerformanceView = () => {
                     </FormControl>
                 </Grid>
 
-                <Grid item xs={4} display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-                    <InputLabel id="nq-label">Include NQs?</InputLabel>
-                    <Checkbox
-                        checked={includeNQ}
-                        onChange={(e) => setIncludeNQ(e.target.checked)}
-                    />
-                </Grid>
+                {metric.parameters.map(param =>
+                    <Grid
+                        key={param.name}
+                        item
+                        xs={6}
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="center"
+                        justifyContent="center"
+                        mt={1}
+                    >
+                        {param.type === "boolean" ?
+                            <>
+                                <InputLabel id={`${param.name}-label`}>{param.label}</InputLabel>
+                                <Checkbox
+                                    labelId={`${param.name}-label`}
+                                    checked={choices[param.name]}
+                                    onChange={(e) => {
+                                        setChoices(
+                                            currentChoices => {
+                                                let newChoices = { ...currentChoices };
+                                                newChoices[param.name] = e.target.checked;
+                                                return newChoices;
+                                            }
+                                        )
+                                    }}
+                                />
+                            </>
 
+                            :
+                            <FormControl sx={{ width: "70%" }}>
+                                <InputLabel id={`${param.name}-label`}>{param.label}</InputLabel>
+                                <Select
+                                    labelId={`${param.name}-label`}
+                                    label={param.label}
+                                    value={choices[param.name]}
+                                    onChange={(e) => {
+                                        setChoices(
+                                            currentChoices => {
+                                                let newChoices = { ...currentChoices };
+                                                newChoices[param.name] = e.target.value;
+                                                return newChoices;
+                                            }
+                                        )
+                                    }}>
+                                    {
+                                        param.choices.map(choice => (
+                                            <MenuItem key={choice.value} value={choice.value}>{choice.label}</MenuItem>
+                                        ))
+                                    }
+                                </Select>
+                            </FormControl>
+
+                        }
+
+                    </Grid>
+
+
+                )}
 
                 <Grid item xs={12} display="flex" justifyContent="end">
                     <Button onClick={handleUpdate}>Update</Button>
@@ -244,13 +303,10 @@ const getColumns = (label) => [
 ]
 
 const METRICS = [
-    {
-        label: "Average Grand Final Points",
-        url: "average/get_average_final_points/"
-    },
+    new Metric("Average Grand Final Points", "average/get_average_final_points/")
+        .addBooleanParameter("include_nq", "Include NQs?")
+        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
 
-    {
-        label: "Average Place",
-        url: "average/get_average_place/"
-    }
+    new Metric("Average Place", "average/get_average_place/")
+        .addBooleanParameter("include_nq", "Include NQs?")
 ]

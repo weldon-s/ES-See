@@ -26,6 +26,9 @@ class AverageViewset(viewsets.GenericViewSet):
         start_year = data.get("start_year")
         end_year = data.get("end_year")
 
+        # get the vote type from the request
+        vote_type = data.get("vote_type", None)
+
         # If include_nq is true, we count non-qualifying performances as 0 points, otherwise we ignore them
         include_nq = data.get("include_nq", True)
 
@@ -57,10 +60,13 @@ class AverageViewset(viewsets.GenericViewSet):
                     result = Result.objects.get(performance=performance)
 
                     # find the key for the points given the voting system
-                    key = get_vote_key(get_primary_vote_type(final.voting_system))
+                    if vote_type is None:
+                        key = get_vote_key(get_primary_vote_type(final.voting_system))
+                    else:
+                        key = vote_type
 
                     # add points to tally and increment number of editions
-                    averages[performance.country.id][0] += getattr(result, key)
+                    averages[performance.country.id][0] += getattr(result, key, 0)
                     averages[performance.country.id][1] += 1
 
         # calculate the average points for each country
