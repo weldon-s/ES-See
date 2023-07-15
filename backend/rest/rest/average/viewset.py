@@ -15,10 +15,10 @@ from models import (
 
 # TODO ignore noncompeting countries
 # TODO tiebreaking
+# TODO proportion
 class AverageViewset(viewsets.GenericViewSet):
-    @action(detail=False, methods=["POST"])
-
     # Gets the average points given to each country in the Grand Final over a given range of years
+    @action(detail=False, methods=["POST"])
     def get_average_final_points(self, request):
         # get the start and end years from the request
         data = loads(request.body)
@@ -26,7 +26,7 @@ class AverageViewset(viewsets.GenericViewSet):
         end_year = data.get("end_year")
 
         # get the vote type from the request
-        vote_type = data.get("vote_type", None)
+        vote_type = data.get("vote_type", VoteType.COMBINED)
 
         # If include_nq is true, we count non-qualifying performances as 0 points, otherwise we ignore them
         include_nq = data.get("include_nq", True)
@@ -40,6 +40,15 @@ class AverageViewset(viewsets.GenericViewSet):
 
         for edition in editions:
             final = edition.show_set.get(show_type=ShowType.GRAND_FINAL)
+
+            # find the key for the points given the voting system
+            if vote_type == get_vote_key(VoteType.COMBINED):
+                key = get_vote_key(final.get_primary_vote_type())
+            else:
+                if VoteType[vote_type.upper()] not in final.voting_system:
+                    continue
+
+                key = vote_type
 
             performances = final.performance_set.all()
 
@@ -58,14 +67,76 @@ class AverageViewset(viewsets.GenericViewSet):
                 else:
                     result = Result.objects.get(performance=performance)
 
-                    # find the key for the points given the voting system
-                    if vote_type is None:
-                        key = get_vote_key(final.get_primary_vote_type())
-                    else:
-                        key = vote_type
+                    # add points to tally and increment number of editions
+                    toAdd = getattr(result, key, 0)
+
+                    if toAdd is None:
+                        toAdd = 0
+
+                    averages[performance.country.id][0] += toAdd
+                    averages[performance.country.id][1] += 1
+
+        # calculate the average points for each country
+        for country_id in averages:
+            averages[country_id] = averages[country_id][0] / averages[country_id][1]
+
+        # convert dict into list sorted by the average we just calculated
+        lst = sorted(averages.items(), key=lambda x: x[1], reverse=True)
+
+        lst = [
+            {"country": x[0], "average": x[1], "place": lst.index(x) + 1} for x in lst
+        ]
+
+        return JsonResponse(lst, safe=False)
+
+    # Gets the average points given to each country in the Semi-Finals over a given range of years
+    @action(detail=False, methods=["POST"])
+    def get_average_semi_points(self, request):
+        # get the start and end years from the request
+        data = loads(request.body)
+        start_year = data.get("start_year")
+        end_year = data.get("end_year")
+
+        # get the vote type from the request
+        vote_type = data.get("vote_type", VoteType.COMBINED)
+
+        editions = Edition.objects.filter(year__gte=start_year, year__lte=end_year)
+
+        # get the average points for each country
+        # we use a dict with country ids as a key, and a list of [points, num_editions] as a value
+        # this way, we don't assume that each country has participated in every edition
+        averages = {}
+
+        for edition in editions:
+            # get the semi-finals for this edition
+            semis = edition.show_set.exclude(show_type=ShowType.GRAND_FINAL)
+
+            for semi in semis:
+                # find the key for the points given the voting system
+                if vote_type == get_vote_key(VoteType.COMBINED):
+                    key = get_vote_key(semi.get_primary_vote_type())
+                else:
+                    if VoteType[vote_type.upper()] not in semi.voting_system:
+                        continue
+
+                    key = vote_type
+
+                performances = semi.performance_set.filter(running_order__gt=0)
+
+                for performance in performances:
+                    result = Result.objects.get(performance=performance)
+
+                    if not performance.country.id in averages:
+                        averages[performance.country.id] = [0, 0]
 
                     # add points to tally and increment number of editions
-                    averages[performance.country.id][0] += getattr(result, key, 0)
+
+                    toAdd = getattr(result, key, 0)
+
+                    if toAdd is None:
+                        toAdd = 0
+
+                    averages[performance.country.id][0] += toAdd
                     averages[performance.country.id][1] += 1
 
         # calculate the average points for each country

@@ -307,6 +307,10 @@ const METRICS = [
         .addBooleanParameter("include_nq", "Include NQs?")
         .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
 
+    new Metric("Average Semi-Final Points", "average/get_average_semi_points/")
+        .addBooleanParameter("include_nq", "Include NQs?")
+        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
+
     new Metric("Average Place", "average/get_average_place/")
         .addBooleanParameter("include_nq", "Include NQs?")
 ]
