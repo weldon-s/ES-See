@@ -12,9 +12,10 @@ const AveragePerformanceView = () => {
     const [startYear, setStartYear] = useState(2023);
     const [endYear, setEndYear] = useState(2023);
     const [includeNQ, setIncludeNQ] = useState(true);
+    const [metric, setMetric] = useState(METRICS[0]);
 
     const [data, setData] = useState(undefined);
-    const [chartData, setChartData] = useState(undefined);
+    const [columnLabel, setColumnLabel] = useState(METRICS[0].label);
 
     const [updateCount, setUpdateCount] = useState(0);
 
@@ -27,7 +28,7 @@ const AveragePerformanceView = () => {
 
     useEffect(() => {
         if (countries) {
-            Client.post("average/get_average_place/", {
+            Client.post(metric.url, {
                 start_year: startYear,
                 end_year: endYear,
                 include_nq: includeNQ
@@ -46,6 +47,10 @@ const AveragePerformanceView = () => {
                 })
         }
     }, [updateCount]);
+
+    useEffect(() => {
+        setColumnLabel(metric.label);
+    }, [updateCount])
 
     const handleUpdate = () => {
         setUpdateCount(n => n + 1);
@@ -69,6 +74,22 @@ const AveragePerformanceView = () => {
             }}>
                 <Grid item xs={12}>
                     <Typography variant="h6" align="center" mb={1}>Settings</Typography>
+                </Grid>
+
+                <Grid item xs={12} display="flex" justifyContent="center" mb={2}>
+                    <FormControl>
+                        <InputLabel id="metric-label">Metric</InputLabel>
+                        <Select
+                            labelId="metric-label"
+                            label="Metric"
+                            value={metric}
+                            onChange={(e) => setMetric(e.target.value)}
+                        >
+                            {METRICS.map(metric => (
+                                <MenuItem key={metric.url} value={metric}>{metric.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </Grid>
 
                 <Grid item xs={4} display="flex" justifyContent="center">
@@ -147,12 +168,13 @@ const AveragePerformanceView = () => {
                                             <DataGrid
                                                 autoHeight
                                                 rows={data}
-                                                columns={COLUMNS}
+                                                columns={getColumns(columnLabel)}
                                                 density="compact"
                                                 hideFooter
                                                 onRowClick={(params) => navigate(`/${params.row.country.code}`)}
                                                 sx={{
-                                                    width: "80%"
+                                                    width: "80%",
+                                                    pb: 1
                                                 }}
                                             />
                                             :
@@ -167,7 +189,7 @@ const AveragePerformanceView = () => {
                                             </BarChart>
                                     )
                                     :
-                                    <Typography variant="h6">No data found for the selected configuration.</Typography>
+                                    <Typography variant="h6">No data found for the selected configuration. Make sure your start year isn't after your end year</Typography>
                             )
                             :
                             <Skeleton height="50px" width="80%"></Skeleton>
@@ -192,12 +214,12 @@ const CustomTooltip = ({ active, payload, label }) => {
             borderRadius: "10px"
         }}>
             <CountryFlagCell country={payload[0].payload.country} />
-            <Typography>{label}:{payload[0].payload.average}</Typography>
+            <Typography>Average:{payload[0].payload.average}</Typography>
         </Box>
     }
 }
 
-const COLUMNS = [
+const getColumns = (label) => [
     {
         field: "place",
         headerName: "Place",
@@ -214,9 +236,21 @@ const COLUMNS = [
 
     {
         field: "average",
-        headerName: "Average Points",
+        headerName: label,
         valueGetter: (params) => params.row.average,
         renderCell: (params) => params.row.average.toFixed(2),
         flex: 2
+    }
+]
+
+const METRICS = [
+    {
+        label: "Average Grand Final Points",
+        url: "average/get_average_final_points/"
+    },
+
+    {
+        label: "Average Place",
+        url: "average/get_average_place/"
     }
 ]

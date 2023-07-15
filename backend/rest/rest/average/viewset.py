@@ -120,8 +120,6 @@ class AverageViewset(viewsets.GenericViewSet):
                     "country", flat=True
                 )
 
-                print(nq_countries.count())
-
                 # then, get their performances
                 nqs = Performance.objects.filter(
                     show__edition=edition, country__in=nq_countries, running_order__gt=0
