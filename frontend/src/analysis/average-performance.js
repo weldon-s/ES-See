@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, Container, FormControl, Grid, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
-import { CountryContext, EditionContext } from '../app';
-import { Form, useNavigate } from 'react-router-dom';
-import Client from '../api/client';
+import { Box, Button, Checkbox, Container, FormControl, Grid, InputLabel, MenuItem, Select, Skeleton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import { Form, useNavigate } from 'react-router-dom';
+import { Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
+
+import { CountryContext, EditionContext } from '../app';
+import Client from '../api/client';
 import CountryFlagCell from '../components/country-flag-cell';
 
 const AveragePerformanceView = () => {
@@ -12,8 +14,11 @@ const AveragePerformanceView = () => {
     const [includeNQ, setIncludeNQ] = useState(true);
 
     const [data, setData] = useState(undefined);
+    const [chartData, setChartData] = useState(undefined);
 
     const [updateCount, setUpdateCount] = useState(0);
+
+    const [table, setTable] = useState(true);
 
     const years = useContext(EditionContext);
     const countries = useContext(CountryContext);
@@ -22,19 +27,22 @@ const AveragePerformanceView = () => {
 
     useEffect(() => {
         if (countries) {
-            Client.post("average/get_average_final_points/", {
+            Client.post("average/get_average_place/", {
                 start_year: startYear,
                 end_year: endYear,
                 include_nq: includeNQ
             })
                 .then(res => {
-                    setData(res.data.map((elem, index) => {
+                    let data = res.data.map((elem, index) => {
                         return {
                             ...elem,
                             country: countries ? countries.find(country => country.id === elem.country) : undefined,
+                            average: parseFloat(elem.average.toFixed(2)),
                             id: index
                         }
-                    }));
+                    })
+
+                    setData(data);
                 })
         }
     }, [updateCount]);
@@ -109,30 +117,85 @@ const AveragePerformanceView = () => {
             </Grid>
 
 
-            {updateCount > 0 && (data ?
-                <DataGrid
-                    autoHeight
-                    rows={data}
-                    columns={COLUMNS}
-                    density="compact"
-                    hideFooter
-                    onRowClick={(params) => navigate(`/${params.row.country.code}`)}
-                    sx={{
-                        width: "80%"
+            <Box sx={{
+                backgroundColor: "#eee",
+                p: 1,
+                m: 1,
+                borderRadius: "10px",
+            }}>
+                <ToggleButtonGroup
+                    exclusive
+                    value={table}
+                    onChange={(e, value) => {
+                        setTable(value)
                     }}
-                />
-                :
-                <Skeleton height="50px" width="80%"></Skeleton>
-            )
+                >
+                    <ToggleButton value={true}>Table</ToggleButton>
+                    <ToggleButton value={false}>Chart</ToggleButton>
+                </ToggleButtonGroup>
+
+            </Box>
+
+            {
+                updateCount > 0 ?
+                    (
+                        data ?
+                            (
+                                data.length > 0 ?
+                                    (
+                                        table ?
+                                            <DataGrid
+                                                autoHeight
+                                                rows={data}
+                                                columns={COLUMNS}
+                                                density="compact"
+                                                hideFooter
+                                                onRowClick={(params) => navigate(`/${params.row.country.code}`)}
+                                                sx={{
+                                                    width: "80%"
+                                                }}
+                                            />
+                                            :
+                                            <BarChart data={data} width={600} height={500} style={{
+                                                fontFamily: "Inter, sans-serif"
+                                            }}>
+                                                <CartesianGrid />
+                                                <Bar dataKey="average" />
+                                                <XAxis dataKey="country.name" hide />
+                                                <YAxis />
+                                                <Tooltip content={CustomTooltip} />
+                                            </BarChart>
+                                    )
+                                    :
+                                    <Typography variant="h6">No data found for the selected configuration.</Typography>
+                            )
+                            :
+                            <Skeleton height="50px" width="80%"></Skeleton>
+                    )
+                    :
+                    <Typography variant="h6">Choose your desired configuration and press "Update" to view your data.</Typography>
             }
-
-
 
         </Container>
     );
 }
 
 export default AveragePerformanceView;
+
+const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length > 0) {
+        console.log(payload);
+
+        return <Box sx={{
+            backgroundColor: "#fffc",
+            p: 1,
+            borderRadius: "10px"
+        }}>
+            <CountryFlagCell country={payload[0].payload.country} />
+            <Typography>{label}:{payload[0].payload.average}</Typography>
+        </Box>
+    }
+}
 
 const COLUMNS = [
     {

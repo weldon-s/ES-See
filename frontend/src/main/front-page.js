@@ -60,6 +60,7 @@ const FrontPage = ({ year }) => {
         if (show) {
             Client.post(`shows/${show.id}/get_results/`)
                 .then(res => {
+                    console.log(res.data)
                     setPlacings(res.data);
                 })
         }

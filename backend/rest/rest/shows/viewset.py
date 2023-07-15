@@ -1,6 +1,17 @@
 from django.http import HttpResponse, JsonResponse
 from json import loads
-from models import Country, Performance, POINTS_PER_PLACE, Result, Show, ShowType, Vote, VoteType
+from models import (
+    Country,
+    get_primary_vote_type,
+    get_vote_key,
+    Performance,
+    POINTS_PER_PLACE,
+    Result,
+    Show,
+    ShowType,
+    Vote,
+    VoteType,
+)
 from rest_framework import serializers, viewsets
 from rest_framework.decorators import action
 
@@ -13,33 +24,36 @@ class ShowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Show
-        fields = ['id', 'edition',  'type', 'vote_types']
-        
+        fields = ["id", "edition", "type", "vote_types"]
+
     def get_type(self, obj: Show):
         return obj.show_type
-        
+
     def get_vote_types(self, obj: Show):
-        return list(map(lambda x: VoteType.choices[x - 1][1].lower(), obj.voting_system))
+        return list(
+            map(lambda x: VoteType.choices[x - 1][1].lower(), obj.voting_system)
+        )
+
 
 class ShowViewSet(viewsets.ModelViewSet):
     queryset = Show.objects.all()
 
-    @action(detail=False, methods=['POST'])
+    @action(detail=False, methods=["POST"])
     def get_show(self, request):
-        #load our year and show type from the request
+        # load our year and show type from the request
         data = loads(request.body)
-        year = data.get('year')
-        show_type = data.get('show_type')
+        year = data.get("year")
+        show_type = data.get("show_type")
 
-        #get the appropriate show from the database and return
+        # get the appropriate show from the database and return
         show = Show.objects.get(edition__id=year, show_type=show_type)
         return JsonResponse(ShowSerializer(show).data, safe=False)
-    
-    @action(detail=True, methods=['POST'])
-    def calculate_results(self, request, pk=None):
-        show = self.get_object()
 
-        #add entries for each performing country and vote type
+    @action(detail=True, methods=["POST"])
+    def calculate_results(self, request, pk=None):
+        show: Show = self.get_object()
+
+        # add entries for each performing country and vote type
         performances = Performance.objects.filter(show=show, running_order__gt=0)
         vote_types = show.voting_system
         result = {}
@@ -47,16 +61,16 @@ class ShowViewSet(viewsets.ModelViewSet):
         for performance in performances:
             result[performance.country.id] = {
                 "running_order": performance.running_order,
-                "id": performance.id
-                }
+                "id": performance.id,
+            }
 
             for vote_type in vote_types:
                 result[performance.country.id][vote_type] = 0
 
-        #get all votes from this show
+        # get all votes from this show
         votes = Vote.objects.filter(performance__show=self.get_object())
 
-        #iterate through all votes and add points to the appropriate countries
+        # iterate through all votes and add points to the appropriate countries
         for vote in votes:
             for i in range(min(len(POINTS_PER_PLACE), len(vote.ranking))):
                 key = Country.objects.get(code=vote.ranking[i])
@@ -64,17 +78,17 @@ class ShowViewSet(viewsets.ModelViewSet):
 
         lst = []
 
-        #now we convert the results to a list
+        # now we convert the results to a list
         for k, v in result.items():
             obj = {"country": k, "running_order": v["running_order"], "id": v["id"]}
 
-            #add voting results for each vote type
+            # add voting results for each vote type
             for int, label in VoteType.choices:
                 if int in vote_types:
                     obj[label.lower()] = v[int]
 
-            #add a "combined" property if there are multiple vote types
-            #this assumes that len(vote_types) > 1 implies VoteType.COMBINED
+            # add a "combined" property if there are multiple vote types
+            # this assumes that len(vote_types) > 1 implies VoteType.COMBINED
             if len(vote_types) > 1:
                 sum = 0
                 for vote_type in VoteType.choices:
@@ -84,7 +98,7 @@ class ShowViewSet(viewsets.ModelViewSet):
 
             lst.append(obj)
 
-        #sort the list by the appropriate vote type to add place data
+        # sort the list by the appropriate vote type to add place data
         if "jury" in lst[0]:
             lst.sort(key=lambda x: x["jury"], reverse=True)
 
@@ -97,11 +111,9 @@ class ShowViewSet(viewsets.ModelViewSet):
             for i in range(len(lst)):
                 lst[i]["televote_place"] = i + 1
 
-        #sort the list by the appropriate vote type
-        #combined if there are multiple vote types, otherwise the only vote type
-        index = VoteType.COMBINED if len(vote_types) > 1 else vote_types[0]
-        index -= 1
-        key = VoteType.choices[index][1].lower()
+        # sort the list by the appropriate vote type
+        # combined if there are multiple vote types, otherwise the only vote type
+        key = get_vote_key(get_primary_vote_type(show.voting_system))
 
         lst.sort(key=lambda x: x[key], reverse=True)
 
@@ -109,23 +121,25 @@ class ShowViewSet(viewsets.ModelViewSet):
             lst[i]["place"] = i + 1
 
             Result.objects.get_or_create(
-                performance = Performance.objects.get(show=self.get_object(), country__id=lst[i]["country"]),
-                place = lst[i]["place"],
-                jury_place = lst[i].get("jury_place", None),
-                televote_place = lst[i].get("televote_place", None),
-                total_points = lst[i].get("combined", None),
-                jury_points = lst[i].get("jury", None),
-                televote_points = lst[i].get("televote", None),
-                running_order = lst[i]["running_order"]
+                performance=Performance.objects.get(
+                    show=self.get_object(), country__id=lst[i]["country"]
+                ),
+                place=lst[i]["place"],
+                jury_place=lst[i].get("jury_place", None),
+                televote_place=lst[i].get("televote_place", None),
+                total_points=lst[i].get("combined", None),
+                jury_points=lst[i].get("jury", None),
+                televote_points=lst[i].get("televote", None),
+                running_order=lst[i]["running_order"],
             )
 
         return JsonResponse(lst, safe=False)
 
-    @action(detail=True, methods=['POST'])
+    @action(detail=True, methods=["POST"])
     def get_results(self, request, pk=None):
         show = self.get_object()
         performances = Performance.objects.filter(show=show, running_order__gt=0)
-        
+
         lst = []
 
         for performance in performances:
@@ -133,5 +147,5 @@ class ShowViewSet(viewsets.ModelViewSet):
             lst.append(result)
 
         lst.sort(key=lambda x: x.place)
-            
+
         return JsonResponse(ResultSerializer(lst, many=True).data, safe=False)
