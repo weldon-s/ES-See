@@ -7,7 +7,7 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } 
 import { CountryContext, EditionContext } from '../app';
 import Client from '../api/client';
 import CountryFlagCell from '../components/country-flag-cell';
-import RequestData from './request-data';
+import { Parameter, RequestData } from './request-data';
 
 const AveragePerformanceView = () => {
     const [startYear, setStartYear] = useState(2023);
@@ -31,8 +31,6 @@ const AveragePerformanceView = () => {
     useEffect(() => {
         if (countries) {
             Client.post(metric.url, {
-                start_year: startYear,
-                end_year: endYear,
                 ...choices
             })
                 .then(res => {
@@ -95,37 +93,6 @@ const AveragePerformanceView = () => {
                         >
                             {METRICS.map(metric => (
                                 <MenuItem key={metric.url} value={metric}>{metric.label}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid>
-
-                <Grid item xs={6} display="flex" justifyContent="center">
-                    <FormControl>
-                        <InputLabel id="start-label">Start Year</InputLabel>
-                        <Select
-                            labelId="start-label"
-                            label="Start Year"
-                            value={startYear}
-                            onChange={(e) => setStartYear(e.target.value)}
-                        >
-                            {years && years.map(year => (
-                                <MenuItem key={year.id} value={year.year}>{year.year}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid>
-
-                <Grid item xs={6} display="flex" justifyContent="center">
-                    <FormControl>
-                        <InputLabel id="end-label">End Year</InputLabel>
-                        <Select
-                            label="End Year"
-                            value={endYear}
-                            onChange={(e) => setEndYear(e.target.value)}
-                        >
-                            {years && years.map(year => (
-                                <MenuItem key={year.id} value={year.year}>{year.year}</MenuItem>
                             ))}
                         </Select>
                     </FormControl>
@@ -301,25 +268,26 @@ const getColumns = (label) => [
     }
 ]
 
+const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
+const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);
+const INCLUDE_NQ_PARAM = Parameter.getBooleanParameter("include_nq", "Include NQs?");
+const VOTE_TYPE_PARAM = Parameter.getParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]);
+
+const requestConstructor = RequestData.getPresetParameters([START_YEAR_PARAM, END_YEAR_PARAM, VOTE_TYPE_PARAM]);
+
 const METRICS = [
-    new RequestData("Average Grand Final Points", "average/get_average_final_points/")
-        .addBooleanParameter("include_nq", "Include NQs?")
-        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
+    requestConstructor("Average Grand Final Points", "average/get_average_final_points/")
+        .addParameter(INCLUDE_NQ_PARAM),
 
-    new RequestData("Average Grand Final Proportion", "average/get_average_final_proportion/")
-        .addBooleanParameter("include_nq", "Include NQs?")
-        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
+    requestConstructor("Average Grand Final Proportion", "average/get_average_final_proportion/")
+        .addParameter(INCLUDE_NQ_PARAM),
 
-    new RequestData("Average Semi-Final Points", "average/get_average_semi_points/")
-        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
+    requestConstructor("Average Semi-Final Points", "average/get_average_semi_points/"),
 
-    new RequestData("Average Semi-Final Proportion", "average/get_average_semi_proportion/")
-        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
+    requestConstructor("Average Semi-Final Proportion", "average/get_average_semi_proportion/"),
 
-    new RequestData("Average Overall Place", "average/get_average_place/")
-        .addBooleanParameter("include_nq", "Include NQs?")
-        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
+    requestConstructor("Average Overall Place", "average/get_average_place/")
+        .addParameter(INCLUDE_NQ_PARAM),
 
-    new RequestData("Average Semi-Final Place", "average/get_average_semi_place/")
-        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]])
+    requestConstructor("Average Semi-Final Place", "average/get_average_semi_place/"),
 ]
