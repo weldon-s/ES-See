@@ -49,6 +49,23 @@ class Edition(BaseModel):
     )  # TODO make separate field for last year's winner?
     city = models.CharField(max_length=25)
 
+    def get_qualifier_data(self):
+        final = self.show_set.get(show_type=ShowType.GRAND_FINAL)
+        qualifiers = list(
+            final.performance_set.filter(running_order__gt=0)
+            .exclude(country__is_big_five=True)
+            .exclude(country__id=self.host.id)
+            .values_list("country__id", flat=True)
+        )
+
+        non_qualifiers = list(
+            final.performance_set.filter(running_order__lte=0)
+            .exclude(country__code="un")
+            .values_list("country__id", flat=True)
+        )
+
+        return {"qualifiers": qualifiers, "non_qualifiers": non_qualifiers}
+
 
 # Shows represent a specific semi-final or final in an edition.
 # They are associated with a given voting system, which is an array of the types of points given out in said show.

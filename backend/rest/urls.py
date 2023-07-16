@@ -24,18 +24,20 @@ from rest.editions.viewset import EditionViewSet
 from rest.entries.viewset import EntryViewSet
 from rest.results.viewset import ResultViewSet
 from rest.average.viewset import AverageViewset
+from rest.qualify.viewset import QualifyViewSet
 
 router = DefaultRouter()
 
-router.register(r'shows', ShowViewSet, 'data-shows')
-router.register(r'countries', CountryViewSet, 'data-countries')
-router.register(r'editions', EditionViewSet, 'data-editions')
-router.register(r'entries', EntryViewSet, 'data-entries')
-router.register(r'results', ResultViewSet, 'data-results')
-router.register(r'average', AverageViewset, 'data-average')
+router.register(r"shows", ShowViewSet, "data-shows")
+router.register(r"countries", CountryViewSet, "data-countries")
+router.register(r"editions", EditionViewSet, "data-editions")
+router.register(r"entries", EntryViewSet, "data-entries")
+router.register(r"results", ResultViewSet, "data-results")
+router.register(r"average", AverageViewset, "data-average")
+router.register(r"qualify", QualifyViewSet, "data-qualify")
 
-#urlpatterns = [
- #   path('', include('data.urls')),
-    #path('admin/', admin.site.urls),
-#]
+# urlpatterns = [
+#   path('', include('data.urls')),
+# path('admin/', admin.site.urls),
+# ]
 urlpatterns = router.urls

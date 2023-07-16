@@ -9,6 +9,7 @@ import EntryInfo from "./main/entry-info";
 import CountryInfo from "./main/country-info";
 import AnalysisMenu from "./analysis";
 import AveragePerformanceView from "./analysis/average-performance";
+import QualifyingHistoryView from "./analysis/qualify-history";
 
 export const EditionContext = React.createContext();
 export const CountryContext = React.createContext();
@@ -19,6 +20,13 @@ const CARDS = [
         description: "See various metrics relating to how a country has performed on average in Eurovision",
         link: "average-performance",
         element: <AveragePerformanceView />
+    },
+
+    {
+        title: "Qualifying History",
+        description: "See the history of a country's qualification for the grand final",
+        link: "qualifying-history",
+        element: <QualifyingHistoryView />
     }
 ]
 
