@@ -9,6 +9,7 @@ import Client from '../api/client';
 import CountryFlagCell from '../components/country-flag-cell';
 import { Parameter, RequestData } from './request-data.ts';
 
+//TODO make this ts
 const AveragePerformanceView = () => {
     const [startYear, setStartYear] = useState(2023);
     const [endYear, setEndYear] = useState(2023);
@@ -223,6 +224,7 @@ const AveragePerformanceView = () => {
                     <Typography variant="h6">Choose your desired configuration and press "Update" to view your data.</Typography>
             }
 
+            <Button onClick={() => navigate("/analysis")} sx={{ mt: 2, alignSelf: "start" }}>Back</Button>
         </Container>
     );
 }

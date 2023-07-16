@@ -35,11 +35,11 @@ export class RequestData {
 }
 
 export class Parameter {
-    name;
-    label;
-    choices;
-    type;
-    constructor(name: string, label: any, choices: ParameterChoice[], type: string = "default") {
+    name: string;
+    label: any;
+    choices: ParameterChoice[];
+    type: string;
+    private constructor(name: string, label: any, choices: ParameterChoice[], type: string = "default") {
         this.name = name;
         this.label = label;
         this.choices = choices;
@@ -76,8 +76,8 @@ export class Parameter {
 }
 
 class ParameterChoice {
-    value;
-    label;
+    value: any;
+    label: any;
 
     constructor(value: any, label: any) {
         this.value = value;

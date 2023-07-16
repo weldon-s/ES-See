@@ -17,6 +17,7 @@ from models import (
 # TODO ignore noncompeting countries
 # TODO tiebreaking
 # TODO median
+# TODO adjusted places (e.g. for AQs)
 class AverageViewset(viewsets.GenericViewSet):
     # This is the main workhorse function for calculating average points/proportions
     def get_average_points(self, data):

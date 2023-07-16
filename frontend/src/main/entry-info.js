@@ -99,7 +99,7 @@ const EntryInfo = ({ country, year }) => {
             {
                 (edition && entry) ?
                     <Typography>
-                        {country.name} participated in the {edition.year} edition of Eurovision
+                        {country.name} {edition.year === 2020 && "would have"} participated in the {edition.year} edition of Eurovision
                         with the song <em>{entry.title}</em> by {entry.artist}.
                     </Typography>
                     :
@@ -112,24 +112,32 @@ const EntryInfo = ({ country, year }) => {
                 ))
             }
 
-            <Typography variant="h6" align="center">Points Given by {country.name}</Typography>
-            {pointsFrom ?
-                <EntryPointView
-                    points={pointsFrom}
-                />
+            {edition.year === 2020 ?
+                <Typography>Due to the COVID-19 pandemic, the 2020 contest was cancelled and {country.name} did not compete</Typography>
                 :
-                <Skeleton height="50px"></Skeleton>
-            }
+                <>
 
-            <Typography variant="h6" align="center">Points Received by {country.name}</Typography>
-            {
-                pointsTo ?
-                    <EntryPointView
-                        points={pointsTo}
-                        results={results}
-                    />
-                    :
-                    <Skeleton height="50px"></Skeleton>
+                    <Typography variant="h6" align="center">Points Given by {country.name}</Typography>
+                    {pointsFrom ?
+                        <EntryPointView
+                            points={pointsFrom}
+                        />
+                        :
+                        <Skeleton height="50px"></Skeleton>
+                    }
+
+                    <Typography variant="h6" align="center">Points Received by {country.name}</Typography>
+                    {
+                        pointsTo ?
+                            <EntryPointView
+                                points={pointsTo}
+                                results={results}
+                            />
+                            :
+                            <Skeleton height="50px"></Skeleton>
+                    }
+                </>
+
             }
 
             <Button onClick={() => navigate(`${location.pathname} + /..`)}>Back to {edition.year}</Button>

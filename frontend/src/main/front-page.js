@@ -6,6 +6,7 @@ import {
     Container,
     CssBaseline,
     Drawer,
+    IconButton,
     List,
     ListItem,
     ListItemButton,
@@ -17,7 +18,7 @@ import {
     Typography,
     styled
 } from "@mui/material";
-import { LibraryMusic } from "@mui/icons-material";
+import { Analytics, LibraryMusic } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
@@ -47,13 +48,15 @@ const FrontPage = ({ year }) => {
     const [showSidebar, setShowSidebar] = useState(true);
 
     useEffect(() => {
-        Client.post("shows/get_show/", {
-            year: yearId,
-            show_type: showType
-        })
-            .then(res => {
-                setShow(res.data);
+        if (years.find(elem => elem.id === yearId).year !== 2020) {
+            Client.post("shows/get_show/", {
+                year: yearId,
+                show_type: showType
             })
+                .then(res => {
+                    setShow(res.data);
+                })
+        }
     }, [yearId, showType])
 
     useEffect(() => {
@@ -144,6 +147,12 @@ const FrontPage = ({ year }) => {
                     </AccordionDetails>
                 </Accordion>
 
+                <Accordion elevation={0} disableGutters>
+                    <AccordionSummary expandIcon={<Analytics />} onClick={() => navigate('../analysis')}>
+                        <Typography textAlign="center" sx={{ m: 0, p: 0 }}>Analysis</Typography>
+                    </AccordionSummary>
+
+                </Accordion>
             </Drawer>
             <Container sx={{ flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
 
@@ -211,7 +220,14 @@ const FrontPage = ({ year }) => {
                             ></ResultDataGrid>
                         </SongContext.Provider>
                         :
-                        <Skeleton height="300px" width="80%"></Skeleton>
+                        years && years.find(elem => elem.id === yearId).year === 2020 ?
+                            <Box height="300px" display="flex" alignItems="center" justifyContent="center">
+                                {/*TODO add planned semis? */}
+                                <Typography>The 2020 contest was not held due to COVID-19.</Typography>
+                            </Box>
+
+                            :
+                            <Skeleton height="300px" width="80%"></Skeleton>
                 }
             </Container >
         </Box>

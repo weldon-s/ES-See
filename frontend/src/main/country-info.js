@@ -110,7 +110,7 @@ const CountryInfo = ({ country }) => {
                 (updated && bestYears) ?
                     <>
                         <Typography variant="body1">
-                            {country.name} has participated in the Eurovision Song Contest {entries.length} times, debuting in {entries[0].edition.year}.
+                            {country.name} has participated in the Eurovision Song Contest {entries.filter(entry => entry.edition.year !== 2020).length} times, debuting in {entries[0].edition.year}.
                         </Typography>
                         <Typography variant="body1">
                             They have participated in {finals} {finals === 1 ? "final" : "finals"}.
