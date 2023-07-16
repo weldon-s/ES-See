@@ -65,7 +65,6 @@ const EntryInfo = ({ country, year }) => {
             country: country.id
         })
             .then(res => {
-                console.log(res.data)
                 setResults(res.data);
             })
     }, [country, year])

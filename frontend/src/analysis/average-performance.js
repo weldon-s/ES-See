@@ -7,7 +7,7 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } 
 import { CountryContext, EditionContext } from '../app';
 import Client from '../api/client';
 import CountryFlagCell from '../components/country-flag-cell';
-import { Parameter, RequestData } from './request-data';
+import { Parameter, RequestData } from './request-data.ts';
 
 const AveragePerformanceView = () => {
     const [startYear, setStartYear] = useState(2023);
@@ -113,7 +113,6 @@ const AveragePerformanceView = () => {
                             <>
                                 <InputLabel id={`${param.name}-label`}>{param.label}</InputLabel>
                                 <Checkbox
-                                    labelId={`${param.name}-label`}
                                     checked={choices[param.name]}
                                     onChange={(e) => {
                                         setChoices(
@@ -232,8 +231,6 @@ export default AveragePerformanceView;
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length > 0) {
-        console.log(payload);
-
         return <Box sx={{
             backgroundColor: "#fffc",
             p: 1,

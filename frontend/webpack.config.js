@@ -28,6 +28,14 @@ module.exports = {
         exclude: /node_modules/,
         use: 'babel-loader',
       },
+
+      {
+        test: /\.(ts|tsx)?$/,
+        use: {
+          loader: 'ts-loader'
+        },
+        exclude: /node_modules/
+      }
     ],
   },
   plugins: [

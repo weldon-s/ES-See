@@ -1,6 +1,9 @@
 //we define these classes to make API calls and their parameters easier
 export class RequestData {
-    constructor(label, url, parameters) {
+    label: any;
+    url: string;
+    parameters: Parameter[];
+    constructor(label: any, url: string, parameters: Parameter[]) {
         this.label = label;
         this.url = url;
         if (typeof parameters === 'undefined') {
@@ -11,35 +14,39 @@ export class RequestData {
         }
     }
 
-    addParameter(param) {
+    addParameter(param: Parameter) {
         return new RequestData(this.label, this.url, [...this.parameters, param]);
     }
 
     //TODO customizable defaults?
     getDefaultValueObject() {
-        let defaultObject = {};
+        let defaultObject: { [key: string]: any } = {};
         this.parameters.forEach((parameter) => {
             defaultObject[parameter.name] = parameter.choices[0].value;
         })
         return defaultObject;
     }
 
-    static getPresetParameters(params) {
-        return (label, url) => {
+    static getPresetParameters(params: Parameter[]) {
+        return (label: any, url: string) => {
             return new RequestData(label, url, params);
         }
     }
 }
 
 export class Parameter {
-    constructor(name, label, choices, type = "default") {
+    name;
+    label;
+    choices;
+    type;
+    constructor(name: string, label: any, choices: ParameterChoice[], type: string = "default") {
         this.name = name;
         this.label = label;
         this.choices = choices;
         this.type = type;
     }
 
-    static getParameter(name, label, array) {
+    static getParameter(name: string, label: any, array: [any, string][]) {
         let choices = array.map((info) => {
             return new ParameterChoice(info[0], info[1]);
         })
@@ -47,7 +54,7 @@ export class Parameter {
         return new Parameter(name, label, choices);
     }
 
-    static getBooleanParameter(name, label) {
+    static getBooleanParameter(name: string, label: any) {
         return new Parameter(name, label,
             [
                 new ParameterChoice(true, "true"),
@@ -57,7 +64,7 @@ export class Parameter {
         )
     }
 
-    static getRangeParameter(name, label, first, last, step = 1) {
+    static getRangeParameter(name: string, label: any, first: number, last: number, step: number = 1) {
         let range = Array.from({ length: (last - first) / step + 1 }, (value, index) => first + index * step);
 
         let choices = range.map((value) => {
@@ -69,7 +76,10 @@ export class Parameter {
 }
 
 class ParameterChoice {
-    constructor(value, label) {
+    value;
+    label;
+
+    constructor(value: any, label: any) {
         this.value = value;
         this.label = label;
     }
