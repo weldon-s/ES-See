@@ -81,6 +81,7 @@ const CountryInfo = ({ country }) => {
         }
     }, [updated]);
 
+    //TODO make this support countries that have never qualified
     useEffect(() => {
         if (updated) {
             setBestPlace(entries

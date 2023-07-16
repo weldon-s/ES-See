@@ -1,5 +1,5 @@
-//we define these classes to make managing metrics and their parameters easier
-class Metric {
+//we define these classes to make API calls and their parameters easier
+class RequestData {
     constructor(label, url, parameters) {
         this.label = label;
         this.url = url;
@@ -18,12 +18,12 @@ class Metric {
 
         let newParameter = new Parameter(name, label, choices);
 
-        return new Metric(this.label, this.url, [...this.parameters, newParameter]);
+        return new RequestData(this.label, this.url, [...this.parameters, newParameter]);
     }
 
     addBooleanParameter(name, label) {
         let newParameter = Parameter.getBooleanParameter(name, label);
-        return new Metric(this.label, this.url, [...this.parameters, newParameter]);
+        return new RequestData(this.label, this.url, [...this.parameters, newParameter]);
     }
 
     getDefaultValueObject() {
@@ -61,4 +61,4 @@ class ParameterChoice {
     }
 }
 
-export default Metric;
+export default RequestData;

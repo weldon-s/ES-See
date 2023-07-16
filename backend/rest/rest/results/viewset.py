@@ -37,7 +37,7 @@ class ResultSerializer(serializers.ModelSerializer):
         return country == edition.host or country.is_big_five
 
     def get_maximum_possible(self, obj: Result):
-        return obj.get_maximum_possible()
+        return obj.performance.show.get_maximum_possible()
 
 
 class ResultViewSet(viewsets.ModelViewSet):

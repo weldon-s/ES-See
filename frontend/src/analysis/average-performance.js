@@ -7,12 +7,12 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } 
 import { CountryContext, EditionContext } from '../app';
 import Client from '../api/client';
 import CountryFlagCell from '../components/country-flag-cell';
-import Metric from './metrics';
+import RequestData from './request-data';
 
 const AveragePerformanceView = () => {
     const [startYear, setStartYear] = useState(2023);
     const [endYear, setEndYear] = useState(2023);
-    const [includeNQ, setIncludeNQ] = useState(true);
+
     const [metric, setMetric] = useState(METRICS[0]);
     const [choices, setChoices] = useState(METRICS[0].getDefaultValueObject());
 
@@ -40,7 +40,7 @@ const AveragePerformanceView = () => {
                         return {
                             ...elem,
                             country: countries ? countries.find(country => country.id === elem.country) : undefined,
-                            average: parseFloat(elem.average.toFixed(2)),
+                            average: parseFloat(elem.average.toFixed(3)),
                             id: index
                         }
                     })
@@ -297,19 +297,25 @@ const getColumns = (label) => [
         field: "average",
         headerName: label,
         valueGetter: (params) => params.row.average,
-        renderCell: (params) => params.row.average.toFixed(2),
         flex: 2
     }
 ]
 
 const METRICS = [
-    new Metric("Average Grand Final Points", "average/get_average_final_points/")
+    new RequestData("Average Grand Final Points", "average/get_average_final_points/")
         .addBooleanParameter("include_nq", "Include NQs?")
         .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
 
-    new Metric("Average Semi-Final Points", "average/get_average_semi_points/")
+    new RequestData("Average Grand Final Proportion", "average/get_average_final_proportion/")
+        .addBooleanParameter("include_nq", "Include NQs?")
         .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
 
-    new Metric("Average Place", "average/get_average_place/")
+    new RequestData("Average Semi-Final Points", "average/get_average_semi_points/")
+        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
+
+    new RequestData("Average Semi-Final Proportion", "average/get_average_semi_proportion/")
+        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
+
+    new RequestData("Average Place", "average/get_average_place/")
         .addBooleanParameter("include_nq", "Include NQs?")
 ]

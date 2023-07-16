@@ -70,6 +70,13 @@ class Show(BaseModel):
             VoteType.COMBINED if len(self.voting_system) > 1 else self.voting_system[0]
         )
 
+    def get_maximum_possible(self):
+        # get the number of countries voting in the show
+        num_countries = Performance.objects.filter(show=self).count()
+        num_votes = len(self.voting_system)
+        # we can't vote for our own country, so subtract 1
+        return (num_countries - 1) * num_votes * POINTS_PER_PLACE[0]
+
 
 # Entries represent a song sent by a country in a given year
 # e.g. Portugal 2023, Serbia 2022, France 2021
@@ -114,12 +121,3 @@ class Result(BaseModel):
     jury = models.IntegerField(null=True, blank=True)
     televote = models.IntegerField(null=True, blank=True)
     running_order = models.IntegerField()
-
-    def get_maximum_possible(self):
-        # get the number of countries voting in the show
-        show = self.performance.show
-        num_countries = Performance.objects.filter(show=show).count()
-        num_votes = len(show.voting_system)
-
-        # we can't vote for our own country, so subtract 1
-        return (num_countries - 1) * num_votes * POINTS_PER_PLACE[0]

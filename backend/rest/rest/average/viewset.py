@@ -17,8 +17,10 @@ from models import (
 # TODO tiebreaking
 # TODO proportion
 class AverageViewset(viewsets.GenericViewSet):
-    def get_average_points(self, data, mode):
-        if not (mode == "final" or mode == "semi"):
+    # This is the main workhorse function for calculating average points/proportions
+    def get_average_points(self, data):
+        print(data)
+        if not (data["mode"] == "final" or data["mode"] == "semi"):
             return
 
         editions = Edition.objects.filter(
@@ -31,7 +33,7 @@ class AverageViewset(viewsets.GenericViewSet):
         averages = {}
 
         for edition in editions:
-            if mode == "final":
+            if data["mode"] == "final":
                 shows = edition.show_set.filter(show_type=ShowType.GRAND_FINAL)
             else:
                 shows = edition.show_set.exclude(show_type=ShowType.GRAND_FINAL)
@@ -46,7 +48,7 @@ class AverageViewset(viewsets.GenericViewSet):
 
                     key = data["vote_type"]
 
-                if mode == "final":
+                if data["mode"] == "final":
                     performances = show.performance_set.all()
 
                     # remove NQs if we are not accounting for them
@@ -54,6 +56,8 @@ class AverageViewset(viewsets.GenericViewSet):
                         performances = performances.filter(running_order__gt=0)
                 else:
                     performances = show.performance_set.filter(running_order__gt=0)
+
+                show_maximum = show.get_maximum_possible()
 
                 for performance in performances:
                     if not performance.country.id in averages:
@@ -73,6 +77,14 @@ class AverageViewset(viewsets.GenericViewSet):
                         if toAdd is None:
                             toAdd = 0
 
+                        # divide by maximum possible points if we are calculating proportions
+                        if data.get("proportional"):
+                            toAdd /= (
+                                show_maximum
+                                if data["vote_type"] == get_vote_key(VoteType.COMBINED)
+                                else show_maximum / 2
+                            )
+
                         averages[performance.country.id][0] += toAdd
                         averages[performance.country.id][1] += 1
 
@@ -91,15 +103,11 @@ class AverageViewset(viewsets.GenericViewSet):
     # Gets the average points given to each country in the Grand Final over a given range of years
     @action(detail=False, methods=["POST"])
     def get_average_final_points(self, request):
-        # get the start and end years from the request
         data = loads(request.body)
+
         start_year = data.get("start_year")
         end_year = data.get("end_year")
-
-        # get the vote type from the request
-        vote_type = data.get("vote_type", VoteType.COMBINED)
-
-        # If include_nq is true, we count non-qualifying performances as 0 points, otherwise we ignore them
+        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
         include_nq = data.get("include_nq", True)
 
         lst = self.get_average_points(
@@ -108,8 +116,31 @@ class AverageViewset(viewsets.GenericViewSet):
                 "end_year": end_year,
                 "vote_type": vote_type,
                 "include_nq": include_nq,
+                "mode": "final",
+            }
+        )
+
+        return JsonResponse(lst, safe=False)
+
+    # Gets the average proportion of maximum points given to each country in the Grand Final over a given range of years
+    @action(detail=False, methods=["POST"])
+    def get_average_final_proportion(self, request):
+        data = loads(request.body)
+
+        start_year = data.get("start_year")
+        end_year = data.get("end_year")
+        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
+        include_nq = data.get("include_nq", True)
+
+        lst = self.get_average_points(
+            {
+                "start_year": start_year,
+                "end_year": end_year,
+                "vote_type": vote_type,
+                "include_nq": include_nq,
+                "proportional": True,
+                "mode": "final",
             },
-            "final",
         )
 
         return JsonResponse(lst, safe=False)
@@ -117,17 +148,39 @@ class AverageViewset(viewsets.GenericViewSet):
     # Gets the average points given to each country in the Semi-Finals over a given range of years
     @action(detail=False, methods=["POST"])
     def get_average_semi_points(self, request):
-        # get the start and end years from the request
+        data = loads(request.body)
+
+        start_year = data.get("start_year")
+        end_year = data.get("end_year")
+        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
+
+        lst = self.get_average_points(
+            {
+                "start_year": start_year,
+                "end_year": end_year,
+                "vote_type": vote_type,
+                "mode": "semi",
+            },
+        )
+
+        return JsonResponse(lst, safe=False)
+
+    # Gets the average proportion of maximum points given to each country in the Semi-Finals over a given range of years
+    @action(detail=False, methods=["POST"])
+    def get_average_semi_proportion(self, request):
         data = loads(request.body)
         start_year = data.get("start_year")
         end_year = data.get("end_year")
-
-        # get the vote type from the request
-        vote_type = data.get("vote_type", VoteType.COMBINED)
+        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
 
         lst = self.get_average_points(
-            {"start_year": start_year, "end_year": end_year, "vote_type": vote_type},
-            "semi",
+            {
+                "start_year": start_year,
+                "end_year": end_year,
+                "vote_type": vote_type,
+                "proportional": True,
+                "mode": "semi",
+            },
         )
 
         return JsonResponse(lst, safe=False)
@@ -194,7 +247,7 @@ class AverageViewset(viewsets.GenericViewSet):
                                 result.performance.show.get_primary_vote_type()
                             ),
                         )
-                        / result.get_maximum_possible(),
+                        / result.performance.show.get_maximum_possible(),
                     ]
                     for result in nq_results
                 ]
