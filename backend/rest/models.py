@@ -121,3 +121,11 @@ class Result(BaseModel):
     jury = models.IntegerField(null=True, blank=True)
     televote = models.IntegerField(null=True, blank=True)
     running_order = models.IntegerField()
+
+    def get_place(self, vote_type):
+        if vote_type == VoteType.JURY:
+            return self.jury_place
+        elif vote_type == VoteType.TELEVOTE:
+            return self.televote_place
+        else:
+            return self.place

@@ -8,6 +8,7 @@ from models import (
     get_vote_key,
     Performance,
     Result,
+    Show,
     ShowType,
     VoteType,
 )
@@ -15,7 +16,7 @@ from models import (
 
 # TODO ignore noncompeting countries
 # TODO tiebreaking
-# TODO proportion
+# TODO median
 class AverageViewset(viewsets.GenericViewSet):
     # This is the main workhorse function for calculating average points/proportions
     def get_average_points(self, data):
@@ -196,19 +197,44 @@ class AverageViewset(viewsets.GenericViewSet):
         data = loads(request.body)
         start_year = data.get("start_year")
         end_year = data.get("end_year")
+        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
 
         # If include_nq is true, we include non-qualifying performances in the ranking, otherwise we ignore them
         include_nq = data.get("include_nq", True)
 
         editions = Edition.objects.filter(year__gte=start_year, year__lte=end_year)
 
-        # get the average points for each country
+        # get the average places for each country
         # we use a dict with country ids as a key, and a list of [sum_of_places, num_editions] as a value
         # this way, we don't assume that each country has participated in every edition
         averages = {}
 
         for edition in editions:
             final = edition.show_set.get(show_type=ShowType.GRAND_FINAL)
+
+            # find the key for the points given the voting system
+            if data["vote_type"] == get_vote_key(VoteType.COMBINED):
+                place_key = VoteType.COMBINED
+            else:
+                if VoteType[data["vote_type"].upper()] not in final.voting_system:
+                    continue
+
+                place_key = VoteType[data["vote_type"].upper()]
+
+            # if we are including NQs, we need to make sure the semis have the vote type as well
+            if data["include_nq"] and data["vote_type"] != get_vote_key(
+                VoteType.COMBINED
+            ):
+                semis = edition.show_set.exclude(show_type=ShowType.GRAND_FINAL)
+
+                exit = False
+
+                for semi in semis:
+                    if VoteType[data["vote_type"].upper()] not in semi.voting_system:
+                        exit = True
+
+                if exit:
+                    continue
 
             performances = final.performance_set.all()
 
@@ -220,7 +246,9 @@ class AverageViewset(viewsets.GenericViewSet):
                     averages[result.performance.country.id] = [0, 0]
 
                 # add place and increment number of editions
-                averages[result.performance.country.id][0] += result.place
+                averages[result.performance.country.id][0] += result.get_place(
+                    place_key
+                )
                 averages[result.performance.country.id][1] += 1
 
             if include_nq:
@@ -245,7 +273,9 @@ class AverageViewset(viewsets.GenericViewSet):
                             result,
                             get_vote_key(
                                 result.performance.show.get_primary_vote_type()
-                            ),
+                            )
+                            if place_key == VoteType.COMBINED
+                            else get_vote_key(place_key),
                         )
                         / result.performance.show.get_maximum_possible(),
                     ]
@@ -266,6 +296,67 @@ class AverageViewset(viewsets.GenericViewSet):
                     # add place and increment number of editions
                     averages[country.id][0] += starting_place + i
                     averages[country.id][1] += 1
+
+        # calculate the average place for each country
+        for country_id in averages:
+            averages[country_id] = averages[country_id][0] / averages[country_id][1]
+
+        # convert dict into list sorted by the average we just calculated
+        lst = sorted(averages.items(), key=lambda x: x[1])
+        lst = [
+            {"country": x[0], "average": x[1], "place": lst.index(x) + 1} for x in lst
+        ]
+
+        return JsonResponse(lst, safe=False)
+
+    # Gets the average place of a country in the Semi-Finals over a given range of years
+    @action(detail=False, methods=["POST"])
+    def get_average_semi_place(self, request):
+        data = loads(request.body)
+
+        # get the start and end years from the request
+        start_year = data.get("start_year")
+        end_year = data.get("end_year")
+        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
+
+        editions = Edition.objects.filter(year__gte=start_year, year__lte=end_year)
+
+        shows = Show.objects.filter(edition__in=editions).exclude(
+            show_type=ShowType.GRAND_FINAL
+        )
+
+        # get the average places for each country
+        # we use a dict with country ids as a key, and a list of [sum_of_places, num_editions] as a value
+        # this way, we don't assume that each country has participated in every edition
+        averages = {}
+
+        for show in shows:
+            # find the key for the points given the voting system
+            if data["vote_type"] == get_vote_key(VoteType.COMBINED):
+                place_key = VoteType.COMBINED
+            else:
+                if VoteType[data["vote_type"].upper()] not in show.voting_system:
+                    continue
+
+                place_key = VoteType[data["vote_type"].upper()]
+
+            performances = show.performance_set.all()
+
+            # remove auto-qualifiers who are only voting and not performing
+            performances = performances.filter(running_order__gt=0)
+
+            results = Result.objects.filter(performance__in=performances)
+
+            for result in results:
+                if not result.performance.country.id in averages:
+                    averages[result.performance.country.id] = [0, 0]
+
+                # add place and increment number of editions
+
+                averages[result.performance.country.id][0] += result.get_place(
+                    place_key
+                )
+                averages[result.performance.country.id][1] += 1
 
         # calculate the average place for each country
         for country_id in averages:

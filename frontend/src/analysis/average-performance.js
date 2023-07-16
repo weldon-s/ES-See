@@ -316,6 +316,10 @@ const METRICS = [
     new RequestData("Average Semi-Final Proportion", "average/get_average_semi_proportion/")
         .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
 
-    new RequestData("Average Place", "average/get_average_place/")
+    new RequestData("Average Overall Place", "average/get_average_place/")
         .addBooleanParameter("include_nq", "Include NQs?")
+        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]),
+
+    new RequestData("Average Semi-Final Place", "average/get_average_semi_place/")
+        .addParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]])
 ]
