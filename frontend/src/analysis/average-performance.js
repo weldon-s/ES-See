@@ -2,61 +2,26 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Box, Button, Checkbox, Container, FormControl, Grid, InputLabel, MenuItem, Select, Skeleton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { Form, useNavigate } from 'react-router-dom';
-import { Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 
-import { CountryContext, EditionContext } from '../app';
-import Client from '../api/client';
 import CountryFlagCell from '../components/country-flag-cell';
 import { Parameter, RequestData } from './request-data.ts';
+import MetricSelectionPanel from '../components/metric-choices';
 
 //TODO make this ts
 const AveragePerformanceView = () => {
-    const [startYear, setStartYear] = useState(2023);
-    const [endYear, setEndYear] = useState(2023);
-
-    const [metric, setMetric] = useState(METRICS[0]);
-    const [choices, setChoices] = useState(METRICS[0].getDefaultValueObject());
-
     const [data, setData] = useState(undefined);
-    const [columnLabel, setColumnLabel] = useState(METRICS[0].label);
-
-    const [updateCount, setUpdateCount] = useState(0);
+    const [hasSelected, setHasSelected] = useState(false);
 
     const [table, setTable] = useState(true);
-
-    const years = useContext(EditionContext);
-    const countries = useContext(CountryContext);
 
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (countries) {
-            Client.post(metric.url, {
-                ...choices
-            })
-                .then(res => {
-                    let data = res.data.map((elem, index) => {
-                        return {
-                            ...elem,
-                            country: countries ? countries.find(country => country.id === elem.country) : undefined,
-                            average: parseFloat(elem.average.toFixed(3)),
-                            id: index
-                        }
-                    })
-
-                    setData(data);
-                })
+        if (data) {
+            setHasSelected(true);
         }
-    }, [updateCount]);
-
-    useEffect(() => {
-        setColumnLabel(metric.label);
-    }, [updateCount])
-
-    const handleUpdate = () => {
-        setUpdateCount(n => n + 1);
-        setData(undefined);
-    };
+    }, [data])
 
     return (
         <Container sx={{
@@ -66,102 +31,10 @@ const AveragePerformanceView = () => {
         }}>
             <Typography variant="h3" align="center">Average Performance</Typography>
 
-            <Grid
-                container
-                borderRadius="10px"
-                width="50%"
-                p={1}
-                m={1}
-                justifyContent="center"
-                sx={{
-                    backgroundColor: "#eee",
-                }}>
-                <Grid item xs={12}>
-                    <Typography variant="h6" align="center" mb={1}>Settings</Typography>
-                </Grid>
-
-                <Grid item xs={12} display="flex" justifyContent="center" mb={2}>
-                    <FormControl>
-                        <InputLabel id="metric-label">Metric</InputLabel>
-                        <Select
-                            labelId="metric-label"
-                            label="Metric"
-                            value={metric}
-                            onChange={(e) => {
-                                setChoices(e.target.value.getDefaultValueObject());
-                                setMetric(e.target.value);
-                            }}
-                        >
-                            {METRICS.map(metric => (
-                                <MenuItem key={metric.url} value={metric}>{metric.label}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid>
-
-                {metric.parameters.map(param =>
-                    <Grid
-                        key={param.name}
-                        item
-                        xs={6}
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        justifyContent="center"
-                        mt={1}
-                    >
-                        {param.type === "boolean" ?
-                            <>
-                                <InputLabel id={`${param.name}-label`}>{param.label}</InputLabel>
-                                <Checkbox
-                                    checked={choices[param.name]}
-                                    onChange={(e) => {
-                                        setChoices(
-                                            currentChoices => {
-                                                let newChoices = { ...currentChoices };
-                                                newChoices[param.name] = e.target.checked;
-                                                return newChoices;
-                                            }
-                                        )
-                                    }}
-                                />
-                            </>
-
-                            :
-                            <FormControl sx={{ width: "70%" }}>
-                                <InputLabel id={`${param.name}-label`}>{param.label}</InputLabel>
-                                <Select
-                                    labelId={`${param.name}-label`}
-                                    label={param.label}
-                                    value={choices[param.name]}
-                                    onChange={(e) => {
-                                        setChoices(
-                                            currentChoices => {
-                                                let newChoices = { ...currentChoices };
-                                                newChoices[param.name] = e.target.value;
-                                                return newChoices;
-                                            }
-                                        )
-                                    }}>
-                                    {
-                                        param.choices.map(choice => (
-                                            <MenuItem key={choice.value} value={choice.value}>{choice.label}</MenuItem>
-                                        ))
-                                    }
-                                </Select>
-                            </FormControl>
-
-                        }
-
-                    </Grid>
-
-
-                )}
-
-                <Grid item xs={12} display="flex" justifyContent="end">
-                    <Button onClick={handleUpdate}>Update</Button>
-                </Grid>
-            </Grid>
+            <MetricSelectionPanel
+                metrics={METRICS}
+                setData={setData}
+            />
 
 
             <Box sx={{
@@ -184,7 +57,7 @@ const AveragePerformanceView = () => {
             </Box>
 
             {
-                updateCount > 0 ?
+                hasSelected ?
                     (
                         data ?
                             (
@@ -194,7 +67,7 @@ const AveragePerformanceView = () => {
                                             <DataGrid
                                                 autoHeight
                                                 rows={data}
-                                                columns={getColumns(columnLabel)}
+                                                columns={COLUMNS}
                                                 density="compact"
                                                 hideFooter
                                                 onRowClick={(params) => navigate(`/${params.row.country.code}`)}
@@ -244,7 +117,7 @@ const CustomTooltip = ({ active, payload, label }) => {
     }
 }
 
-const getColumns = (label) => [
+const COLUMNS = [
     {
         field: "place",
         headerName: "Place",
@@ -261,7 +134,7 @@ const getColumns = (label) => [
 
     {
         field: "average",
-        headerName: label,
+        headerName: "Result",
         valueGetter: (params) => params.row.average,
         flex: 2
     }

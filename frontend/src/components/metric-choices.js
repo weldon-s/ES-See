@@ -1,44 +1,75 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from "react";
+import { Button, Checkbox, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 
-import { CountryContext } from "../app"
-import Client from '../api/client';
-import { Parameter, RequestData } from './request-data.ts';
-import { Checkbox, Container, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import { CountryContext } from "../app";
+import Client from "../api/client";
 
-const QualifyingHistoryView = () => {
-    const [data, setData] = useState(undefined)
-    const [year, setYear] = useState(2023)
-    const [metric, setMetric] = useState(METRICS[0])
-    const [choices, setChoices] = useState(METRICS[0].getDefaultValueObject())
+//This class handles metric and parameter selection, as well as making API calls
+const MetricSelectionPanel = ({ metrics, setData }) => {
+    const [metric, setMetric] = useState(metrics[0])
+    const [choices, setChoices] = useState(metric.getDefaultValueObject())
+    const [updateCount, setUpdateCount] = useState(0);
 
-    const countries = useContext(CountryContext);
-
+    const countries = useContext(CountryContext)
 
     useEffect(() => {
         if (countries) {
-            Client.post("qualify/get_qualifiers/", {
+            Client.post(metric.url, {
                 ...choices
             })
                 .then(res => {
-                    setData({
-                        "qualifiers": res.data.qualifiers.map(elem => countries.find(country => country.id === elem)),
-                        "non_qualifiers": res.data.non_qualifiers.map(elem => countries.find(country => country.id === elem))
+                    let data = res.data.map((elem, index) => {
+                        return {
+                            ...elem,
+                            country: countries ? countries.find(country => country.id === elem.country) : undefined,
+                            average: parseFloat(elem.average.toFixed(3)),
+                            id: index
+                        }
                     })
+
+                    setData(data);
                 })
         }
-    }, [countries])
+    }, [updateCount]);
 
-    useEffect(() => {
-        console.log(data)
-    }, [data])
+    const handleUpdate = () => {
+        setUpdateCount(n => n + 1);
+        setData(undefined);
+    }
 
     return (
-        <Container sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-        }}>
-            <Typography variant="h3" align="center">Qualifying History</Typography>
+        <Grid
+            container
+            borderRadius="10px"
+            width="50%"
+            p={1}
+            m={1}
+            justifyContent="center"
+            sx={{
+                backgroundColor: "#eee",
+            }}>
+            <Grid item xs={12}>
+                <Typography variant="h6" align="center" mb={1}>Settings</Typography>
+            </Grid>
+
+            <Grid item xs={12} display="flex" justifyContent="center" mb={2}>
+                <FormControl>
+                    <InputLabel id="metric-label">Metric</InputLabel>
+                    <Select
+                        labelId="metric-label"
+                        label="Metric"
+                        value={metric}
+                        onChange={(e) => {
+                            setChoices(e.target.value.getDefaultValueObject());
+                            setMetric(e.target.value);
+                        }}
+                    >
+                        {metrics.map(metric => (
+                            <MenuItem key={metric.url} value={metric}>{metric.label}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Grid>
 
             {metric.parameters.map(param =>
                 <Grid
@@ -98,13 +129,12 @@ const QualifyingHistoryView = () => {
 
 
             )}
-        </Container>
+
+            <Grid item xs={12} display="flex" justifyContent="end">
+                <Button onClick={handleUpdate}>Update</Button>
+            </Grid>
+        </Grid>
     );
 }
 
-export default QualifyingHistoryView;
-
-const METRICS = [
-    new RequestData("Qualifying History", "qualify/get_qualifiers/")
-        .addParameter(Parameter.getRangeParameter("year", "Year", 2023, 1956, -1))
-]
+export default MetricSelectionPanel;
