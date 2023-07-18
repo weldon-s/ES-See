@@ -5,7 +5,7 @@ import { CountryContext } from "../app";
 import Client from "../api/client";
 
 //This class handles metric and parameter selection, as well as making API calls
-const MetricSelectionPanel = ({ metrics, setData }) => {
+const MetricSelectionPanel = ({ metrics, setData, processData = data => data }) => {
     const [metric, setMetric] = useState(metrics[0])
     const [choices, setChoices] = useState(metric.getDefaultValueObject())
     const [updateCount, setUpdateCount] = useState(0);
@@ -18,17 +18,9 @@ const MetricSelectionPanel = ({ metrics, setData }) => {
                 ...choices
             })
                 .then(res => {
-                    let data = res.data.map((elem, index) => {
-                        return {
-                            ...elem,
-                            country: countries ? countries.find(country => country.id === elem.country) : undefined,
-                            average: parseFloat(elem.average.toFixed(3)),
-                            id: index
-                        }
-                    })
 
-                    setData(data);
-                })
+                    setData(processData(res.data));
+                });
         }
     }, [updateCount]);
 

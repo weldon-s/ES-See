@@ -3,33 +3,23 @@ import React, { useContext, useEffect, useState } from 'react';
 import { CountryContext } from "../app"
 import Client from '../api/client';
 import { Parameter, RequestData } from './request-data.ts';
-import { Checkbox, Container, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import { Checkbox, Container, FormControl, Grid, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
+
+import MetricSelectionPanel from '../components/metric-choices';
+import { DataGrid } from '@mui/x-data-grid';
+
+import CountryFlagCell from '../components/country-flag-cell';
 
 const QualifyingHistoryView = () => {
     const [data, setData] = useState(undefined)
-    const [year, setYear] = useState(2023)
-    const [metric, setMetric] = useState(METRICS[0])
-    const [choices, setChoices] = useState(METRICS[0].getDefaultValueObject())
+    const [hasSelected, setHasSelected] = useState(false)
 
     const countries = useContext(CountryContext);
 
-
     useEffect(() => {
-        if (countries) {
-            Client.post("qualify/get_qualifiers/", {
-                ...choices
-            })
-                .then(res => {
-                    setData({
-                        "qualifiers": res.data.qualifiers.map(elem => countries.find(country => country.id === elem)),
-                        "non_qualifiers": res.data.non_qualifiers.map(elem => countries.find(country => country.id === elem))
-                    })
-                })
+        if (data) {
+            setHasSelected(true);
         }
-    }, [countries])
-
-    useEffect(() => {
-        console.log(data)
     }, [data])
 
     return (
@@ -40,64 +30,40 @@ const QualifyingHistoryView = () => {
         }}>
             <Typography variant="h3" align="center">Qualifying History</Typography>
 
-            {metric.parameters.map(param =>
-                <Grid
-                    key={param.name}
-                    item
-                    xs={6}
-                    display="flex"
-                    flexDirection="column"
-                    alignItems="center"
-                    justifyContent="center"
-                    mt={1}
-                >
-                    {param.type === "boolean" ?
-                        <>
-                            <InputLabel id={`${param.name}-label`}>{param.label}</InputLabel>
-                            <Checkbox
-                                checked={choices[param.name]}
-                                onChange={(e) => {
-                                    setChoices(
-                                        currentChoices => {
-                                            let newChoices = { ...currentChoices };
-                                            newChoices[param.name] = e.target.checked;
-                                            return newChoices;
-                                        }
-                                    )
-                                }}
-                            />
-                        </>
+            <MetricSelectionPanel
+                metrics={METRICS}
+                setData={setData}
+                processData={(data) =>
+                    data.map((elem, index) => {
+                        return {
+                            ...elem,
+                            country: countries.find((country) => country.id === elem.country),
+                            id: index
+                        }
+                    })
+                }
+            />
 
-                        :
-                        <FormControl sx={{ width: "70%" }}>
-                            <InputLabel id={`${param.name}-label`}>{param.label}</InputLabel>
-                            <Select
-                                labelId={`${param.name}-label`}
-                                label={param.label}
-                                value={choices[param.name]}
-                                onChange={(e) => {
-                                    setChoices(
-                                        currentChoices => {
-                                            let newChoices = { ...currentChoices };
-                                            newChoices[param.name] = e.target.value;
-                                            return newChoices;
-                                        }
-                                    )
-                                }}>
-                                {
-                                    param.choices.map(choice => (
-                                        <MenuItem key={choice.value} value={choice.value}>{choice.label}</MenuItem>
-                                    ))
-                                }
-                            </Select>
-                        </FormControl>
+            {hasSelected ? (
+                data ?
+                    <DataGrid
+                        autoHeight
+                        rows={data}
+                        columns={COLUMNS}
+                        density="compact"
+                        hideFooter
+                        onRowClick={(params) => navigate(`/${params.row.country.code}`)}
+                        sx={{
+                            width: "80%",
+                            pb: 1
+                        }}
+                    />
+                    :
+                    <Skeleton height="50px" width="80%"></Skeleton>
+            ) :
+                <Typography variant="h6">Choose your desired configuration and press "Update" to view your data.</Typography>
 
-                    }
-
-                </Grid>
-
-
-            )}
+            }
         </Container>
     );
 }
@@ -107,4 +73,20 @@ export default QualifyingHistoryView;
 const METRICS = [
     new RequestData("Qualifying History", "qualify/get_qualifiers/")
         .addParameter(Parameter.getRangeParameter("year", "Year", 2023, 1956, -1))
+]
+
+const COLUMNS = [
+    {
+        field: "country",
+        headerName: "Country",
+        valueGetter: (params) => params.row.country.name,
+        renderCell: (params) => <CountryFlagCell country={params.row.country} />,
+        flex: 2
+    },
+
+    {
+        field: "qualify_count",
+        headerName: "Qualification Count",
+        flex: 2
+    }
 ]

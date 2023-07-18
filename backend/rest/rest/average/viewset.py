@@ -20,6 +20,7 @@ from models import (
 # TODO adjusted places (e.g. for AQs)
 class AverageViewset(viewsets.GenericViewSet):
     # This is the main workhorse function for calculating average points/proportions
+    # TODO fix semi proportion bug (2023 tele)
     def get_average_points(self, data):
         print(data)
         if not (data["mode"] == "final" or data["mode"] == "semi"):

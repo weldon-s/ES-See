@@ -4,6 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { Form, useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 
+import { CountryContext } from "../app"
 import CountryFlagCell from '../components/country-flag-cell';
 import { Parameter, RequestData } from './request-data.ts';
 import MetricSelectionPanel from '../components/metric-choices';
@@ -14,6 +15,8 @@ const AveragePerformanceView = () => {
     const [hasSelected, setHasSelected] = useState(false);
 
     const [table, setTable] = useState(true);
+
+    const countries = useContext(CountryContext);
 
     const navigate = useNavigate();
 
@@ -34,6 +37,15 @@ const AveragePerformanceView = () => {
             <MetricSelectionPanel
                 metrics={METRICS}
                 setData={setData}
+                processData={(data) =>
+                    data.map((elem, index) => {
+                        return {
+                            ...elem,
+                            country: countries ? countries.find(country => country.id === elem.country) : undefined,
+                            id: index
+                        }
+                    })
+                }
             />
 
 
@@ -112,7 +124,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             borderRadius: "10px"
         }}>
             <CountryFlagCell country={payload[0].payload.country} />
-            <Typography>Average:{payload[0].payload.average}</Typography>
+            <Typography>Average:{payload[0].payload.average.toFixed(3)}</Typography>
         </Box>
     }
 }
@@ -135,7 +147,7 @@ const COLUMNS = [
     {
         field: "average",
         headerName: "Result",
-        valueGetter: (params) => params.row.average,
+        renderCell: (params) => params.row.average.toFixed(3),
         flex: 2
     }
 ]
