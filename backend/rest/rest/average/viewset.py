@@ -20,7 +20,6 @@ from models import (
 # TODO adjusted places (e.g. for AQs)
 class AverageViewset(viewsets.GenericViewSet):
     # This is the main workhorse function for calculating average points/proportions
-    # TODO fix semi proportion bug (2023 tele)
     def get_average_points(self, data):
         print(data)
         if not (data["mode"] == "final" or data["mode"] == "semi"):
@@ -83,9 +82,10 @@ class AverageViewset(viewsets.GenericViewSet):
                         # divide by maximum possible points if we are calculating proportions
                         if data.get("proportional"):
                             toAdd /= (
-                                show_maximum
-                                if data["vote_type"] == get_vote_key(VoteType.COMBINED)
-                                else show_maximum / 2
+                                show_maximum / 2
+                                if data["vote_type"] != get_vote_key(VoteType.COMBINED)
+                                and len(show.voting_system) == 2
+                                else show_maximum
                             )
 
                         averages[performance.country.id][0] += toAdd

@@ -18,7 +18,6 @@ const MetricSelectionPanel = ({ metrics, setData, processData = data => data }) 
                 ...choices
             })
                 .then(res => {
-
                     setData(processData(res.data));
                 });
         }

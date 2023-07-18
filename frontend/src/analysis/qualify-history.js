@@ -3,7 +3,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import { CountryContext } from "../app"
 import Client from '../api/client';
 import { Parameter, RequestData } from './request-data.ts';
-import { Checkbox, Container, FormControl, Grid, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
+import { Box, Container, Skeleton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 
 import MetricSelectionPanel from '../components/metric-choices';
 import { DataGrid } from '@mui/x-data-grid';
@@ -11,8 +13,10 @@ import { DataGrid } from '@mui/x-data-grid';
 import CountryFlagCell from '../components/country-flag-cell';
 
 const QualifyingHistoryView = () => {
-    const [data, setData] = useState(undefined)
-    const [hasSelected, setHasSelected] = useState(false)
+    const [data, setData] = useState(undefined);
+    const [hasSelected, setHasSelected] = useState(false);
+
+    const [table, setTable] = useState(true);
 
     const countries = useContext(CountryContext);
 
@@ -41,29 +45,70 @@ const QualifyingHistoryView = () => {
                             id: index
                         }
                     })
+                        .sort((a, b) => b.qualify_count - a.qualify_count)
                 }
             />
 
-            {hasSelected ? (
-                data ?
-                    <DataGrid
-                        autoHeight
-                        rows={data}
-                        columns={COLUMNS}
-                        density="compact"
-                        hideFooter
-                        onRowClick={(params) => navigate(`/${params.row.country.code}`)}
-                        sx={{
-                            width: "80%",
-                            pb: 1
-                        }}
-                    />
-                    :
-                    <Skeleton height="50px" width="80%"></Skeleton>
-            ) :
-                <Typography variant="h6">Choose your desired configuration and press "Update" to view your data.</Typography>
+            <Box sx={{
+                backgroundColor: "#eee",
+                p: 1,
+                m: 1,
+                borderRadius: "10px",
+            }}>
+                <ToggleButtonGroup
+                    exclusive
+                    value={table}
+                    onChange={(e, value) => {
+                        setTable(value)
+                    }}
+                >
+                    <ToggleButton value={true}>Table</ToggleButton>
+                    <ToggleButton value={false}>Chart</ToggleButton>
+                </ToggleButtonGroup>
 
+            </Box>
+
+            {
+                hasSelected ?
+                    (
+                        data ?
+                            (
+                                data.length > 0 ?
+                                    (
+                                        table ?
+                                            <DataGrid
+                                                autoHeight
+                                                rows={data}
+                                                columns={COLUMNS}
+                                                density="compact"
+                                                hideFooter
+                                                onRowClick={(params) => navigate(`/${params.row.country.code}`)}
+                                                sx={{
+                                                    width: "80%",
+                                                    pb: 1
+                                                }}
+                                            />
+                                            :
+                                            <BarChart data={data} width={600} height={500} style={{
+                                                fontFamily: "Inter, sans-serif"
+                                            }}>
+                                                <CartesianGrid />
+                                                <Bar dataKey="qualify_count" />
+                                                <XAxis dataKey="country.name" hide />
+                                                <YAxis />
+                                                <Tooltip content={CustomTooltip} />
+                                            </BarChart>
+                                    )
+                                    :
+                                    <Typography variant="h6">No data found for the selected configuration. Make sure your start year isn't after your end year</Typography>
+                            )
+                            :
+                            <Skeleton height="50px" width="80%"></Skeleton>
+                    )
+                    :
+                    <Typography variant="h6">Choose your desired configuration and press "Update" to view your data.</Typography>
             }
+
         </Container>
     );
 }
@@ -71,8 +116,10 @@ const QualifyingHistoryView = () => {
 export default QualifyingHistoryView;
 
 const METRICS = [
-    new RequestData("Qualifying History", "qualify/get_qualifiers/")
-        .addParameter(Parameter.getRangeParameter("year", "Year", 2023, 1956, -1))
+    new RequestData("Qualifying History", "qualify/get_qualify_count/")
+        .addParameter(Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1))
+        .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1))
+
 ]
 
 const COLUMNS = [
@@ -90,3 +137,16 @@ const COLUMNS = [
         flex: 2
     }
 ]
+
+const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length > 0) {
+        return <Box sx={{
+            backgroundColor: "#fffc",
+            p: 1,
+            borderRadius: "10px"
+        }}>
+            <CountryFlagCell country={payload[0].payload.country} />
+            <Typography>Result:{payload[0].payload.qualify_count}</Typography>
+        </Box>
+    }
+}
