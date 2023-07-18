@@ -6,13 +6,14 @@ from models import Edition
 
 
 class QualifyViewSet(viewsets.GenericViewSet):
-    @action(detail=False, methods=["POST"])
-    def get_qualify_count(self, request):
+    def get_qualify_data(self, data):
         # get all editions in the given range
-        start_year = request.data["start_year"]
-        end_year = request.data["end_year"]
-        editions = Edition.objects.filter(year__gte=start_year, year__lte=end_year)
+        editions = Edition.objects.filter(
+            year__gte=data["start_year"], year__lte=data["end_year"]
+        )
 
+        # our dict entries have countries as keys and [qualify_count, participation_count] as values
+        # we count participation as participation in SEMIFINALS (so hosts aren't included)
         dict = {}
 
         for edition in editions:
@@ -31,10 +32,38 @@ class QualifyViewSet(viewsets.GenericViewSet):
             # add our qualifier_count values to the dict
             for elem in qualifier_lst:
                 if not elem["country"] in dict:
-                    dict[elem["country"]] = 0
+                    dict[elem["country"]] = [0, 0]
 
-                dict[elem["country"]] += elem["qualify_count"]
+                dict[elem["country"]][0] += elem["qualify_count"]
+                dict[elem["country"]][1] += 1
 
         # convert dict to list for ease of use
-        lst = [{"country": k, "qualify_count": v} for k, v in dict.items()]
+        # return proportional data if we want the qualification rate
+        if data["rate"]:
+            return [{"country": k, "qualify": v[0] / v[1]} for k, v in dict.items()]
+
+        return [{"country": k, "qualify": v[0]} for k, v in dict.items()]
+
+    @action(detail=False, methods=["POST"])
+    def get_qualify_count(self, request):
+        # get all editions in the given range
+        start_year = request.data["start_year"]
+        end_year = request.data["end_year"]
+
+        lst = self.get_qualify_data(
+            {"start_year": start_year, "end_year": end_year, "rate": False}
+        )
+
+        return JsonResponse(lst, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_qualify_rate(self, request):
+        # get all editions in the given range
+        start_year = request.data["start_year"]
+        end_year = request.data["end_year"]
+
+        lst = self.get_qualify_data(
+            {"start_year": start_year, "end_year": end_year, "rate": True}
+        )
+
         return JsonResponse(lst, safe=False)

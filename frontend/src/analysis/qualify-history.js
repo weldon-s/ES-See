@@ -45,7 +45,7 @@ const QualifyingHistoryView = () => {
                             id: index
                         }
                     })
-                        .sort((a, b) => b.qualify_count - a.qualify_count)
+                        .sort((a, b) => b.qualify - a.qualify)
                 }
             />
 
@@ -93,7 +93,7 @@ const QualifyingHistoryView = () => {
                                                 fontFamily: "Inter, sans-serif"
                                             }}>
                                                 <CartesianGrid />
-                                                <Bar dataKey="qualify_count" />
+                                                <Bar dataKey="qualify" />
                                                 <XAxis dataKey="country.name" hide />
                                                 <YAxis />
                                                 <Tooltip content={CustomTooltip} />
@@ -116,7 +116,11 @@ const QualifyingHistoryView = () => {
 export default QualifyingHistoryView;
 
 const METRICS = [
-    new RequestData("Qualifying History", "qualify/get_qualify_count/")
+    new RequestData("Qualifying Count", "qualify/get_qualify_count/")
+        .addParameter(Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1))
+        .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1)),
+
+    new RequestData("Qualifying Rate", "qualify/get_qualify_rate/")
         .addParameter(Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1))
         .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1))
 
@@ -132,7 +136,7 @@ const COLUMNS = [
     },
 
     {
-        field: "qualify_count",
+        field: "qualify",
         headerName: "Qualification Count",
         flex: 2
     }
@@ -146,7 +150,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             borderRadius: "10px"
         }}>
             <CountryFlagCell country={payload[0].payload.country} />
-            <Typography>Result:{payload[0].payload.qualify_count}</Typography>
+            <Typography>Result:{payload[0].payload.qualify}</Typography>
         </Box>
     }
 }
