@@ -40,9 +40,11 @@ class QualifyViewSet(viewsets.GenericViewSet):
         # convert dict to list for ease of use
         # return proportional data if we want the qualification rate
         if data["rate"]:
-            return [{"country": k, "qualify": v[0] / v[1]} for k, v in dict.items()]
+            lst = [{"country": k, "qualify": v[0] / v[1]} for k, v in dict.items()]
+        else:
+            lst = [{"country": k, "qualify": v[0]} for k, v in dict.items()]
 
-        return [{"country": k, "qualify": v[0]} for k, v in dict.items()]
+        return sorted(lst, key=lambda x: x["qualify"], reverse=True)
 
     @action(detail=False, methods=["POST"])
     def get_qualify_count(self, request):
