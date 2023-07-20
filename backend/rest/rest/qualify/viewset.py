@@ -69,3 +69,61 @@ class QualifyViewSet(viewsets.GenericViewSet):
         )
 
         return JsonResponse(lst, safe=False)
+
+    # We consider streaks to be broken when a country NQs
+    # If they autoqualify or do not participate, the streak is not broken, but it is not extended either
+    @action(detail=False, methods=["POST"])
+    def get_longest_q_streak(self, request):
+        # get years from request
+        start_year = request.data["start_year"]
+        end_year = request.data["end_year"]
+        duration = end_year - start_year + 1
+
+        data = {}
+
+        for year in range(start_year, end_year + 1):
+            # skip 2020
+            if year == 2020:
+                continue
+
+            # get qualifier data for this year
+            qualifier_obj = Edition.objects.get(year=year).get_qualifier_data()
+
+            # 1 extends streak, -1 breaks streak, 0 maintains streak
+            for country in qualifier_obj["qualifiers"]:
+                if country not in data:
+                    data[country] = [0] * duration
+
+                data[country][year - start_year] = 1
+
+            for country in qualifier_obj["non_qualifiers"]:
+                if country not in data:
+                    data[country] = [0] * duration
+
+                data[country][year - start_year] = -1
+
+        streaks = []
+
+        for country, q_data in data.items():
+            longest = 0
+            current = 0
+
+            for num in q_data:
+                # if we are going to break the streak, check if it is the longest and then reset
+                if num == -1:
+                    if current > longest:
+                        longest = current
+
+                    current = 0
+
+                # otherwise, increment (1) or do nothing (0)
+                else:
+                    current += num
+
+            # check again at the end in case the last streak is never broken
+            if current > longest:
+                longest = current
+
+            streaks.append({"country": country, "qualify": longest})
+
+        return JsonResponse(streaks, safe=False)

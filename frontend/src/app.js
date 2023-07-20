@@ -92,7 +92,11 @@ const CARDS = [
 
                     new RequestData("Qualifying Rate", "qualify/get_qualify_rate/")
                         .addParameter(Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1))
-                        .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1))
+                        .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1)),
+
+                    new RequestData("Longest Qualifying Streak", "qualify/get_longest_q_streak/")
+                        .addParameter(Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1))
+                        .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1)),
                 ]
             }
             columns={
