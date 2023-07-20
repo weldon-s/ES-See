@@ -19,13 +19,13 @@ import { Parameter, RequestData } from "./analysis/request-data.ts"
 export const EditionContext = React.createContext();
 export const CountryContext = React.createContext();
 
+//TODO move all of this
 const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
 const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);
 const INCLUDE_NQ_PARAM = Parameter.getBooleanParameter("include_nq", "Include NQs?");
 const VOTE_TYPE_PARAM = Parameter.getParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]);
 
 const requestConstructor = RequestData.getPresetParameters([START_YEAR_PARAM, END_YEAR_PARAM, VOTE_TYPE_PARAM]);
-
 const CARDS = [
     {
         title: "Average Performance",
@@ -95,6 +95,10 @@ const CARDS = [
                         .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1)),
 
                     new RequestData("Longest Qualifying Streak", "qualify/get_longest_q_streak/")
+                        .addParameter(Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1))
+                        .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1)),
+
+                    new RequestData("Longest Non-Qualifying Streak", "qualify/get_longest_nq_streak/")
                         .addParameter(Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1))
                         .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1)),
                 ]

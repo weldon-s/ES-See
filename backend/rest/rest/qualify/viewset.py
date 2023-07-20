@@ -70,18 +70,11 @@ class QualifyViewSet(viewsets.GenericViewSet):
 
         return JsonResponse(lst, safe=False)
 
-    # We consider streaks to be broken when a country NQs
-    # If they autoqualify or do not participate, the streak is not broken, but it is not extended either
-    @action(detail=False, methods=["POST"])
-    def get_longest_q_streak(self, request):
-        # get years from request
-        start_year = request.data["start_year"]
-        end_year = request.data["end_year"]
-        duration = end_year - start_year + 1
+    def get_longest_streak(self, data):
+        all_data = {}
+        duration = data["end_year"] - data["start_year"] + 1
 
-        data = {}
-
-        for year in range(start_year, end_year + 1):
+        for year in range(data["start_year"], data["end_year"] + 1):
             # skip 2020
             if year == 2020:
                 continue
@@ -90,21 +83,24 @@ class QualifyViewSet(viewsets.GenericViewSet):
             qualifier_obj = Edition.objects.get(year=year).get_qualifier_data()
 
             # 1 extends streak, -1 breaks streak, 0 maintains streak
-            for country in qualifier_obj["qualifiers"]:
-                if country not in data:
-                    data[country] = [0] * duration
+            for key, lst in qualifier_obj.items():
+                if key == data["streak_key"]:
+                    for country in lst:
+                        if country not in all_data:
+                            all_data[country] = [0] * duration
 
-                data[country][year - start_year] = 1
+                        all_data[country][year - data["start_year"]] = 1
 
-            for country in qualifier_obj["non_qualifiers"]:
-                if country not in data:
-                    data[country] = [0] * duration
+                else:
+                    for country in lst:
+                        if country not in all_data:
+                            all_data[country] = [0] * duration
 
-                data[country][year - start_year] = -1
+                        all_data[country][year - data["start_year"]] = -1
 
         streaks = []
 
-        for country, q_data in data.items():
+        for country, q_data in all_data.items():
             longest = 0
             current = 0
 
@@ -125,5 +121,33 @@ class QualifyViewSet(viewsets.GenericViewSet):
                 longest = current
 
             streaks.append({"country": country, "qualify": longest})
+
+        return streaks
+
+    # We consider streaks to be broken when a country NQs
+    # If they autoqualify or do not participate, the streak is not broken, but it is not extended either
+    @action(detail=False, methods=["POST"])
+    def get_longest_q_streak(self, request):
+        streaks = self.get_longest_streak(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "streak_key": "qualifiers",
+            }
+        )
+
+        return JsonResponse(streaks, safe=False)
+
+    # We consider streaks to be broken when a country Qs
+    # If they do not participate, the streak is not broken, but it is not extended either
+    @action(detail=False, methods=["POST"])
+    def get_longest_nq_streak(self, request):
+        streaks = self.get_longest_streak(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "streak_key": "non_qualifiers",
+            }
+        )
 
         return JsonResponse(streaks, safe=False)
