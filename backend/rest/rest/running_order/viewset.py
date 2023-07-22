@@ -16,30 +16,34 @@ class RunningOrderViewset(GenericViewSet):
         # our dict will have the form {country: [sum of running orders, number of appearances]}
         dict = {}
         for edition in editions:
-            final = edition.show_set.get(show_type=ShowType.GRAND_FINAL)
+            if data["mode"] == "final":
+                shows = edition.show_set.filter(show_type=ShowType.GRAND_FINAL)
+            elif data["mode"] == "semi":
+                shows = edition.show_set.exclude(show_type=ShowType.GRAND_FINAL)
 
-            # we only want to count performances that actually happened (and not countries that are just voting)
-            performances = final.performance_set.filter(running_order__gt=0)
-            max_running_order = performances.aggregate(Max("running_order"))[
-                "running_order__max"
-            ]
+            for show in shows:
+                # we only want to count performances that actually happened (and not countries that are just voting)
+                performances = show.performance_set.filter(running_order__gt=0)
+                max_running_order = performances.aggregate(Max("running_order"))[
+                    "running_order__max"
+                ]
 
-            for performance in performances:
-                country = performance.country
+                for performance in performances:
+                    country = performance.country
 
-                if country not in dict:
-                    dict[country] = [0, 0]
+                    if country not in dict:
+                        dict[country] = [0, 0]
 
-                if data["proportional"]:
-                    # we want to give each country a score between 0 and 1 (both inclusive)
-                    # this is based on how far through the running order they are
-                    dict[country][0] += (performance.running_order - 1) / (
-                        max_running_order - 1
-                    )
-                else:
-                    dict[country][0] += performance.running_order
+                    if data["proportional"]:
+                        # we want to give each country a score between 0 and 1 (both inclusive)
+                        # this is based on how far through the running order they are
+                        dict[country][0] += (performance.running_order - 1) / (
+                            max_running_order - 1
+                        )
+                    else:
+                        dict[country][0] += performance.running_order
 
-                dict[country][1] += 1
+                    dict[country][1] += 1
 
         lst = [
             {"country": country.id, "average": dict[country][0] / dict[country][1]}
@@ -56,6 +60,7 @@ class RunningOrderViewset(GenericViewSet):
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
+                "mode": "final",
                 "proportional": False,
             }
         )
@@ -68,6 +73,33 @@ class RunningOrderViewset(GenericViewSet):
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
+                "mode": "final",
+                "proportional": True,
+            }
+        )
+
+        return JsonResponse(lst, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_average_semi_running_order(self, request):
+        lst = self.get_average_running_order(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "mode": "semi",
+                "proportional": False,
+            }
+        )
+
+        return JsonResponse(lst, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_average_semi_running_order_proportion(self, request):
+        lst = self.get_average_running_order(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "mode": "semi",
                 "proportional": True,
             }
         )
