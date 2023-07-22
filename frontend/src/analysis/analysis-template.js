@@ -18,9 +18,13 @@ const AnalysisTemplate = ({ title, dataKey, metrics, columns }) => {
 
     const navigate = useNavigate();
 
+    console.log("metrics")
+    console.log(metrics)
+
     const [metric, setMetric] = useState(metrics[0])
     const [choices, setChoices] = useState(metric.getDefaultValueObject())
     const [updateCount, setUpdateCount] = useState(0);
+    const [processedColumns, setProcessedColumns] = useState(columns);
 
     useEffect(() => {
         if (countries) {
@@ -37,6 +41,14 @@ const AnalysisTemplate = ({ title, dataKey, metrics, columns }) => {
                     })
 
                     setData(newData);
+                    setProcessedColumns(columns.map(
+                        column => {
+                            return {
+                                ...column,
+                                headerName: column.headerName.replace("$header", metric.header)
+                            }
+                        }
+                    ))
                 });
         }
     }, [updateCount]);
@@ -182,7 +194,7 @@ const AnalysisTemplate = ({ title, dataKey, metrics, columns }) => {
                                             <DataGrid
                                                 autoHeight
                                                 rows={data}
-                                                columns={columns}
+                                                columns={processedColumns}
                                                 density="compact"
                                                 hideFooter
                                                 onRowClick={(params) => navigate(`/${params.row.country.code}`)}

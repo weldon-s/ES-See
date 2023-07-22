@@ -3,33 +3,35 @@ export class RequestData {
     label: any;
     url: string;
     parameters: Parameter[];
-    constructor(label: any, url: string, parameters: Parameter[]) {
+    header: string;
+    constructor(label: any, url: string, parameters?: Parameter[], header?: string) {
         this.label = label;
         this.url = url;
-        if (typeof parameters === 'undefined') {
-            this.parameters = [];
-        }
-        else {
-            this.parameters = parameters;
-        }
+        this.parameters = typeof parameters === 'undefined' ? [] : parameters;
+        this.header = typeof header === 'undefined' ? label : header;
     }
 
     addParameter(param: Parameter) {
-        return new RequestData(this.label, this.url, [...this.parameters, param]);
+        return new RequestData(this.label, this.url, [...this.parameters, param], this.header);
     }
 
     //TODO customizable defaults?
     getDefaultValueObject() {
         let defaultObject: { [key: string]: any } = {};
         this.parameters.forEach((parameter) => {
-            defaultObject[parameter.name] = parameter.choices[0].value;
+            if (parameter.choices.length > 0) {
+                defaultObject[parameter.name] = parameter.choices[0].value;
+            }
+            else {
+                defaultObject[parameter.name] = "";
+            }
         })
         return defaultObject;
     }
 
     static getPresetParameters(params: Parameter[]) {
-        return (label: any, url: string) => {
-            return new RequestData(label, url, params);
+        return (label: any, url: string, header?: string) => {
+            return new RequestData(label, url, params, header);
         }
     }
 }

@@ -1,9 +1,10 @@
-import React from "react"
+import React, { useContext } from "react"
 import { Route } from "react-router-dom"
 import AnalysisMenu from ".";
 import AnalysisTemplate from "./analysis-template"
 import CountryFlagCell from '../components/country-flag-cell';
 import { Parameter, RequestData } from "./request-data.ts"
+import { CountryContext } from "../app";
 
 const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
 const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);
@@ -11,7 +12,7 @@ const INCLUDE_NQ_PARAM = Parameter.getBooleanParameter("include_nq", "Include NQ
 const VOTE_TYPE_PARAM = Parameter.getParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]);
 
 const requestConstructor = RequestData.getPresetParameters([START_YEAR_PARAM, END_YEAR_PARAM, VOTE_TYPE_PARAM]);
-const CARDS = [
+const getCards = (countries) => [
     {
         title: "Average Performance",
         description: "See various metrics relating to how a country has performed on average in Eurovision",
@@ -53,7 +54,7 @@ const CARDS = [
 
                     {
                         field: "average",
-                        headerName: "Result",
+                        headerName: "$header",
                         renderCell: (params) => params.row.average.toFixed(3),
                         flex: 2
                     }
@@ -100,7 +101,7 @@ const CARDS = [
 
                     {
                         field: "qualify",
-                        headerName: "Qualification Count",
+                        headerName: "$header",
                         flex: 2
                     }
                 ]
@@ -146,8 +147,49 @@ const CARDS = [
                     },
                     {
                         field: "average",
-                        headerName: "Average Running Order",
+                        headerName: "$header",
                         valueGetter: (params) => params.row.average.toFixed(3),
+                        flex: 2
+                    }
+                ]
+            }
+        />
+    },
+
+    //TODO fix this one not rendering the choice properly
+    {
+        title: "Voting History",
+        description: "See how a country has given points to other countries in the past",
+        link: "voting-history",
+        element: <AnalysisTemplate
+            title="Voting History"
+            dataKey="points"
+            metrics={
+                [
+                    new RequestData("Grand Final Points Given", "exchanges/get_final_points_from/")
+                        .addParameter(Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1))
+                        .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1))
+                        .addParameter(Parameter.getParameter(
+                            "country",
+                            "Country",
+                            countries ? countries.map(country => [country.id, country.name]) : []
+                        ))
+                ]
+            }
+
+            columns={
+                [
+                    {
+                        field: "country",
+                        headerName: "Country",
+                        valueGetter: (params) => params.row.country.name,
+                        renderCell: (params) => <CountryFlagCell country={params.row.country} />,
+                        flex: 2
+                    },
+
+                    {
+                        field: "points",
+                        headerName: "$header",
                         flex: 2
                     }
                 ]
@@ -156,14 +198,18 @@ const CARDS = [
     },
 ]
 
-const ANALYSIS_ROUTE = (
-    <Route path="/analysis">
-        <Route index element={<AnalysisMenu cards={CARDS} />} />
+const getAnalysisRoute = (countries) => {
+    const cards = getCards(countries);
 
-        {
-            CARDS.map(card => <Route key={card.link} path={card.link} element={card.element} />)
-        }
-    </Route>
-)
+    return (
+        <Route path="/analysis">
+            <Route index element={<AnalysisMenu cards={cards} />} />
 
-export default ANALYSIS_ROUTE;
+            {
+                cards.map(card => <Route key={card.link} path={card.link} element={card.element} />)
+            }
+        </Route>
+    );
+}
+
+export default getAnalysisRoute;

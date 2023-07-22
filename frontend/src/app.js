@@ -8,7 +8,8 @@ import Client from "../src/api/client"
 import EntryInfo from "./main/entry-info";
 import CountryInfo from "./main/country-info";
 
-import ANALYSIS_ROUTE from "./analysis/routes";
+import AnalysisRoute from "./analysis/routes";
+import getAnalysisRoute from "./analysis/routes";
 
 
 export const EditionContext = React.createContext();
@@ -77,7 +78,7 @@ function App() {
                                     ))
                                 }
 
-                                {ANALYSIS_ROUTE}
+                                {getAnalysisRoute(countries)}
 
 
                             </Routes>
