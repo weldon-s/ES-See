@@ -25,6 +25,7 @@ from rest.entries.viewset import EntryViewSet
 from rest.results.viewset import ResultViewSet
 from rest.average.viewset import AverageViewset
 from rest.qualify.viewset import QualifyViewSet
+from rest.running_order.viewset import RunningOrderViewset
 
 router = DefaultRouter()
 
@@ -35,6 +36,7 @@ router.register(r"entries", EntryViewSet, "data-entries")
 router.register(r"results", ResultViewSet, "data-results")
 router.register(r"average", AverageViewset, "data-average")
 router.register(r"qualify", QualifyViewSet, "data-qualify")
+router.register(r"running_order", RunningOrderViewset, "data-running_order")
 
 # urlpatterns = [
 #   path('', include('data.urls')),

@@ -188,7 +188,7 @@ const AnalysisTemplate = ({ title, dataKey, metrics, columns }) => {
                                                 onRowClick={(params) => navigate(`/${params.row.country.code}`)}
                                                 sx={{
                                                     width: "80%",
-                                                    pb: 1
+                                                    mb: 1
                                                 }}
                                             />
                                             :

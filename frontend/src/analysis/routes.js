@@ -107,7 +107,40 @@ const CARDS = [
             }
 
         />
-    }
+    },
+
+    {
+        title: "Running Order",
+        description: "See country's average running order position",
+        link: "running-order",
+        element: <AnalysisTemplate
+            title="Running Order"
+            dataKey="average"
+            metrics={
+                [
+                    new RequestData("Average Grand Final Running Order", "running_order/get_average_final_running_order/")
+                        .addParameter(Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1))
+                        .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1)),
+                ]
+            }
+            columns={
+                [
+                    {
+                        field: "country",
+                        headerName: "Country",
+                        valueGetter: (params) => params.row.country.name,
+                        renderCell: (params) => <CountryFlagCell country={params.row.country} />,
+                        flex: 2
+                    },
+                    {
+                        field: "average",
+                        headerName: "Average Running Order",
+                        flex: 2
+                    }
+                ]
+            }
+        />
+    },
 ]
 
 const ANALYSIS_ROUTE = (
