@@ -121,6 +121,10 @@ const CARDS = [
                     new RequestData("Average Grand Final Running Order", "running_order/get_average_final_running_order/")
                         .addParameter(Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1))
                         .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1)),
+
+                    new RequestData("Average Grand Final Running Order Proportion", "running_order/get_average_final_running_order_proportion/")
+                        .addParameter(Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1))
+                        .addParameter(Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1)),
                 ]
             }
             columns={
@@ -135,6 +139,7 @@ const CARDS = [
                     {
                         field: "average",
                         headerName: "Average Running Order",
+                        valueGetter: (params) => params.row.average.toFixed(3),
                         flex: 2
                     }
                 ]
