@@ -170,6 +170,18 @@ const getCards = (countries) => {
 
                         voteTypeYearsConstructor("Average Semi-Final Points Given", "exchanges/get_average_semi_points_from/")
                             .addParameter(COUNTRY_PARAM),
+
+                        voteTypeYearsConstructor("Grand Final Points Received", "exchanges/get_final_points_to/")
+                            .addParameter(COUNTRY_PARAM),
+
+                        voteTypeYearsConstructor("Average Grand Final Points Received", "exchanges/get_average_final_points_to/")
+                            .addParameter(COUNTRY_PARAM),
+
+                        voteTypeYearsConstructor("Semi-Final Points Received", "exchanges/get_semi_points_to/")
+                            .addParameter(COUNTRY_PARAM),
+
+                        voteTypeYearsConstructor("Average Semi-Final Points Received", "exchanges/get_average_semi_points_to/")
+                            .addParameter(COUNTRY_PARAM),
                     ]
                 }
 

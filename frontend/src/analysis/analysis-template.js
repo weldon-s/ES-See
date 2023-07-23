@@ -18,9 +18,6 @@ const AnalysisTemplate = ({ title, dataKey, metrics, columns }) => {
 
     const navigate = useNavigate();
 
-    console.log("metrics")
-    console.log(metrics)
-
     const [metric, setMetric] = useState(metrics[0])
     const [choices, setChoices] = useState(metric.getDefaultValueObject())
     const [updateCount, setUpdateCount] = useState(0);
