@@ -33,7 +33,7 @@ function App() {
 
         Client.post("countries/get_all/")
             .then(res => {
-                setCountries(res.data);
+                setCountries(res.data.sort((a, b) => a.name.localeCompare(b.name)));
             });
     }, [])
 

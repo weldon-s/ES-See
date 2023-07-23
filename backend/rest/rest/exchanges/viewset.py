@@ -6,11 +6,10 @@ from models import Country, Edition, Performance, POINTS_PER_PLACE, ShowType
 
 
 class ExchangeViewSet(viewsets.GenericViewSet):
-    @action(detail=False, methods=["POST"])
-    def get_final_points_from(self, request):
-        start_year = request.data["start_year"]
-        end_year = request.data["end_year"]
-        country = request.data["country"]
+    def get_points_from(self, data):
+        start_year = data["start_year"]
+        end_year = data["end_year"]
+        country = data["country"]
 
         editions = Edition.objects.filter(year__gte=start_year, year__lte=end_year)
 
@@ -23,22 +22,23 @@ class ExchangeViewSet(viewsets.GenericViewSet):
 
         for edition in editions:
             final = edition.show_set.get(show_type=ShowType.GRAND_FINAL)
-            performances = final.performance_set.filter(running_order__gt=0)
+            performances = final.performance_set.filter(running_order__gt=0).exclude(
+                country__id=country
+            )
+
+            try:
+                votes = final.performance_set.get(country=country).vote_set.all()
+            except Performance.DoesNotExist:
+                continue
 
             for performance in performances:
-                # we don't want to include ourselves
-                if performance.country == country:
-                    continue
-
                 if performance.country not in dict:
                     dict[performance.country] = [0, 0]
-
-                votes = performance.vote_set.all()
 
                 for vote in votes:
                     # we get the place that the country passed in as an argument gave to this other country
                     try:
-                        place = vote.ranking.index(Country.objects.get(id=country).code)
+                        place = vote.ranking.index(performance.country.code)
                     except ValueError:
                         continue
 
@@ -50,13 +50,39 @@ class ExchangeViewSet(viewsets.GenericViewSet):
         lst = [
             {
                 "country": country.id,
-                "points": dict[country][0],
+                "points": dict[country][0] / dict[country][1]
+                if data["proportional"]
+                else dict[country][0],
             }
             for country in dict
         ]
 
         lst = sorted(lst, key=lambda x: x["points"], reverse=True)
 
-        print(lst)
+        return lst
+
+    @action(detail=False, methods=["POST"])
+    def get_final_points_from(self, request):
+        lst = self.get_points_from(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "country": request.data["country"],
+                "proportional": False,
+            }
+        )
+
+        return JsonResponse(lst, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_average_final_points_from(self, request):
+        lst = self.get_points_from(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "country": request.data["country"],
+                "proportional": True,
+            }
+        )
 
         return JsonResponse(lst, safe=False)
