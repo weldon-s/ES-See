@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from models import (
     Country,
     Entry,
-    get_vote_key,
+    get_vote_label,
     Performance,
     POINTS_PER_PLACE,
     ShowType,
@@ -60,7 +60,7 @@ class EntryViewSet(viewsets.ModelViewSet):
             vote_types = performance.show.voting_system
 
             for vote_type in vote_types:
-                vote_key = get_vote_key(vote_type)
+                vote_key = get_vote_label(vote_type)
 
                 if vote_key not in ret[show_type]:
                     ret[show_type][vote_key] = {}
@@ -70,7 +70,7 @@ class EntryViewSet(viewsets.ModelViewSet):
             show_type = vote.performance.show.get_show_key()
 
             # find vote type
-            vote_type = get_vote_key(vote.vote_type)
+            vote_type = get_vote_label(vote.vote_type)
 
             # find points and initialize dict if not already there
             index = vote.ranking.index(self.get_object().country.code)
@@ -103,7 +103,7 @@ class EntryViewSet(viewsets.ModelViewSet):
                 ret[show_type] = {}
 
             # find vote type
-            vote_type = get_vote_key(vote.vote_type)
+            vote_type = get_vote_label(vote.vote_type)
 
             if vote_type not in ret[show_type]:
                 ret[show_type][vote_type] = {}

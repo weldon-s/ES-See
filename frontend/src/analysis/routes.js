@@ -159,10 +159,16 @@ const getCards = (countries) => {
                 dataKey="points"
                 metrics={
                     [
-                        yearsConstructor("Grand Final Points Given", "exchanges/get_final_points_from/")
+                        voteTypeYearsConstructor("Grand Final Points Given", "exchanges/get_final_points_from/")
                             .addParameter(COUNTRY_PARAM),
 
-                        yearsConstructor("Average Grand Final Points Given", "exchanges/get_average_final_points_from/")
+                        voteTypeYearsConstructor("Average Grand Final Points Given", "exchanges/get_average_final_points_from/")
+                            .addParameter(COUNTRY_PARAM),
+
+                        voteTypeYearsConstructor("Semi-Final Points Given", "exchanges/get_semi_points_from/")
+                            .addParameter(COUNTRY_PARAM),
+
+                        voteTypeYearsConstructor("Average Semi-Final Points Given", "exchanges/get_average_semi_points_from/")
                             .addParameter(COUNTRY_PARAM),
                     ]
                 }

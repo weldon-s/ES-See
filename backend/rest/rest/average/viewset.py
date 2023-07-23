@@ -5,7 +5,8 @@ from rest_framework.decorators import action
 
 from models import (
     Edition,
-    get_vote_key,
+    get_vote_index,
+    get_vote_label,
     Performance,
     Result,
     Show,
@@ -42,10 +43,10 @@ class AverageViewset(viewsets.GenericViewSet):
 
             for show in shows:
                 # find the key for the points given the voting system
-                if data["vote_type"] == get_vote_key(VoteType.COMBINED):
-                    key = get_vote_key(show.get_primary_vote_type())
+                if data["vote_type"] == get_vote_label(VoteType.COMBINED):
+                    key = get_vote_label(show.get_primary_vote_type())
                 else:
-                    if VoteType[data["vote_type"].upper()] not in show.voting_system:
+                    if get_vote_index(data["vote_type"]) not in show.voting_system:
                         continue
 
                     key = data["vote_type"]
@@ -83,7 +84,8 @@ class AverageViewset(viewsets.GenericViewSet):
                         if data.get("proportional"):
                             toAdd /= (
                                 show_maximum / 2
-                                if data["vote_type"] != get_vote_key(VoteType.COMBINED)
+                                if data["vote_type"]
+                                != get_vote_label(VoteType.COMBINED)
                                 and len(show.voting_system) == 2
                                 else show_maximum
                             )
@@ -110,7 +112,7 @@ class AverageViewset(viewsets.GenericViewSet):
 
         start_year = data.get("start_year")
         end_year = data.get("end_year")
-        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
+        vote_type = data.get("vote_type", get_vote_label(VoteType.COMBINED))
         include_nq = data.get("include_nq", True)
 
         lst = self.get_average_points(
@@ -132,7 +134,7 @@ class AverageViewset(viewsets.GenericViewSet):
 
         start_year = data.get("start_year")
         end_year = data.get("end_year")
-        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
+        vote_type = data.get("vote_type", get_vote_label(VoteType.COMBINED))
         include_nq = data.get("include_nq", True)
 
         lst = self.get_average_points(
@@ -155,7 +157,7 @@ class AverageViewset(viewsets.GenericViewSet):
 
         start_year = data.get("start_year")
         end_year = data.get("end_year")
-        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
+        vote_type = data.get("vote_type", get_vote_label(VoteType.COMBINED))
 
         lst = self.get_average_points(
             {
@@ -174,7 +176,7 @@ class AverageViewset(viewsets.GenericViewSet):
         data = loads(request.body)
         start_year = data.get("start_year")
         end_year = data.get("end_year")
-        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
+        vote_type = data.get("vote_type", get_vote_label(VoteType.COMBINED))
 
         lst = self.get_average_points(
             {
@@ -199,7 +201,7 @@ class AverageViewset(viewsets.GenericViewSet):
         data = loads(request.body)
         start_year = data.get("start_year")
         end_year = data.get("end_year")
-        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
+        vote_type = data.get("vote_type", get_vote_label(VoteType.COMBINED))
 
         # If include_nq is true, we include non-qualifying performances in the ranking, otherwise we ignore them
         include_nq = data.get("include_nq", True)
@@ -215,16 +217,16 @@ class AverageViewset(viewsets.GenericViewSet):
             final = edition.show_set.get(show_type=ShowType.GRAND_FINAL)
 
             # find the key for the points given the voting system
-            if data["vote_type"] == get_vote_key(VoteType.COMBINED):
+            if data["vote_type"] == get_vote_label(VoteType.COMBINED):
                 place_key = VoteType.COMBINED
             else:
-                if VoteType[data["vote_type"].upper()] not in final.voting_system:
+                if get_vote_index(data["vote_type"]) not in final.voting_system:
                     continue
 
-                place_key = VoteType[data["vote_type"].upper()]
+                place_key = get_vote_index(data["vote_type"])
 
             # if we are including NQs, we need to make sure the semis have the vote type as well
-            if data["include_nq"] and data["vote_type"] != get_vote_key(
+            if data["include_nq"] and data["vote_type"] != get_vote_label(
                 VoteType.COMBINED
             ):
                 semis = edition.show_set.exclude(show_type=ShowType.GRAND_FINAL)
@@ -232,7 +234,7 @@ class AverageViewset(viewsets.GenericViewSet):
                 exit = False
 
                 for semi in semis:
-                    if VoteType[data["vote_type"].upper()] not in semi.voting_system:
+                    if get_vote_index(data["vote_type"]) not in semi.voting_system:
                         exit = True
 
                 if exit:
@@ -273,11 +275,11 @@ class AverageViewset(viewsets.GenericViewSet):
                         result.performance.country,
                         getattr(
                             result,
-                            get_vote_key(
+                            get_vote_label(
                                 result.performance.show.get_primary_vote_type()
                             )
                             if place_key == VoteType.COMBINED
-                            else get_vote_key(place_key),
+                            else get_vote_label(place_key),
                         )
                         / result.performance.show.get_maximum_possible(),
                     ]
@@ -319,7 +321,7 @@ class AverageViewset(viewsets.GenericViewSet):
         # get the start and end years from the request
         start_year = data.get("start_year")
         end_year = data.get("end_year")
-        vote_type = data.get("vote_type", get_vote_key(VoteType.COMBINED))
+        vote_type = data.get("vote_type", get_vote_label(VoteType.COMBINED))
 
         editions = Edition.objects.filter(year__gte=start_year, year__lte=end_year)
 
@@ -334,13 +336,13 @@ class AverageViewset(viewsets.GenericViewSet):
 
         for show in shows:
             # find the key for the points given the voting system
-            if data["vote_type"] == get_vote_key(VoteType.COMBINED):
+            if data["vote_type"] == get_vote_label(VoteType.COMBINED):
                 place_key = VoteType.COMBINED
             else:
-                if VoteType[data["vote_type"].upper()] not in show.voting_system:
+                if get_vote_index(data["vote_type"]) not in show.voting_system:
                     continue
 
-                place_key = VoteType[data["vote_type"].upper()]
+                place_key = get_vote_index(data["vote_type"])
 
             performances = show.performance_set.all()
 

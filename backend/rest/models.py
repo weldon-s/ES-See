@@ -18,8 +18,12 @@ ShowType = models.IntegerChoices("ShowType", "SEMI-FINAL_1 SEMI-FINAL_2 GRAND_FI
 VoteType = models.IntegerChoices("VoteType", "JURY TELEVOTE COMBINED")
 
 
-def get_vote_key(vote_type):
+def get_vote_label(vote_type):
     return VoteType.choices[vote_type - 1][1].lower()
+
+
+def get_vote_index(vote_label):
+    return VoteType[vote_label.upper()]
 
 
 # Points per place (place not in array means no points for that place)
