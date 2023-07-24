@@ -99,6 +99,12 @@ class Show(BaseModel):
         return (num_countries - 1) * num_votes * POINTS_PER_PLACE[0]
 
 
+# Languages represent, well... languages
+# TODO add countries where a language is official?
+class Language(BaseModel):
+    name = models.CharField(max_length=25)
+
+
 # Entries represent a song sent by a country in a given year
 # e.g. Portugal 2023, Serbia 2022, France 2021
 class Entry(BaseModel):
@@ -109,6 +115,8 @@ class Entry(BaseModel):
 
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     year = models.ForeignKey(Edition, on_delete=models.CASCADE)
+
+    languages = models.ManyToManyField(Language)
 
     def _str_(self):
         return f"{self.title} by {self.artist}"
