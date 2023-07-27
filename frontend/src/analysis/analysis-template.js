@@ -228,6 +228,7 @@ const AnalysisTemplate = ({ title, dataKey, metrics, columns }) => {
 
 export default AnalysisTemplate
 
+//TODO make this more malleable
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length > 0) {
         const dataKey = payload[0].dataKey;

@@ -205,6 +205,38 @@ const getCards = (countries) => {
                 }
             />
         },
+
+        {
+            title: "Languages",
+            description: "See the languages used in Eurovision",
+            link: "languages",
+            element: <AnalysisTemplate
+                title="Languages"
+                dataKey="count"
+                metrics={
+                    [
+                        yearsConstructor("Number of Entries", "languages/get_language_count/"),
+                        yearsConstructor("Number of Countries", "languages/get_country_count/")
+                    ]
+                }
+                columns={
+                    [
+                        {
+                            field: "language",
+                            headerName: "Language",
+                            flex: 2
+                        },
+
+                        {
+                            field: "count",
+                            headerName: "$header",
+                            flex: 2
+                        }
+                    ]
+                }
+            />
+
+        }
     ]
 }
 

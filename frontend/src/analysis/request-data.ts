@@ -16,6 +16,7 @@ export class RequestData {
     }
 
     //TODO customizable defaults?
+    //TODO customizable columns
     getDefaultValueObject() {
         let defaultObject: { [key: string]: any } = {};
         this.parameters.forEach((parameter) => {
