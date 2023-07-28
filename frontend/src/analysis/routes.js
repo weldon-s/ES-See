@@ -215,8 +215,11 @@ const getCards = (countries) => {
                 dataKey="count"
                 metrics={
                     [
-                        yearsConstructor("Number of Entries", "languages/get_language_count/"),
-                        yearsConstructor("Number of Countries", "languages/get_country_count/")
+                        yearsConstructor("Number of Entries", "languages/get_language_count/")
+                            .addParameter(Parameter.getBooleanParameter("weighted", "Weighted?")),
+                        yearsConstructor("Number of Countries", "languages/get_country_count/"),
+                        yearsConstructor("Longest Use Streak", "languages/get_use_streak/"),
+                        yearsConstructor("Qualification Rate", "languages/get_qualification_rate/"),
                     ]
                 }
                 columns={
