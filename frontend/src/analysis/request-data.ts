@@ -3,16 +3,17 @@ export class RequestData {
     label: any;
     url: string;
     parameters: Parameter[];
-    header: string;
-    constructor(label: any, url: string, parameters?: Parameter[], header?: string) {
+    decimalPlaces: number = 3;
+
+    constructor(label: any, url: string, parameters?: Parameter[], decimalPlaces?: number) {
         this.label = label;
         this.url = url;
         this.parameters = typeof parameters === 'undefined' ? [] : parameters;
-        this.header = typeof header === 'undefined' ? label : header;
+        this.decimalPlaces = typeof decimalPlaces === 'undefined' ? 3 : decimalPlaces;
     }
 
     addParameter(param: Parameter) {
-        return new RequestData(this.label, this.url, [...this.parameters, param], this.header);
+        return new RequestData(this.label, this.url, [...this.parameters, param], this.decimalPlaces);
     }
 
     //TODO customizable defaults?
@@ -31,8 +32,8 @@ export class RequestData {
     }
 
     static getPresetParameters(params: Parameter[]) {
-        return (label: any, url: string, header?: string) => {
-            return new RequestData(label, url, params, header);
+        return (label: any, url: string, decimalPlaces?: number) => {
+            return new RequestData(label, url, params, decimalPlaces);
         }
     }
 }

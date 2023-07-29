@@ -173,9 +173,6 @@ class LanguageViewSet(viewsets.ModelViewSet):
     # returns the earliest or latest appearance of a language
     # TODO year with most appearances of a language?
     def get_appearance(self, data):
-        print(data)
-        print(data["mode"])
-
         entries = Entry.objects.filter(
             year__year__gte=data["start_year"], year__year__lte=data["end_year"]
         )
@@ -202,8 +199,6 @@ class LanguageViewSet(viewsets.ModelViewSet):
         ]
 
         lst.sort(key=lambda x: x["result"], reverse=data["mode"] == "latest")
-
-        print(lst)
 
         return JsonResponse(lst, safe=False)
 

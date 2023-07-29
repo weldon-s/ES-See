@@ -18,13 +18,29 @@ const AnalysisTemplate = ({ title, metrics, columns }) => {
 
     const navigate = useNavigate();
 
-    const [metric, setMetric] = useState(metrics[0])
-    const [choices, setChoices] = useState(metric.getDefaultValueObject())
+    const [metric, setMetric] = useState("")
+    const [choices, setChoices] = useState(undefined)
     const [updateCount, setUpdateCount] = useState(0);
     const [processedColumns, setProcessedColumns] = useState(columns);
 
+    //TODO make this more malleable
+    const CustomTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length > 0) {
+            const dataKey = "result";
+
+            return <Box sx={{
+                backgroundColor: "#fffc",
+                p: 1,
+                borderRadius: "10px"
+            }}>
+                <CountryFlagCell country={payload[0].payload.country} />
+                <Typography>{payload[0].payload.result.toFixed(metric.decimalPlaces)}</Typography>
+            </Box>
+        }
+    }
+
     useEffect(() => {
-        if (countries) {
+        if (countries && metric) {
             Client.post(metric.url, {
                 ...choices
             })
@@ -38,14 +54,16 @@ const AnalysisTemplate = ({ title, metrics, columns }) => {
                     })
 
                     setData(newData);
-                    setProcessedColumns(columns.map(
-                        column => {
-                            return {
-                                ...column,
-                                headerName: column.headerName.replace("$header", metric.header)
-                            }
-                        }
-                    ))
+
+                    let newColumns = [...columns];
+                    newColumns.push({
+                        field: "result",
+                        headerName: metric.label,
+                        valueGetter: (params) => params.row.result.toFixed(metric.decimalPlaces),
+                        flex: 2
+                    })
+
+                    setProcessedColumns(newColumns);
                 });
         }
     }, [updateCount]);
@@ -77,6 +95,7 @@ const AnalysisTemplate = ({ title, metrics, columns }) => {
                     <Typography variant="h6" align="center" mb={1}>Settings</Typography>
                 </Grid>
 
+
                 <Grid item xs={12} display="flex" justifyContent="center" mb={2}>
                     <FormControl>
                         <InputLabel id="metric-label">Metric</InputLabel>
@@ -88,6 +107,9 @@ const AnalysisTemplate = ({ title, metrics, columns }) => {
                                 setChoices(e.target.value.getDefaultValueObject());
                                 setMetric(e.target.value);
                             }}
+                            sx={{
+                                minWidth: "200px",
+                            }}
                         >
                             {metrics.map(metric => (
                                 <MenuItem key={metric.url} value={metric}>{metric.label}</MenuItem>
@@ -96,7 +118,7 @@ const AnalysisTemplate = ({ title, metrics, columns }) => {
                     </FormControl>
                 </Grid>
 
-                {metric.parameters.map(param =>
+                {metric && metric.parameters.map(param =>
                     <Grid
                         key={param.name}
                         item
@@ -227,19 +249,3 @@ const AnalysisTemplate = ({ title, metrics, columns }) => {
 }
 
 export default AnalysisTemplate
-
-//TODO make this more malleable
-const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length > 0) {
-        const dataKey = "result";
-
-        return <Box sx={{
-            backgroundColor: "#fffc",
-            p: 1,
-            borderRadius: "10px"
-        }}>
-            <CountryFlagCell country={payload[0].payload.country} />
-            <Typography>{payload[0].payload.result.toFixed(3)}</Typography>
-        </Box>
-    }
-}

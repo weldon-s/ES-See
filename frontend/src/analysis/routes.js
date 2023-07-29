@@ -60,13 +60,6 @@ const getCards = (countries) => {
                             renderCell: (params) => <CountryFlagCell country={params.row.country} />,
                             flex: 2
                         },
-
-                        {
-                            field: "result",
-                            headerName: "$header",
-                            renderCell: (params) => params.row.result.toFixed(3),
-                            flex: 2
-                        }
                     ]
                 }
             />
@@ -81,13 +74,13 @@ const getCards = (countries) => {
                 dataKey="result"
                 metrics={
                     [
-                        yearsConstructor("Qualifying Count", "qualify/get_qualify_count/"),
+                        yearsConstructor("Qualifying Count", "qualify/get_qualify_count/", 0),
 
                         yearsConstructor("Qualifying Rate", "qualify/get_qualify_rate/"),
 
-                        yearsConstructor("Longest Qualifying Streak", "qualify/get_longest_q_streak/"),
+                        yearsConstructor("Longest Qualifying Streak", "qualify/get_longest_q_streak/", 0),
 
-                        yearsConstructor("Longest Non-Qualifying Streak", "qualify/get_longest_nq_streak/"),
+                        yearsConstructor("Longest Non-Qualifying Streak", "qualify/get_longest_nq_streak/", 0),
                     ]
                 }
                 columns={
@@ -99,12 +92,6 @@ const getCards = (countries) => {
                             renderCell: (params) => <CountryFlagCell country={params.row.country} />,
                             flex: 2
                         },
-
-                        {
-                            field: "result",
-                            headerName: "$header",
-                            flex: 2
-                        }
                     ]
                 }
 
@@ -138,12 +125,6 @@ const getCards = (countries) => {
                             renderCell: (params) => <CountryFlagCell country={params.row.country} />,
                             flex: 2
                         },
-                        {
-                            field: "result",
-                            headerName: "$header",
-                            valueGetter: (params) => params.row.result.toFixed(3),
-                            flex: 2
-                        }
                     ]
                 }
             />
@@ -159,25 +140,25 @@ const getCards = (countries) => {
                 dataKey="result"
                 metrics={
                     [
-                        voteTypeYearsConstructor("Grand Final Points Given", "exchanges/get_final_points_from/")
+                        voteTypeYearsConstructor("Grand Final Points Given", "exchanges/get_final_points_from/", 0)
                             .addParameter(COUNTRY_PARAM),
 
                         voteTypeYearsConstructor("Average Grand Final Points Given", "exchanges/get_average_final_points_from/")
                             .addParameter(COUNTRY_PARAM),
 
-                        voteTypeYearsConstructor("Semi-Final Points Given", "exchanges/get_semi_points_from/")
+                        voteTypeYearsConstructor("Semi-Final Points Given", "exchanges/get_semi_points_from/", 0)
                             .addParameter(COUNTRY_PARAM),
 
                         voteTypeYearsConstructor("Average Semi-Final Points Given", "exchanges/get_average_semi_points_from/")
                             .addParameter(COUNTRY_PARAM),
 
-                        voteTypeYearsConstructor("Grand Final Points Received", "exchanges/get_final_points_to/")
+                        voteTypeYearsConstructor("Grand Final Points Received", "exchanges/get_final_points_to/", 0)
                             .addParameter(COUNTRY_PARAM),
 
                         voteTypeYearsConstructor("Average Grand Final Points Received", "exchanges/get_average_final_points_to/")
                             .addParameter(COUNTRY_PARAM),
 
-                        voteTypeYearsConstructor("Semi-Final Points Received", "exchanges/get_semi_points_to/")
+                        voteTypeYearsConstructor("Semi-Final Points Received", "exchanges/get_semi_points_to/", 0)
                             .addParameter(COUNTRY_PARAM),
 
                         voteTypeYearsConstructor("Average Semi-Final Points Received", "exchanges/get_average_semi_points_to/")
@@ -194,13 +175,6 @@ const getCards = (countries) => {
                             renderCell: (params) => <CountryFlagCell country={params.row.country} />,
                             flex: 2
                         },
-
-                        {
-                            field: "points",
-                            headerName: "$header",
-                            valueGetter: (params) => params.row.points.toFixed(3),
-                            flex: 2
-                        }
                     ]
                 }
             />
@@ -215,13 +189,13 @@ const getCards = (countries) => {
                 dataKey="result"
                 metrics={
                     [
-                        yearsConstructor("Number of Entries", "languages/get_language_count/")
+                        yearsConstructor("Number of Entries", "languages/get_language_count/", 0)
                             .addParameter(Parameter.getBooleanParameter("weighted", "Weighted?")),
-                        yearsConstructor("Number of Countries", "languages/get_country_count/"),
-                        yearsConstructor("Longest Use Streak", "languages/get_use_streak/"),
+                        yearsConstructor("Number of Countries", "languages/get_country_count/", 0),
+                        yearsConstructor("Longest Use Streak", "languages/get_use_streak/", 0),
                         yearsConstructor("Qualification Rate", "languages/get_qualification_rate/"),
-                        yearsConstructor("Earliest Appearance", "languages/get_earliest_appearance/"),
-                        yearsConstructor("Latest Appearance", "languages/get_latest_appearance/"),
+                        yearsConstructor("Earliest Appearance", "languages/get_earliest_appearance/", 0),
+                        yearsConstructor("Latest Appearance", "languages/get_latest_appearance/", 0),
                     ]
                 }
                 columns={
@@ -229,13 +203,6 @@ const getCards = (countries) => {
                         {
                             field: "language",
                             headerName: "Language",
-                            flex: 2
-                        },
-
-                        {
-                            field: "result",
-                            headerName: "$header",
-                            valueGetter: (params) => params.row.result.toFixed(3),
                             flex: 2
                         }
                     ]
