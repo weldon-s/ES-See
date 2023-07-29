@@ -3,8 +3,7 @@ import { Route } from "react-router-dom"
 import AnalysisMenu from ".";
 import AnalysisTemplate from "./analysis-template"
 import CountryFlagCell from '../components/country-flag-cell';
-import { Parameter, RequestData } from "./request-data.ts"
-import { CountryContext } from "../app";
+import { Parameter, RequestData } from "./request-data"
 
 const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
 const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);

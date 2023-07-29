@@ -3,7 +3,7 @@ import React, { Fragment, useContext, useEffect, useMemo, useState } from "react
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { CountryContext, EditionContext } from "../app";
+import { CountryContext, EditionContext } from "../contexts";
 import Client from "../api/client";
 import CountryFlagCell from "../components/country-flag-cell";
 import { getOrdinal, getPointsKey, getShowName } from "../utils";

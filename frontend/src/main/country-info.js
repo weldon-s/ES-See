@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Box, Container, Skeleton, Typography } from '@mui/material';
 
 import Client from '../api/client';
-import { EditionContext } from '../app';
+import { EditionContext } from '../contexts';
 import { getOrdinal, getPointsKey } from '../utils';
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';

@@ -24,7 +24,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { CountryContext, EditionContext } from "../app";
+import { CountryContext, EditionContext } from "../contexts";
 import Client from "../api/client"
 import CountryFlagCell from "../components/country-flag-cell";
 
