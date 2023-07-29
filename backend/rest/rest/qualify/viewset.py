@@ -18,6 +18,7 @@ class QualifyViewSet(viewsets.GenericViewSet):
 
         for edition in editions:
             # get qualifier data for this edition and make an array: qualify_count is 1 if qualifier, 0 if non-qualifier
+            # TODO make this not error when year is missing
             qualifier_obj = edition.get_qualifier_data()
             qualifier_lst = [
                 {"country": x, "qualify_count": 1} for x in qualifier_obj["qualifiers"]
@@ -40,11 +41,11 @@ class QualifyViewSet(viewsets.GenericViewSet):
         # convert dict to list for ease of use
         # return proportional data if we want the qualification rate
         if data["rate"]:
-            lst = [{"country": k, "qualify": v[0] / v[1]} for k, v in dict.items()]
+            lst = [{"country": k, "result": v[0] / v[1]} for k, v in dict.items()]
         else:
-            lst = [{"country": k, "qualify": v[0]} for k, v in dict.items()]
+            lst = [{"country": k, "result": v[0]} for k, v in dict.items()]
 
-        return sorted(lst, key=lambda x: x["qualify"], reverse=True)
+        return sorted(lst, key=lambda x: x["result"], reverse=True)
 
     @action(detail=False, methods=["POST"])
     def get_qualify_count(self, request):
@@ -120,7 +121,7 @@ class QualifyViewSet(viewsets.GenericViewSet):
             if current > longest:
                 longest = current
 
-            streaks.append({"country": country, "qualify": longest})
+            streaks.append({"country": country, "result": longest})
 
         return streaks
 

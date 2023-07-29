@@ -28,7 +28,7 @@ const getCards = (countries) => {
             link: "average-performance",
             element: <AnalysisTemplate
                 title="Average Performance"
-                dataKey="average"
+                dataKey="result"
                 metrics={[
                     voteTypeYearsConstructor("Average Grand Final Points", "average/get_average_final_points/")
                         .addParameter(INCLUDE_NQ_PARAM),
@@ -62,9 +62,9 @@ const getCards = (countries) => {
                         },
 
                         {
-                            field: "average",
+                            field: "result",
                             headerName: "$header",
-                            renderCell: (params) => params.row.average.toFixed(3),
+                            renderCell: (params) => params.row.result.toFixed(3),
                             flex: 2
                         }
                     ]
@@ -78,7 +78,7 @@ const getCards = (countries) => {
             link: "qualifying-history",
             element: <AnalysisTemplate
                 title="Qualifying History"
-                dataKey="qualify"
+                dataKey="result"
                 metrics={
                     [
                         yearsConstructor("Qualifying Count", "qualify/get_qualify_count/"),
@@ -101,7 +101,7 @@ const getCards = (countries) => {
                         },
 
                         {
-                            field: "qualify",
+                            field: "result",
                             headerName: "$header",
                             flex: 2
                         }
@@ -117,7 +117,7 @@ const getCards = (countries) => {
             link: "running-order",
             element: <AnalysisTemplate
                 title="Running Order"
-                dataKey="average"
+                dataKey="result"
                 metrics={
                     [
                         yearsConstructor("Average Grand Final Running Order", "running_order/get_average_final_running_order/"),
@@ -139,9 +139,9 @@ const getCards = (countries) => {
                             flex: 2
                         },
                         {
-                            field: "average",
+                            field: "result",
                             headerName: "$header",
-                            valueGetter: (params) => params.row.average.toFixed(3),
+                            valueGetter: (params) => params.row.result.toFixed(3),
                             flex: 2
                         }
                     ]
@@ -156,7 +156,7 @@ const getCards = (countries) => {
             link: "voting-history",
             element: <AnalysisTemplate
                 title="Voting History"
-                dataKey="points"
+                dataKey="result"
                 metrics={
                     [
                         voteTypeYearsConstructor("Grand Final Points Given", "exchanges/get_final_points_from/")
@@ -212,7 +212,7 @@ const getCards = (countries) => {
             link: "languages",
             element: <AnalysisTemplate
                 title="Languages"
-                dataKey="count"
+                dataKey="result"
                 metrics={
                     [
                         yearsConstructor("Number of Entries", "languages/get_language_count/")
@@ -233,9 +233,9 @@ const getCards = (countries) => {
                         },
 
                         {
-                            field: "count",
+                            field: "result",
                             headerName: "$header",
-                            valueGetter: (params) => params.row.count.toFixed(3),
+                            valueGetter: (params) => params.row.result.toFixed(3),
                             flex: 2
                         }
                     ]

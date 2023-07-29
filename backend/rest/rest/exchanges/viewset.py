@@ -68,14 +68,14 @@ class ExchangeViewSet(viewsets.GenericViewSet):
         lst = [
             {
                 "country": country.id,
-                "points": dict[country][0] / dict[country][1]
+                "result": dict[country][0] / dict[country][1]
                 if data["proportional"]
                 else dict[country][0],
             }
             for country in dict
         ]
 
-        lst = sorted(lst, key=lambda x: x["points"], reverse=True)
+        lst = sorted(lst, key=lambda x: x["result"], reverse=True)
 
         return lst
 
@@ -133,14 +133,14 @@ class ExchangeViewSet(viewsets.GenericViewSet):
         lst = [
             {
                 "country": country.id,
-                "points": dict[country][0] / dict[country][1]
+                "result": dict[country][0] / dict[country][1]
                 if data["proportional"]
                 else dict[country][0],
             }
             for country in dict
         ]
 
-        lst = sorted(lst, key=lambda x: x["points"], reverse=True)
+        lst = sorted(lst, key=lambda x: x["result"], reverse=True)
 
         return lst
 

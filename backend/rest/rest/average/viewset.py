@@ -99,7 +99,7 @@ class AverageViewset(viewsets.GenericViewSet):
         # convert dict into list sorted by the average we just calculated
         lst = sorted(averages.items(), key=lambda x: x[1], reverse=True)
         lst = [
-            {"country": x[0], "average": x[1], "place": lst.index(x) + 1} for x in lst
+            {"country": x[0], "result": x[1], "place": lst.index(x) + 1} for x in lst
         ]
 
         return lst
@@ -307,7 +307,7 @@ class AverageViewset(viewsets.GenericViewSet):
         # convert dict into list sorted by the average we just calculated
         lst = sorted(averages.items(), key=lambda x: x[1])
         lst = [
-            {"country": x[0], "average": x[1], "place": lst.index(x) + 1} for x in lst
+            {"country": x[0], "result": x[1], "place": lst.index(x) + 1} for x in lst
         ]
 
         return JsonResponse(lst, safe=False)
@@ -368,7 +368,7 @@ class AverageViewset(viewsets.GenericViewSet):
         # convert dict into list sorted by the average we just calculated
         lst = sorted(averages.items(), key=lambda x: x[1])
         lst = [
-            {"country": x[0], "average": x[1], "place": lst.index(x) + 1} for x in lst
+            {"country": x[0], "result": x[1], "place": lst.index(x) + 1} for x in lst
         ]
 
         return JsonResponse(lst, safe=False)

@@ -9,7 +9,7 @@ import { CountryContext } from "../app";
 import CountryFlagCell from '../components/country-flag-cell';
 
 //TODO make this ts
-const AnalysisTemplate = ({ title, dataKey, metrics, columns }) => {
+const AnalysisTemplate = ({ title, metrics, columns }) => {
     const [data, setData] = useState(undefined);
 
     const [table, setTable] = useState(true);
@@ -205,7 +205,7 @@ const AnalysisTemplate = ({ title, dataKey, metrics, columns }) => {
                                                 fontFamily: "Inter, sans-serif"
                                             }}>
                                                 <CartesianGrid />
-                                                <Bar dataKey={dataKey} />
+                                                <Bar dataKey="result" />
                                                 <XAxis dataKey="country.name" hide />
                                                 <YAxis />
                                                 <Tooltip content={CustomTooltip} />
@@ -231,7 +231,7 @@ export default AnalysisTemplate
 //TODO make this more malleable
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length > 0) {
-        const dataKey = payload[0].dataKey;
+        const dataKey = "result";
 
         return <Box sx={{
             backgroundColor: "#fffc",
@@ -239,7 +239,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             borderRadius: "10px"
         }}>
             <CountryFlagCell country={payload[0].payload.country} />
-            <Typography>{payload[0].payload[dataKey].toFixed(3)}</Typography>
+            <Typography>{payload[0].payload.result.toFixed(3)}</Typography>
         </Box>
     }
 }

@@ -40,11 +40,11 @@ class LanguageViewSet(viewsets.ModelViewSet):
                     data[language] += 1
 
         lst = [
-            {"language": language.name, "count": count}
+            {"language": language.name, "result": count}
             for language, count in data.items()
         ]
 
-        lst.sort(key=lambda x: x["count"], reverse=True)
+        lst.sort(key=lambda x: x["result"], reverse=True)
 
         return JsonResponse(lst, safe=False)
 
@@ -70,11 +70,11 @@ class LanguageViewSet(viewsets.ModelViewSet):
                 data[language].add(entry.country.id)
 
         lst = [
-            {"language": language.name, "count": len(country_set)}
+            {"language": language.name, "result": len(country_set)}
             for language, country_set in data.items()
         ]
 
-        lst.sort(key=lambda x: x["count"], reverse=True)
+        lst.sort(key=lambda x: x["result"], reverse=True)
 
         return JsonResponse(lst, safe=False)
 
@@ -120,11 +120,11 @@ class LanguageViewSet(viewsets.ModelViewSet):
             if current > longest:
                 longest = current
 
-            streaks.append({"language": language.name, "count": longest})
+            streaks.append({"language": language.name, "result": longest})
 
         # keys are languages, values are streaks
 
-        streaks.sort(key=lambda x: x["count"], reverse=True)
+        streaks.sort(key=lambda x: x["result"], reverse=True)
 
         return JsonResponse(streaks, safe=False)
 
@@ -162,11 +162,11 @@ class LanguageViewSet(viewsets.ModelViewSet):
                 data[language][1] += 1
 
         lst = [
-            {"language": language.name, "count": data[language][0] / data[language][1]}
+            {"language": language.name, "result": data[language][0] / data[language][1]}
             for language in data
         ]
 
-        lst.sort(key=lambda x: x["count"], reverse=True)
+        lst.sort(key=lambda x: x["result"], reverse=True)
 
         return JsonResponse(lst, safe=False)
 
@@ -197,11 +197,11 @@ class LanguageViewSet(viewsets.ModelViewSet):
                     dict[language] = max(dict[language], entry.year.year)
 
         lst = [
-            {"language": language.name, "count": year}
+            {"language": language.name, "result": year}
             for language, year in dict.items()
         ]
 
-        lst.sort(key=lambda x: x["count"], reverse=data["mode"] == "latest")
+        lst.sort(key=lambda x: x["result"], reverse=data["mode"] == "latest")
 
         print(lst)
 

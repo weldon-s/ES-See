@@ -46,11 +46,11 @@ class RunningOrderViewset(GenericViewSet):
                     dict[country][1] += 1
 
         lst = [
-            {"country": country.id, "average": dict[country][0] / dict[country][1]}
+            {"country": country.id, "result": dict[country][0] / dict[country][1]}
             for country in dict
         ]
 
-        lst = sorted(lst, key=lambda x: x["average"])
+        lst = sorted(lst, key=lambda x: x["result"])
 
         return lst
 
