@@ -27,7 +27,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
     const navigate = useNavigate();
 
     const [metricId, setMetricId] = useState<number>(0);
-    const [choices, setChoices] = useState<{ [key: string]: any }>({});
+    const [choices, setChoices] = useState<{ [key: string]: any }>(metrics[0].getValueObject());
     const [updateCount, setUpdateCount] = useState(0);
     const [processedColumns, setProcessedColumns] = useState(columns);
 
@@ -116,7 +116,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                             label="Metric"
                             value={metricId}
                             onChange={(e: any) => {
-                                setChoices(metrics[e.target.value].getDefaultValueObject());
+                                setChoices(choices => metrics[e.target.value].getValueObject(choices));
                                 setMetricId(e.target.value);
                             }}
                             sx={{
@@ -244,6 +244,8 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                                             <BarChart data={data} width={600} height={500} style={{
                                                 fontFamily: "Inter, sans-serif"
                                             }}>
+                                                {/*TODO fix axes when years are y-values*/}
+                                                {console.log(data)}
                                                 <CartesianGrid />
                                                 <Bar dataKey="result" />
                                                 <XAxis dataKey="country.name" hide />

@@ -18,17 +18,25 @@ export class RequestData {
 
     //TODO customizable defaults?
     //TODO customizable columns
-    getDefaultValueObject() {
-        let defaultObject: { [key: string]: any } = {};
+    getValueObject(existingValues?: { [key: string]: any }) {
+        //We'll see if we have any parameters matching the names of the parameters in this object
+        //If so, if the existing value for said parameter is valid (i.e. in the list of choices for this object), we'll just use that value
+
+        let valueObject: { [key: string]: any } = {};
+
         this.parameters.forEach((parameter) => {
-            if (parameter.choices.length > 0) {
-                defaultObject[parameter.name] = parameter.choices[0].value;
+            if (existingValues && Object.keys(existingValues).includes(parameter.name)) {
+                valueObject[parameter.name] = existingValues[parameter.name];
+            }
+            else if (parameter.choices.length > 0) {
+                valueObject[parameter.name] = parameter.choices[0].value;
             }
             else {
-                defaultObject[parameter.name] = "";
+                valueObject[parameter.name] = "";
             }
         })
-        return defaultObject;
+
+        return valueObject;
     }
 
     static getPresetParameters(params: Parameter[]) {
