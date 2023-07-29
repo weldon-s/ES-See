@@ -147,7 +147,7 @@ class LanguageViewSet(viewsets.ModelViewSet):
                 country=entry.country, show__edition__year=entry.year.year
             ).exclude(show__show_type=ShowType.GRAND_FINAL)
 
-            if len(performances) == 0:
+            if len(performances) == 0 or performances[0].running_order <= 0:
                 continue
 
             result = Result.objects.get(performance=performances[0])
@@ -156,7 +156,7 @@ class LanguageViewSet(viewsets.ModelViewSet):
                 if language not in data:
                     data[language] = [0, 0]
 
-                if result.combined <= 10:
+                if result.place <= 10:
                     data[language][0] += 1
 
                 data[language][1] += 1
@@ -169,3 +169,48 @@ class LanguageViewSet(viewsets.ModelViewSet):
         lst.sort(key=lambda x: x["count"], reverse=True)
 
         return JsonResponse(lst, safe=False)
+
+    # returns the earliest or latest appearance of a language
+    # TODO year with most appearances of a language?
+    def get_appearance(self, data):
+        print(data)
+        print(data["mode"])
+
+        entries = Entry.objects.filter(
+            year__year__gte=data["start_year"], year__year__lte=data["end_year"]
+        )
+
+        # keys are languages, values are years fitting the criterion
+        dict = {}
+
+        for entry in entries:
+            for language in entry.languages.all():
+                if language not in dict:
+                    dict[language] = entry.year.year
+
+                # if we are looking for the earliest appearance, we want to find the minimum year
+                if data["mode"] == "earliest":
+                    dict[language] = min(dict[language], entry.year.year)
+
+                # if we are looking for the latest appearance, we want to find the maximum year
+                elif data["mode"] == "latest":
+                    dict[language] = max(dict[language], entry.year.year)
+
+        lst = [
+            {"language": language.name, "count": year}
+            for language, year in dict.items()
+        ]
+
+        lst.sort(key=lambda x: x["count"], reverse=data["mode"] == "latest")
+
+        print(lst)
+
+        return JsonResponse(lst, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_earliest_appearance(self, request):
+        return self.get_appearance({"mode": "earliest", **request.data})
+
+    @action(detail=False, methods=["POST"])
+    def get_latest_appearance(self, request):
+        return self.get_appearance({"mode": "latest", **request.data})

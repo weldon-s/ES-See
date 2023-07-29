@@ -220,6 +220,8 @@ const getCards = (countries) => {
                         yearsConstructor("Number of Countries", "languages/get_country_count/"),
                         yearsConstructor("Longest Use Streak", "languages/get_use_streak/"),
                         yearsConstructor("Qualification Rate", "languages/get_qualification_rate/"),
+                        yearsConstructor("Earliest Appearance", "languages/get_earliest_appearance/"),
+                        yearsConstructor("Latest Appearance", "languages/get_latest_appearance/"),
                     ]
                 }
                 columns={
@@ -233,6 +235,7 @@ const getCards = (countries) => {
                         {
                             field: "count",
                             headerName: "$header",
+                            valueGetter: (params) => params.row.count.toFixed(3),
                             flex: 2
                         }
                     ]
