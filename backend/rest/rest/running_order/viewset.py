@@ -3,7 +3,8 @@ from django.http import JsonResponse
 from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
 
-from models import Edition, Performance, ShowType
+from models import Edition, ShowType
+from rest.countries.viewset import CountrySerializer
 
 
 class RunningOrderViewset(GenericViewSet):
@@ -46,7 +47,10 @@ class RunningOrderViewset(GenericViewSet):
                     dict[country][1] += 1
 
         lst = [
-            {"country": country.id, "result": dict[country][0] / dict[country][1]}
+            {
+                "country": CountrySerializer(country).data,
+                "result": dict[country][0] / dict[country][1],
+            }
             for country in dict
         ]
 

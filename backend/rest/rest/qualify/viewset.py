@@ -2,7 +2,8 @@ from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.decorators import action
 
-from models import Edition
+from models import Country, Edition
+from rest.countries.viewset import CountrySerializer
 
 
 class QualifyViewSet(viewsets.GenericViewSet):
@@ -41,9 +42,21 @@ class QualifyViewSet(viewsets.GenericViewSet):
         # convert dict to list for ease of use
         # return proportional data if we want the qualification rate
         if data["rate"]:
-            lst = [{"country": k, "result": v[0] / v[1]} for k, v in dict.items()]
+            lst = [
+                {
+                    "country": CountrySerializer(Country.objects.get(id=k)).data,
+                    "result": v[0] / v[1],
+                }
+                for k, v in dict.items()
+            ]
         else:
-            lst = [{"country": k, "result": v[0]} for k, v in dict.items()]
+            lst = [
+                {
+                    "country": CountrySerializer(Country.objects.get(id=k)).data,
+                    "result": v[0],
+                }
+                for k, v in dict.items()
+            ]
 
         return sorted(lst, key=lambda x: x["result"], reverse=True)
 
@@ -121,7 +134,12 @@ class QualifyViewSet(viewsets.GenericViewSet):
             if current > longest:
                 longest = current
 
-            streaks.append({"country": country, "result": longest})
+            streaks.append(
+                {
+                    "country": CountrySerializer(Country.objects.get(id=country)).data,
+                    "result": longest,
+                }
+            )
 
         return streaks
 

@@ -1,7 +1,7 @@
 import React, { useContext } from "react"
 import { Route } from "react-router-dom"
 import AnalysisMenu from ".";
-import AnalysisTemplate from "./analysis-template"
+import AnalysisTemplate, { COUNTRY, LANGUAGE } from "./analysis-template"
 import CountryFlagCell from '../components/country-flag-cell';
 import { Parameter, RequestData } from "./request-data"
 
@@ -44,23 +44,7 @@ const getCards = (countries) => {
 
                     voteTypeYearsConstructor("Average Semi-Final Place", "average/get_average_semi_place/"),
                 ]}
-                columns={
-                    [
-                        {
-                            field: "place",
-                            headerName: "Place",
-                            flex: 1
-                        },
-
-                        {
-                            field: "country",
-                            headerName: "Country",
-                            valueGetter: (params) => params.row.country.name,
-                            renderCell: (params) => <CountryFlagCell country={params.row.country} />,
-                            flex: 2
-                        },
-                    ]
-                }
+                target={COUNTRY}
             />
         },
 
@@ -82,18 +66,7 @@ const getCards = (countries) => {
                         yearsConstructor("Longest Non-Qualifying Streak", "qualify/get_longest_nq_streak/", 0),
                     ]
                 }
-                columns={
-                    [
-                        {
-                            field: "country",
-                            headerName: "Country",
-                            valueGetter: (params) => params.row.country.name,
-                            renderCell: (params) => <CountryFlagCell country={params.row.country} />,
-                            flex: 2
-                        },
-                    ]
-                }
-
+                target={COUNTRY}
             />
         },
 
@@ -115,17 +88,7 @@ const getCards = (countries) => {
                         yearsConstructor("Average Semi-Final Running Order Proportion", "running_order/get_average_semi_running_order_proportion/")
                     ]
                 }
-                columns={
-                    [
-                        {
-                            field: "country",
-                            headerName: "Country",
-                            valueGetter: (params) => params.row.country.name,
-                            renderCell: (params) => <CountryFlagCell country={params.row.country} />,
-                            flex: 2
-                        },
-                    ]
-                }
+                target={COUNTRY}
             />
         },
 
@@ -164,18 +127,7 @@ const getCards = (countries) => {
                             .addParameter(COUNTRY_PARAM),
                     ]
                 }
-
-                columns={
-                    [
-                        {
-                            field: "country",
-                            headerName: "Country",
-                            valueGetter: (params) => params.row.country.name,
-                            renderCell: (params) => <CountryFlagCell country={params.row.country} />,
-                            flex: 2
-                        },
-                    ]
-                }
+                target={COUNTRY}
             />
         },
 
@@ -197,15 +149,7 @@ const getCards = (countries) => {
                         yearsConstructor("Latest Appearance", "languages/get_latest_appearance/", 0),
                     ]
                 }
-                columns={
-                    [
-                        {
-                            field: "language",
-                            headerName: "Language",
-                            flex: 2
-                        }
-                    ]
-                }
+                target={LANGUAGE}
             />
 
         }

@@ -14,6 +14,8 @@ from models import (
     VoteType,
 )
 
+from rest.countries.viewset import CountrySerializer
+
 
 # TODO ignore noncompeting countries
 # TODO tiebreaking
@@ -30,7 +32,7 @@ class AverageViewset(viewsets.GenericViewSet):
         )
 
         # get the average points for each country
-        # we use a dict with country ids as a key, and a list of [points, num_editions] as a value
+        # we use a dict with a country as a key, and a list of [points, num_editions] as a value
         # this way, we don't assume that each country has participated in every edition
         averages = {}
 
@@ -62,13 +64,13 @@ class AverageViewset(viewsets.GenericViewSet):
                 show_maximum = show.get_maximum_possible()
 
                 for performance in performances:
-                    if not performance.country.id in averages:
-                        averages[performance.country.id] = [0, 0]
+                    if not performance.country in averages:
+                        averages[performance.country] = [0, 0]
 
                     # if this performance did not qualify, increment show counter without adding points
                     # we can use this logic since only the grand final would have NQs remaining since we removed them for semis
                     if performance.running_order <= 0:
-                        averages[performance.country.id][1] += 1
+                        averages[performance.country][1] += 1
 
                     else:
                         result = Result.objects.get(performance=performance)
@@ -89,17 +91,22 @@ class AverageViewset(viewsets.GenericViewSet):
                                 else show_maximum
                             )
 
-                        averages[performance.country.id][0] += toAdd
-                        averages[performance.country.id][1] += 1
+                        averages[performance.country][0] += toAdd
+                        averages[performance.country][1] += 1
 
         # calculate the average points for each country
-        for country_id in averages:
-            averages[country_id] = averages[country_id][0] / averages[country_id][1]
+        for country in averages:
+            averages[country] = averages[country][0] / averages[country][1]
 
         # convert dict into list sorted by the average we just calculated
         lst = sorted(averages.items(), key=lambda x: x[1], reverse=True)
         lst = [
-            {"country": x[0], "result": x[1], "place": lst.index(x) + 1} for x in lst
+            {
+                "country": CountrySerializer(x[0]).data,
+                "result": x[1],
+                "place": lst.index(x) + 1,
+            }
+            for x in lst
         ]
 
         return lst
@@ -208,7 +215,7 @@ class AverageViewset(viewsets.GenericViewSet):
         editions = Edition.objects.filter(year__gte=start_year, year__lte=end_year)
 
         # get the average places for each country
-        # we use a dict with country ids as a key, and a list of [sum_of_places, num_editions] as a value
+        # we use a dict with a country as a key, and a list of [sum_of_places, num_editions] as a value
         # this way, we don't assume that each country has participated in every edition
         averages = {}
 
@@ -245,14 +252,12 @@ class AverageViewset(viewsets.GenericViewSet):
             gf_results = Result.objects.filter(performance__in=q_performances)
 
             for result in gf_results:
-                if not result.performance.country.id in averages:
-                    averages[result.performance.country.id] = [0, 0]
+                if not result.performance.country in averages:
+                    averages[result.performance.country] = [0, 0]
 
                 # add place and increment number of editions
-                averages[result.performance.country.id][0] += result.get_place(
-                    place_key
-                )
-                averages[result.performance.country.id][1] += 1
+                averages[result.performance.country][0] += result.get_place(place_key)
+                averages[result.performance.country][1] += 1
 
             if include_nq:
                 # first, get the NQing countries from the final
@@ -293,21 +298,26 @@ class AverageViewset(viewsets.GenericViewSet):
                 for i in range(len(nq_data)):
                     country = nq_data[i][0]
 
-                    if not country.id in averages:
-                        averages[country.id] = [0, 0]
+                    if not country in averages:
+                        averages[country] = [0, 0]
 
                     # add place and increment number of editions
-                    averages[country.id][0] += starting_place + i
-                    averages[country.id][1] += 1
+                    averages[country][0] += starting_place + i
+                    averages[country][1] += 1
 
         # calculate the average place for each country
-        for country_id in averages:
-            averages[country_id] = averages[country_id][0] / averages[country_id][1]
+        for country in averages:
+            averages[country] = averages[country][0] / averages[country][1]
 
         # convert dict into list sorted by the average we just calculated
         lst = sorted(averages.items(), key=lambda x: x[1])
         lst = [
-            {"country": x[0], "result": x[1], "place": lst.index(x) + 1} for x in lst
+            {
+                "country": CountrySerializer(x[0]).data,
+                "result": x[1],
+                "place": lst.index(x) + 1,
+            }
+            for x in lst
         ]
 
         return JsonResponse(lst, safe=False)
@@ -329,7 +339,7 @@ class AverageViewset(viewsets.GenericViewSet):
         )
 
         # get the average places for each country
-        # we use a dict with country ids as a key, and a list of [sum_of_places, num_editions] as a value
+        # we use a dict with a country as a key, and a list of [sum_of_places, num_editions] as a value
         # this way, we don't assume that each country has participated in every edition
         averages = {}
 
@@ -351,24 +361,27 @@ class AverageViewset(viewsets.GenericViewSet):
             results = Result.objects.filter(performance__in=performances)
 
             for result in results:
-                if not result.performance.country.id in averages:
-                    averages[result.performance.country.id] = [0, 0]
+                if not result.performance.country in averages:
+                    averages[result.performance.country] = [0, 0]
 
                 # add place and increment number of editions
 
-                averages[result.performance.country.id][0] += result.get_place(
-                    place_key
-                )
-                averages[result.performance.country.id][1] += 1
+                averages[result.performance.country][0] += result.get_place(place_key)
+                averages[result.performance.country][1] += 1
 
         # calculate the average place for each country
-        for country_id in averages:
-            averages[country_id] = averages[country_id][0] / averages[country_id][1]
+        for country in averages:
+            averages[country] = averages[country][0] / averages[country][1]
 
         # convert dict into list sorted by the average we just calculated
         lst = sorted(averages.items(), key=lambda x: x[1])
         lst = [
-            {"country": x[0], "result": x[1], "place": lst.index(x) + 1} for x in lst
+            {
+                "country": CountrySerializer(x[0]).data,
+                "result": x[1],
+                "place": lst.index(x) + 1,
+            }
+            for x in lst
         ]
 
         return JsonResponse(lst, safe=False)

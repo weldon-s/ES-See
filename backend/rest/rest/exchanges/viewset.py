@@ -11,6 +11,7 @@ from models import (
     ShowType,
     VoteType,
 )
+from rest.countries.viewset import CountrySerializer
 
 
 class ExchangeViewSet(viewsets.GenericViewSet):
@@ -67,7 +68,7 @@ class ExchangeViewSet(viewsets.GenericViewSet):
 
         lst = [
             {
-                "country": country.id,
+                "country": CountrySerializer(country).data,
                 "result": dict[country][0] / dict[country][1]
                 if data["proportional"]
                 else dict[country][0],
@@ -132,7 +133,7 @@ class ExchangeViewSet(viewsets.GenericViewSet):
 
         lst = [
             {
-                "country": country.id,
+                "country": CountrySerializer(country).data,
                 "result": dict[country][0] / dict[country][1]
                 if data["proportional"]
                 else dict[country][0],
