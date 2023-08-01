@@ -142,6 +142,9 @@ const getCards = (countries) => {
                     [
                         yearsConstructor("Number of Entries", "languages/get_language_count/", 2)
                             .addParameter(Parameter.getBooleanParameter("weighted", "Weighted?")),
+                        yearsConstructor("Number of Entries by Country", "languages/get_language_count_by_country/", 2)
+                            .addParameter(COUNTRY_PARAM)
+                            .addParameter(Parameter.getBooleanParameter("weighted", "Weighted?")),
                         yearsConstructor("Number of Countries", "languages/get_country_count/", 0),
                         yearsConstructor("Longest Use Streak", "languages/get_use_streak/", 0),
                         yearsConstructor("Qualification Rate", "languages/get_qualification_rate/"),

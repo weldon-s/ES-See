@@ -40,7 +40,7 @@ class LanguageViewSet(viewsets.ModelViewSet):
                     data[language] += 1
 
         lst = [
-            {"language": language.name, "result": count}
+            {"language": LanguageSerializer(language).data, "result": count}
             for language, count in data.items()
         ]
 
@@ -48,8 +48,42 @@ class LanguageViewSet(viewsets.ModelViewSet):
 
         return JsonResponse(lst, safe=False)
 
+    # returns the number of entries in a specific language by country
+    @action(detail=False, methods=["POST"])
+    def get_language_count_by_country(self, request):
+        start_year = request.data["start_year"]
+        end_year = request.data["end_year"]
+        weighted = request.data.get("weighted", False)
+
+        entries = Entry.objects.filter(
+            year__year__gte=start_year,
+            year__year__lte=end_year,
+            country__id=request.data["country"],
+        )
+
+        # keys are languages, values are totals
+        data = {}
+
+        for entry in entries:
+            for language in entry.languages.all():
+                if language not in data:
+                    data[language] = 0
+
+                if weighted:
+                    data[language] += 1 / len(entry.languages.all())
+                else:
+                    data[language] += 1
+
+        lst = [
+            {"language": LanguageSerializer(language).data, "result": result}
+            for language, result in data.items()
+        ]
+
+        lst.sort(key=lambda x: x["result"], reverse=True)
+
+        return JsonResponse(lst, safe=False)
+
     # returns the number of countries that have sent entries in a specific language over a time period
-    # TODO add get language count by country
     @action(detail=False, methods=["POST"])
     def get_country_count(self, request):
         start_year = request.data["start_year"]
@@ -71,7 +105,7 @@ class LanguageViewSet(viewsets.ModelViewSet):
                 data[language].add(entry.country.id)
 
         lst = [
-            {"language": language.name, "result": len(country_set)}
+            {"language": LanguageSerializer(language).data, "result": len(country_set)}
             for language, country_set in data.items()
         ]
 
@@ -121,7 +155,9 @@ class LanguageViewSet(viewsets.ModelViewSet):
             if current > longest:
                 longest = current
 
-            streaks.append({"language": language.name, "result": longest})
+            streaks.append(
+                {"language": LanguageSerializer(language).data, "result": longest}
+            )
 
         # keys are languages, values are streaks
 
@@ -163,7 +199,10 @@ class LanguageViewSet(viewsets.ModelViewSet):
                 data[language][1] += 1
 
         lst = [
-            {"language": language.name, "result": data[language][0] / data[language][1]}
+            {
+                "language": LanguageSerializer(language).data,
+                "result": data[language][0] / data[language][1],
+            }
             for language in data
         ]
 
@@ -195,7 +234,7 @@ class LanguageViewSet(viewsets.ModelViewSet):
                     dict[language] = max(dict[language], entry.year.year)
 
         lst = [
-            {"language": language.name, "result": year}
+            {"language": LanguageSerializer(language).data, "result": year}
             for language, year in dict.items()
         ]
 

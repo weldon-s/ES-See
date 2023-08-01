@@ -297,8 +297,8 @@ class AnalysisTarget {
 
     static language: AnalysisTarget = new AnalysisTarget(
         "Language",
-        (row: any) => <Typography> {row.language} </Typography>,
-        (row: any) => row.language,
+        (row: any) => <Typography> {row.language.name} </Typography>,
+        (row: any) => row.language.name,
         (row: any) => ''
     )
 }
