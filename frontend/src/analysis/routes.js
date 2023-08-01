@@ -27,7 +27,6 @@ const getCards = (countries) => {
             link: "average-performance",
             element: <AnalysisTemplate
                 title="Average Performance"
-                dataKey="result"
                 metrics={[
                     voteTypeYearsConstructor("Average Grand Final Points", "average/get_average_final_points/")
                         .addParameter(INCLUDE_NQ_PARAM),
@@ -54,7 +53,6 @@ const getCards = (countries) => {
             link: "qualifying-history",
             element: <AnalysisTemplate
                 title="Qualifying History"
-                dataKey="result"
                 metrics={
                     [
                         yearsConstructor("Qualifying Count", "qualify/get_qualify_count/", 0),
@@ -76,7 +74,6 @@ const getCards = (countries) => {
             link: "running-order",
             element: <AnalysisTemplate
                 title="Running Order"
-                dataKey="result"
                 metrics={
                     [
                         yearsConstructor("Average Grand Final Running Order", "running_order/get_average_final_running_order/"),
@@ -99,7 +96,6 @@ const getCards = (countries) => {
             link: "voting-history",
             element: <AnalysisTemplate
                 title="Voting History"
-                dataKey="result"
                 metrics={
                     [
                         voteTypeYearsConstructor("Grand Final Points Given", "exchanges/get_final_points_from/", 0)
@@ -137,7 +133,6 @@ const getCards = (countries) => {
             link: "languages",
             element: <AnalysisTemplate
                 title="Languages"
-                dataKey="result"
                 metrics={
                     [
                         yearsConstructor("Number of Entries", "languages/get_language_count/", 2)
@@ -155,6 +150,22 @@ const getCards = (countries) => {
                 target={LANGUAGE}
             />
 
+        },
+
+        {
+            title: "Jury vs. Televote",
+            description: "See how a country's jury and televote results compare",
+            link: "jury-vs-televote",
+            element: <AnalysisTemplate
+                title="Jury vs. Televote"
+                metrics={
+                    [
+                        yearsConstructor("Final Jury vs. Televote Points", "votetypes/get_discrepancy_points/"),
+                        yearsConstructor("Final Jury vs. Televote Places", "votetypes/get_discrepancy_places/"),
+                    ]
+                }
+                target={COUNTRY}
+            />
         }
     ]
 }

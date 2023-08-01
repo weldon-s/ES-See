@@ -1,4 +1,5 @@
 //we define these classes to make API calls and their parameters easier
+//TODO bring API calls in here to better encapsulate
 export class RequestData {
     label: any;
     url: string;

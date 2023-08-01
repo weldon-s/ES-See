@@ -28,6 +28,7 @@ from rest.qualify.viewset import QualifyViewSet
 from rest.running_order.viewset import RunningOrderViewset
 from rest.exchanges.viewset import ExchangeViewSet
 from rest.languages.viewset import LanguageViewSet
+from rest.votetypes.viewset import VoteTypeViewSet
 
 router = DefaultRouter()
 
@@ -41,6 +42,7 @@ router.register(r"qualify", QualifyViewSet, "data-qualify")
 router.register(r"running_order", RunningOrderViewset, "data-running_order")
 router.register(r"exchanges", ExchangeViewSet, "data-exchanges")
 router.register(r"languages", LanguageViewSet, "data-languages")
+router.register(r"votetypes", VoteTypeViewSet, "data-votetypes")
 
 # urlpatterns = [
 #   path('', include('data.urls')),
