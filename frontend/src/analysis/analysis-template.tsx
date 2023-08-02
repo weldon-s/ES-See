@@ -27,8 +27,8 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
     const navigate = useNavigate();
 
     const [metricId, setMetricId] = useState<number>(0);
-    const [choices, setChoices] = useState<{ [key: string]: any }>(metrics[0].getValueObject());
     const [updateCount, setUpdateCount] = useState(0);
+    const [rerender, setRerender] = useState(0);
     const [columns, setColumns] = useState<any[]>([]);
 
     const CustomTooltip = (props: TooltipProps<string, string>) => {
@@ -50,10 +50,8 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
 
     useEffect(() => {
         if (countries && updateCount > 0) {
-            Client.post(metrics[metricId].url, {
-                ...choices
-            })
-                .then(res => {
+            metrics[metricId].request()
+                .then((res: any) => {
                     const newData = res.data.map((elem: any, index: number) => {
                         return {
                             ...elem,
@@ -122,7 +120,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                             label="Metric"
                             value={metricId}
                             onChange={(e: any) => {
-                                setChoices(choices => metrics[e.target.value].getValueObject(choices));
+                                //setChoices(choices => metrics[e.target.value].getValueObject(choices));
                                 setMetricId(e.target.value);
                             }}
                             sx={{
@@ -155,15 +153,10 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                                     <>
                                         <InputLabel id={`${param.name}-label`}> {param.label} </InputLabel>
                                         <Checkbox
-                                            checked={choices[param.name]}
+                                            checked={metrics[metricId].getChoice(param.name)}
                                             onChange={(e) => {
-                                                setChoices(
-                                                    currentChoices => {
-                                                        let newChoices = { ...currentChoices };
-                                                        newChoices[param.name] = e.target.checked;
-                                                        return newChoices;
-                                                    }
-                                                )
+                                                setRerender(n => n + 1);
+                                                metrics[metricId].setChoice(param.name, e.target.checked)
                                             }}
                                         />
                                     </>
@@ -175,15 +168,10 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                                         <Select
                                             labelId={`${param.name}-label`}
                                             label={param.label}
-                                            value={choices[param.name]}
+                                            value={metrics[metricId].getChoice(param.name)}
                                             onChange={(e) => {
-                                                setChoices(
-                                                    currentChoices => {
-                                                        let newChoices = { ...currentChoices };
-                                                        newChoices[param.name] = e.target.value;
-                                                        return newChoices;
-                                                    }
-                                                )
+                                                setRerender(n => n + 1);
+                                                metrics[metricId].setChoice(param.name, e.target.value)
                                             }}>
                                             {
                                                 param.choices.map(choice => (

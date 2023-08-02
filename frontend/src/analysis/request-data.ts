@@ -1,3 +1,5 @@
+import Client from "../api/client";
+
 //we define these classes to make API calls and their parameters easier
 //TODO bring API calls in here to better encapsulate
 export class RequestData {
@@ -5,21 +7,19 @@ export class RequestData {
     url: string;
     parameters: Parameter[];
     decimalPlaces: number = 3;
+    private choices: { [key: string]: any } = {}; //TODO make other fields private?
 
     constructor(label: any, url: string, parameters?: Parameter[], decimalPlaces?: number) {
         this.label = label;
         this.url = url;
         this.parameters = typeof parameters === 'undefined' ? [] : parameters;
         this.decimalPlaces = typeof decimalPlaces === 'undefined' ? 3 : decimalPlaces;
-    }
-
-    addParameter(param: Parameter) {
-        return new RequestData(this.label, this.url, [...this.parameters, param], this.decimalPlaces);
+        this.choices = this.getValueObject();
     }
 
     //TODO customizable defaults?
     //TODO customizable columns
-    getValueObject(existingValues?: { [key: string]: any }) {
+    private getValueObject(existingValues?: { [key: string]: any }) {
         //We'll see if we have any parameters matching the names of the parameters in this object
         //If so, if the existing value for said parameter is valid (i.e. in the list of choices for this object), we'll just use that value
 
@@ -38,6 +38,39 @@ export class RequestData {
         })
 
         return valueObject;
+    }
+
+    addParameter(param: Parameter) {
+        return new RequestData(this.label, this.url, [...this.parameters, param], this.decimalPlaces);
+    }
+
+    getChoice(key: string) {
+        return this.choices[key];
+    }
+
+    setChoice(key: string, value: any) {
+        const param = this.parameters.find((param) => param.name === key);
+
+        if (!param) {
+            return; //error?
+        }
+
+        if (param.choices.some((choice) => choice.value === value)) {
+            this.choices[key] = value;
+        }
+    }
+
+    request() {
+        //we return a promise so that the caller can do something with the response
+        return new Promise((resolve, reject) => {
+            Client.post(this.url, this.choices)
+                .then((response) => {
+                    resolve(response);
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        })
     }
 
     static getPresetParameters(params: Parameter[]) {
