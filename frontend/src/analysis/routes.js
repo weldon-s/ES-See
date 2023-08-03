@@ -161,7 +161,10 @@ const getCards = (countries) => {
                 metrics={
                     [
                         yearsConstructor("Final Jury vs. Televote Points", "votetypes/get_discrepancy_points/"),
+                        yearsConstructor("Average Final Jury vs. Televote Points", "votetypes/get_average_discrepancy_points/"),
                         yearsConstructor("Final Jury vs. Televote Places", "votetypes/get_discrepancy_places/"),
+                        yearsConstructor("Average Final Jury vs. Televote Places", "votetypes/get_average_discrepancy_places/"),
+                        yearsConstructor("Average Final Jury vs. Televote Proportion", "votetypes/get_points_proportion/"),
                     ]
                 }
                 target={COUNTRY}
