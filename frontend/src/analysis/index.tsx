@@ -1,8 +1,10 @@
 import React from "react";
 import { Box, Button, Card, Container, Grid, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { Card as RouteCard } from "./routes";
 
-const AnalysisMenu = ({ cards }) => {
+const AnalysisMenu = (props: { cards: RouteCard[] }) => {
+    const { cards } = props;
     const navigate = useNavigate();
 
     return (
@@ -29,7 +31,8 @@ const AnalysisMenu = ({ cards }) => {
 
 export default AnalysisMenu;
 
-const AnalysisCard = ({ title, description, link }) => {
+const AnalysisCard = (props: { title: string, description: string, link: string }) => {
+    const { title, description, link } = props;
     const navigate = useNavigate();
 
     return (

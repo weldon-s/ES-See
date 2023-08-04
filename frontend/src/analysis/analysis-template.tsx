@@ -263,7 +263,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
 export default AnalysisTemplate
 
 //Class for different targets of analysis (e.g. countries, languages)
-class AnalysisTarget {
+export class AnalysisTarget {
     name: string;
     render: (row: any) => ReactNode;
     getValue: (row: any) => any;
