@@ -8,7 +8,7 @@ import Client from "./api/client"
 import EntryInfo from "./main/entry-info";
 import CountryInfo from "./main/country-info";
 
-import getAnalysisRoute from "./analysis/routes";
+import getAnalysisRoute from "./analysis";
 
 import Contexts from "./contexts";
 
