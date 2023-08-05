@@ -26,7 +26,7 @@ import { useNavigate } from "react-router-dom";
 
 import { CountryContext, EditionContext } from "../contexts";
 import Client from "../api/client"
-import CountryFlagCell from "../components/country-flag-cell";
+import { CountryFlagCell } from "../components/flags";
 
 const DRAWER_WIDTH = 250;
 

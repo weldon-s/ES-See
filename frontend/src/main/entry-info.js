@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { CountryContext, EditionContext } from "../contexts";
 import Client from "../api/client";
-import CountryFlagCell from "../components/country-flag-cell";
+import { CountryFlagCell, Flag } from "../components/flags";
 import { getOrdinal, getPointsKey, getShowName } from "../utils";
 
 const EntryInfo = ({ country, year }) => {
@@ -91,6 +91,12 @@ const EntryInfo = ({ country, year }) => {
                 edition ?
                     <Typography variant="h3" align="center">
                         {country.name} in Eurovision {edition.year}
+
+                        <Flag code={country.code} style={{
+                            height: "1em",
+                            marginLeft: "0.5em",
+                            borderRadius: "5px",
+                        }} />
                     </Typography>
                     :
                     <Skeleton height="50px"></Skeleton>

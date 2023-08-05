@@ -7,7 +7,7 @@ import { TooltipProps } from 'recharts';
 
 import Client from '../api/client';
 import { CountryContext } from '../contexts';
-import CountryFlagCell from '../components/country-flag-cell';
+import { CountryFlagCell } from '../components/flags';
 import { RequestData } from './request-data';
 
 interface AnalysisTemplateProps {

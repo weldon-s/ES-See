@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Box, Container, Skeleton, Typography } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { useNavigate } from 'react-router-dom';
 
 import Client from '../api/client';
 import { EditionContext } from '../contexts';
 import { getOrdinal, getPointsKey } from '../utils';
-import { DataGrid } from '@mui/x-data-grid';
-import { useNavigate } from 'react-router-dom';
+import { Flag } from '../components/flags';
 
 const CountryInfo = ({ country }) => {
     const [rawEntries, setRawEntries] = useState(undefined);
@@ -13,6 +14,7 @@ const CountryInfo = ({ country }) => {
     const [updated, setUpdated] = useState(false);
     const [finals, setFinals] = useState(undefined);
     const [bestPlace, setBestPlace] = useState(undefined);
+    const [hasQualified, setHasQualified] = useState(undefined);
     const [bestYears, setBestYears] = useState(undefined);
 
     const years = useContext(EditionContext);
@@ -81,22 +83,52 @@ const CountryInfo = ({ country }) => {
         }
     }, [updated]);
 
-    //TODO make this support countries that have never qualified
     useEffect(() => {
         if (updated) {
-            setBestPlace(entries
-                .map(elem => "grand final" in elem.results ? elem.results["grand final"].place : 30)
-                .reduce((a, b) => Math.min(a, b))
-            );
+            //get all the times the country has qualified
+            const finals = entries.filter(elem => "grand final" in elem.results);
+
+            //if they've qualified, find their best final place
+            if (finals.length > 0) {
+                setBestPlace(finals
+                    .map(elem => elem.results["grand final"].place)
+                    .reduce((a, b) => Math.min(a, b))
+                );
+
+                setHasQualified(true);
+            }
+
+            //otherwise, find their best semi-final place
+            else {
+                console.log(entries)
+                setBestPlace(entries
+                    .filter(elem => "semi-final" in elem.results)
+                    .map(elem => elem.results["semi-final"].place)
+                    .reduce((a, b) => Math.min(a, b))
+                );
+
+                setHasQualified(false);
+            }
+
         }
     }, [updated])
 
     useEffect(() => {
         if (bestPlace) {
-            setBestYears(entries
-                .filter(elem => "grand final" in elem.results && elem.results["grand final"].place === bestPlace)
-                .map(elem => elem.edition.year)
-            );
+            // if they've qualified, find the years they got that place in the final
+            if (hasQualified) {
+                setBestYears(entries
+                    .filter(elem => "grand final" in elem.results && elem.results["grand final"].place === bestPlace)
+                    .map(elem => elem.edition.year)
+                );
+            }
+            // otherwise, find the years they got that place in the semi-final
+            else {
+                setBestYears(entries
+                    .filter(elem => "semi-final" in elem.results && elem.results["semi-final"].place === bestPlace)
+                    .map(elem => elem.edition.year)
+                );
+            }
         }
     }, [bestPlace])
 
@@ -104,7 +136,14 @@ const CountryInfo = ({ country }) => {
         <Container>
             <Typography variant="h3" align="center">
                 {country.name} in the Eurovision Song Contest
+
+                <Flag code={country.code} style={{
+                    height: "1em",
+                    marginLeft: "0.5em",
+                    borderRadius: "5px",
+                }} />
             </Typography>
+
 
             {
                 (updated && bestYears) ?
@@ -117,7 +156,7 @@ const CountryInfo = ({ country }) => {
                         </Typography>
 
                         <Typography variant="body1">
-                            Their best result was {getOrdinal(bestPlace)} place, which they achieved in {" "}
+                            Their best result was {getOrdinal(bestPlace)} place {!hasQualified && "in their semi-final"}, which they achieved in {" "}
                             {bestYears.map((elem, index) => <span key={index}>{elem}
                                 {index === bestYears.length - 1 ? "" : index === bestYears.length - 2 ? " and " : ", "}</span>)}
                         </Typography>
@@ -167,7 +206,7 @@ const COLUMNS = [
     {
         field: "title",
         headerName: "Title",
-        flex: 2
+        flex: 4
     },
 
     {
