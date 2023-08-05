@@ -177,14 +177,11 @@ const getViews = (countries: any[]) => {
             "See how a country's jury and televote results compare",
 
             [
-                yearsConstructor("Final Jury vs. Televote Points", "votetypes/get_final_discrepancy_points/"),
-                yearsConstructor("Semi-Final Jury vs. Televote Points", "votetypes/get_semi_discrepancy_points/"),
-                yearsConstructor("Average Final Jury vs. Televote Points", "votetypes/get_average_final_discrepancy_points/"),
-                yearsConstructor("Average Semi-Final Jury vs. Televote Points", "votetypes/get_average_semi_discrepancy_points/"),
-                yearsConstructor("Final Jury vs. Televote Places", "votetypes/get_final_discrepancy_places/"),
-                yearsConstructor("Semi-Final Jury vs. Televote Places", "votetypes/get_semi_discrepancy_places/"),
-                yearsConstructor("Average Final Jury vs. Televote Places", "votetypes/get_average_final_discrepancy_places/"),
-                yearsConstructor("Average Semi-Final Jury vs. Televote Places", "votetypes/get_average_semi_discrepancy_places/"),
+                yearsConstructor("Jury vs. Televote Discrepancy", "votetypes/get_discrepancy/")
+                    .addParameter(Parameter.getParameter("metric", "Metric", [["points", "Points"], ["places", "Places"]]))
+                    .addParameter(Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]))
+                    .addParameter(Parameter.getBooleanParameter("average", "Average?"))
+                ,
                 yearsConstructor("Average Final Jury vs. Televote Proportion", "votetypes/get_final_points_proportion/"),
                 yearsConstructor("Average Semi-Final Jury vs. Televote Proportion", "votetypes/get_semi_points_proportion/"),
             ],

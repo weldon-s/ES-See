@@ -9,7 +9,7 @@ from models import Performance, Result, ShowType
 class VoteTypeViewSet(viewsets.GenericViewSet):
     # TODO overall places
     # returns the discrepancy for two values for each country
-    def get_discrepancy(self, data):
+    def calculate_discrepancy(self, data):
         start_year = data["start_year"]
         end_year = data["end_year"]
         average = data["average"]
@@ -123,116 +123,20 @@ class VoteTypeViewSet(viewsets.GenericViewSet):
         return lst
 
     @action(detail=False, methods=["POST"])
-    def get_final_discrepancy_points(self, request):
-        lst = self.get_discrepancy(
+    def get_discrepancy(self, request):
+        metric = request.data["metric"]  # points or places
+
+        if metric != "points" and metric != "places":
+            return JsonResponse({"error": "Invalid metric"}, status=400)
+
+        lst = self.calculate_discrepancy(
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
-                "positive_key": "televote",
-                "negative_key": "jury",
-                "mode": "final",
-                "average": False,
-            }
-        )
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_semi_discrepancy_points(self, request):
-        lst = self.get_discrepancy(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "positive_key": "televote",
-                "negative_key": "jury",
-                "mode": "semi",
-                "average": False,
-            }
-        )
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_average_final_discrepancy_points(self, request):
-        lst = self.get_discrepancy(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "positive_key": "televote",
-                "negative_key": "jury",
-                "mode": "final",
-                "average": True,
-            }
-        )
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_average_semi_discrepancy_points(self, request):
-        lst = self.get_discrepancy(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "positive_key": "televote",
-                "negative_key": "jury",
-                "mode": "semi",
-                "average": True,
-            }
-        )
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_final_discrepancy_places(self, request):
-        lst = self.get_discrepancy(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "positive_key": "jury_place",
-                "negative_key": "televote_place",
-                "mode": "final",
-                "average": False,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_semi_discrepancy_places(self, request):
-        lst = self.get_discrepancy(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "positive_key": "jury_place",
-                "negative_key": "televote_place",
-                "mode": "semi",
-                "average": False,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_average_final_discrepancy_places(self, request):
-        lst = self.get_discrepancy(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "positive_key": "jury_place",
-                "negative_key": "televote_place",
-                "mode": "final",
-                "average": True,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_average_semi_discrepancy_places(self, request):
-        lst = self.get_discrepancy(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "positive_key": "jury_place",
-                "negative_key": "televote_place",
-                "mode": "semi",
-                "average": True,
+                "positive_key": "televote" if metric == "points" else "jury_place",
+                "negative_key": "jury" if metric == "points" else "televote_place",
+                "mode": request.data["shows"],
+                "average": request.data["average"],
             }
         )
 

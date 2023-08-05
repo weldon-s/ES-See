@@ -1,7 +1,7 @@
 import Client from "../api/client";
 
 //we define these classes to make API calls and their parameters easier
-//TODO bring API calls in here to better encapsulate
+//TODO make labels infer from capitalized version
 export class RequestData {
     label: any;
     url: string;
