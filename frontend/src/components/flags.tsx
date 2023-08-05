@@ -13,7 +13,7 @@ export const CountryFlagCell = forwardRef(
 
 export const Flag = forwardRef(
     (props: any, ref) => {
-        const passedStyle = props?.style;
+        const passedStyle = props?.style ?? {};
 
         return <span
             {...props}
@@ -23,12 +23,10 @@ export const Flag = forwardRef(
                 props.round ?
                     {
                         borderRadius: '50%',
-                        ...props?.style
+                        ...passedStyle
                     }
                     :
-                    {
-                        ...props?.style
-                    }
+                    passedStyle
             }
         />
     });

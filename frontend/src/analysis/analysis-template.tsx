@@ -246,7 +246,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                                             </BarChart>
                                     )
                                     :
-                                    <Typography variant="h6" > No data found for the selected configuration.Make sure your start year isn't after your end year</Typography>
+                                    <Typography variant="h6" > No data found for the selected configuration. Make sure your start year isn't after your end year</Typography>
                             )
                             :
                             <Skeleton height="50px" width="80%" > </Skeleton>

@@ -8,7 +8,7 @@ from models import Performance, Result, ShowType
 
 class VoteTypeViewSet(viewsets.GenericViewSet):
     # TODO overall places
-    # returns the discrepancy for two values for each country in grand finals
+    # returns the discrepancy for two values for each country
     def get_discrepancy(self, data):
         start_year = data["start_year"]
         end_year = data["end_year"]
@@ -17,18 +17,23 @@ class VoteTypeViewSet(viewsets.GenericViewSet):
         performances = Performance.objects.filter(
             show__edition__year__gte=start_year,
             show__edition__year__lte=end_year,
-            show__show_type=ShowType.GRAND_FINAL,
             running_order__gt=0,
         )
+
+        if data["mode"] == "final":
+            performances = performances.filter(show__show_type=ShowType.GRAND_FINAL)
+        elif data["mode"] == "semi":
+            performances = performances.exclude(show__show_type=ShowType.GRAND_FINAL)
 
         # keys are countries, values are [difference, number of occurrences]
         dict = {}
 
         for performance in performances:
             result = Result.objects.get(performance=performance)
-            # make sure we have both televote and jury results for this performance
-            if not (hasattr(result, data["positive_key"])) or not (
-                hasattr(result, data["negative_key"])
+            # make sure we have both results for this performance
+            if (
+                getattr(result, data["positive_key"], None) is None
+                or getattr(result, data["negative_key"], None) is None
             ):
                 continue
 
@@ -55,7 +60,8 @@ class VoteTypeViewSet(viewsets.GenericViewSet):
 
         return lst
 
-    # returns the average proportion of two values for each country in grand finals
+    # returns the average proportion of two values for each country
+    # TODO add proportion that sums all values and divides by total, not just year-by-year average
     def get_proportion(self, data):
         start_year = data["start_year"]
         end_year = data["end_year"]
@@ -63,9 +69,13 @@ class VoteTypeViewSet(viewsets.GenericViewSet):
         performances = Performance.objects.filter(
             show__edition__year__gte=start_year,
             show__edition__year__lte=end_year,
-            show__show_type=ShowType.GRAND_FINAL,
             running_order__gt=0,
         )
+
+        if data["mode"] == "final":
+            performances = performances.filter(show__show_type=ShowType.GRAND_FINAL)
+        elif data["mode"] == "semi":
+            performances = performances.exclude(show__show_type=ShowType.GRAND_FINAL)
 
         # keys are countries, values are [proportion, number of occurrences]
 
@@ -73,10 +83,14 @@ class VoteTypeViewSet(viewsets.GenericViewSet):
 
         for performance in performances:
             result = Result.objects.get(performance=performance)
-            if not hasattr(result, data["positive_key"]) or not hasattr(
-                result, data["negative_key"]
+            # make sure we have both results for this performance
+            if (
+                getattr(result, data["positive_key"], None) is None
+                or getattr(result, data["negative_key"], None) is None
             ):
                 continue
+
+            print("notcont")
 
             country = performance.country
 
@@ -109,39 +123,70 @@ class VoteTypeViewSet(viewsets.GenericViewSet):
         return lst
 
     @action(detail=False, methods=["POST"])
-    def get_discrepancy_points(self, request):
+    def get_final_discrepancy_points(self, request):
         lst = self.get_discrepancy(
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
                 "positive_key": "televote",
                 "negative_key": "jury",
+                "mode": "final",
                 "average": False,
             }
         )
         return JsonResponse(lst, safe=False)
 
     @action(detail=False, methods=["POST"])
-    def get_average_discrepancy_points(self, request):
+    def get_semi_discrepancy_points(self, request):
         lst = self.get_discrepancy(
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
                 "positive_key": "televote",
                 "negative_key": "jury",
+                "mode": "semi",
+                "average": False,
+            }
+        )
+        return JsonResponse(lst, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_average_final_discrepancy_points(self, request):
+        lst = self.get_discrepancy(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "positive_key": "televote",
+                "negative_key": "jury",
+                "mode": "final",
                 "average": True,
             }
         )
         return JsonResponse(lst, safe=False)
 
     @action(detail=False, methods=["POST"])
-    def get_discrepancy_places(self, request):
+    def get_average_semi_discrepancy_points(self, request):
+        lst = self.get_discrepancy(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "positive_key": "televote",
+                "negative_key": "jury",
+                "mode": "semi",
+                "average": True,
+            }
+        )
+        return JsonResponse(lst, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_final_discrepancy_places(self, request):
         lst = self.get_discrepancy(
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
                 "positive_key": "jury_place",
                 "negative_key": "televote_place",
+                "mode": "final",
                 "average": False,
             }
         )
@@ -149,13 +194,29 @@ class VoteTypeViewSet(viewsets.GenericViewSet):
         return JsonResponse(lst, safe=False)
 
     @action(detail=False, methods=["POST"])
-    def get_average_discrepancy_places(self, request):
+    def get_semi_discrepancy_places(self, request):
         lst = self.get_discrepancy(
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
                 "positive_key": "jury_place",
                 "negative_key": "televote_place",
+                "mode": "semi",
+                "average": False,
+            }
+        )
+
+        return JsonResponse(lst, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_average_final_discrepancy_places(self, request):
+        lst = self.get_discrepancy(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "positive_key": "jury_place",
+                "negative_key": "televote_place",
+                "mode": "final",
                 "average": True,
             }
         )
@@ -163,13 +224,43 @@ class VoteTypeViewSet(viewsets.GenericViewSet):
         return JsonResponse(lst, safe=False)
 
     @action(detail=False, methods=["POST"])
-    def get_points_proportion(self, request):
+    def get_average_semi_discrepancy_places(self, request):
+        lst = self.get_discrepancy(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "positive_key": "jury_place",
+                "negative_key": "televote_place",
+                "mode": "semi",
+                "average": True,
+            }
+        )
+
+        return JsonResponse(lst, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_final_points_proportion(self, request):
         lst = self.get_proportion(
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
                 "positive_key": "televote",
                 "negative_key": "jury",
+                "mode": "final",
+            }
+        )
+
+        return JsonResponse(lst, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_semi_points_proportion(self, request):
+        lst = self.get_proportion(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "positive_key": "televote",
+                "negative_key": "jury",
+                "mode": "semi",
             }
         )
 
