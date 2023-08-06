@@ -23,7 +23,7 @@ from rest.countries.viewset import CountrySerializer
 # TODO adjusted places (e.g. for AQs)
 class AverageViewset(viewsets.GenericViewSet):
     # This is the main workhorse function for calculating average points/proportions
-    def get_average_points(self, data):
+    def calculate_average_points(self, data):
         if not (data["mode"] == "final" or data["mode"] == "semi"):
             return
 
@@ -111,87 +111,36 @@ class AverageViewset(viewsets.GenericViewSet):
 
         return lst
 
-    # Gets the average points given to each country in the Grand Final over a given range of years
+    # TODO see if we can unify include_nq
     @action(detail=False, methods=["POST"])
     def get_average_final_points(self, request):
-        data = loads(request.body)
+        vote_type = request.data.get("vote_type", get_vote_label(VoteType.COMBINED))
 
-        start_year = data.get("start_year")
-        end_year = data.get("end_year")
-        vote_type = data.get("vote_type", get_vote_label(VoteType.COMBINED))
-        include_nq = data.get("include_nq", True)
-
-        lst = self.get_average_points(
+        lst = self.calculate_average_points(
             {
-                "start_year": start_year,
-                "end_year": end_year,
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
                 "vote_type": vote_type,
-                "include_nq": include_nq,
                 "mode": "final",
+                "proportional": request.data["proportional"],
+                "include_nq": request.data["include_nq"],
             }
         )
 
         return JsonResponse(lst, safe=False)
 
-    # Gets the average proportion of maximum points given to each country in the Grand Final over a given range of years
-    @action(detail=False, methods=["POST"])
-    def get_average_final_proportion(self, request):
-        data = loads(request.body)
-
-        start_year = data.get("start_year")
-        end_year = data.get("end_year")
-        vote_type = data.get("vote_type", get_vote_label(VoteType.COMBINED))
-        include_nq = data.get("include_nq", True)
-
-        lst = self.get_average_points(
-            {
-                "start_year": start_year,
-                "end_year": end_year,
-                "vote_type": vote_type,
-                "include_nq": include_nq,
-                "proportional": True,
-                "mode": "final",
-            },
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    # Gets the average points given to each country in the Semi-Finals over a given range of years
     @action(detail=False, methods=["POST"])
     def get_average_semi_points(self, request):
-        data = loads(request.body)
+        vote_type = request.data.get("vote_type", get_vote_label(VoteType.COMBINED))
 
-        start_year = data.get("start_year")
-        end_year = data.get("end_year")
-        vote_type = data.get("vote_type", get_vote_label(VoteType.COMBINED))
-
-        lst = self.get_average_points(
+        lst = self.calculate_average_points(
             {
-                "start_year": start_year,
-                "end_year": end_year,
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
                 "vote_type": vote_type,
                 "mode": "semi",
-            },
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    # Gets the average proportion of maximum points given to each country in the Semi-Finals over a given range of years
-    @action(detail=False, methods=["POST"])
-    def get_average_semi_proportion(self, request):
-        data = loads(request.body)
-        start_year = data.get("start_year")
-        end_year = data.get("end_year")
-        vote_type = data.get("vote_type", get_vote_label(VoteType.COMBINED))
-
-        lst = self.get_average_points(
-            {
-                "start_year": start_year,
-                "end_year": end_year,
-                "vote_type": vote_type,
-                "proportional": True,
-                "mode": "semi",
-            },
+                "proportional": request.data["proportional"],
+            }
         )
 
         return JsonResponse(lst, safe=False)

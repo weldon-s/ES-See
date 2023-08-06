@@ -62,7 +62,7 @@ class VoteTypeViewSet(viewsets.GenericViewSet):
 
     # returns the average proportion of two values for each country
     # TODO add proportion that sums all values and divides by total, not just year-by-year average
-    def get_proportion(self, data):
+    def calculate_proportion(self, data):
         start_year = data["start_year"]
         end_year = data["end_year"]
 
@@ -143,28 +143,14 @@ class VoteTypeViewSet(viewsets.GenericViewSet):
         return JsonResponse(lst, safe=False)
 
     @action(detail=False, methods=["POST"])
-    def get_final_points_proportion(self, request):
-        lst = self.get_proportion(
+    def get_points_proportion(self, request):
+        lst = self.calculate_proportion(
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
                 "positive_key": "televote",
                 "negative_key": "jury",
-                "mode": "final",
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_semi_points_proportion(self, request):
-        lst = self.get_proportion(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "positive_key": "televote",
-                "negative_key": "jury",
-                "mode": "semi",
+                "mode": request.data["shows"],
             }
         )
 

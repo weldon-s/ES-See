@@ -15,7 +15,7 @@ from rest.countries.viewset import CountrySerializer
 
 
 class ExchangeViewSet(viewsets.GenericViewSet):
-    def get_points_from(self, data):
+    def calculate_points_from(self, data):
         country = data["country"]
 
         editions = Edition.objects.filter(
@@ -70,7 +70,7 @@ class ExchangeViewSet(viewsets.GenericViewSet):
             {
                 "country": CountrySerializer(country).data,
                 "result": dict[country][0] / dict[country][1]
-                if data["proportional"]
+                if data["average"]
                 else dict[country][0],
             }
             for country in dict
@@ -80,7 +80,7 @@ class ExchangeViewSet(viewsets.GenericViewSet):
 
         return lst
 
-    def get_points_to(self, data):
+    def calculate_points_to(self, data):
         editions = Edition.objects.filter(
             year__gte=data["start_year"], year__lte=data["end_year"]
         )
@@ -135,7 +135,7 @@ class ExchangeViewSet(viewsets.GenericViewSet):
             {
                 "country": CountrySerializer(country).data,
                 "result": dict[country][0] / dict[country][1]
-                if data["proportional"]
+                if data["average"]
                 else dict[country][0],
             }
             for country in dict
@@ -146,120 +146,30 @@ class ExchangeViewSet(viewsets.GenericViewSet):
         return lst
 
     @action(detail=False, methods=["POST"])
-    def get_final_points_from(self, request):
-        lst = self.get_points_from(
+    def get_points_from(self, request):
+        lst = self.calculate_points_from(
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
                 "vote_type": request.data["vote_type"],
                 "country": request.data["country"],
-                "mode": "final",
-                "proportional": False,
+                "mode": request.data["shows"],
+                "average": request.data["average"],
             }
         )
 
         return JsonResponse(lst, safe=False)
 
     @action(detail=False, methods=["POST"])
-    def get_average_final_points_from(self, request):
-        lst = self.get_points_from(
+    def get_points_to(self, request):
+        lst = self.calculate_points_to(
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
                 "vote_type": request.data["vote_type"],
                 "country": request.data["country"],
-                "mode": "final",
-                "proportional": True,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_semi_points_from(self, request):
-        lst = self.get_points_from(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "vote_type": request.data["vote_type"],
-                "country": request.data["country"],
-                "mode": "semi",
-                "proportional": False,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_average_semi_points_from(self, request):
-        lst = self.get_points_from(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "vote_type": request.data["vote_type"],
-                "country": request.data["country"],
-                "mode": "semi",
-                "proportional": True,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_final_points_to(self, request):
-        lst = self.get_points_to(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "vote_type": request.data["vote_type"],
-                "country": request.data["country"],
-                "mode": "final",
-                "proportional": False,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_average_final_points_to(self, request):
-        lst = self.get_points_to(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "vote_type": request.data["vote_type"],
-                "country": request.data["country"],
-                "mode": "final",
-                "proportional": True,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_semi_points_to(self, request):
-        lst = self.get_points_to(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "vote_type": request.data["vote_type"],
-                "country": request.data["country"],
-                "mode": "semi",
-                "proportional": False,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_average_semi_points_to(self, request):
-        lst = self.get_points_to(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "vote_type": request.data["vote_type"],
-                "country": request.data["country"],
-                "mode": "semi",
-                "proportional": True,
+                "mode": request.data["shows"],
+                "average": request.data["average"],
             }
         )
 

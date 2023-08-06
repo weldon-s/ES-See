@@ -8,7 +8,7 @@ from rest.countries.viewset import CountrySerializer
 
 
 class RunningOrderViewset(GenericViewSet):
-    def get_average_running_order(self, data):
+    def calculate_average_running_order(self, data):
         start_year = data["start_year"]
         end_year = data["end_year"]
 
@@ -59,52 +59,13 @@ class RunningOrderViewset(GenericViewSet):
         return lst
 
     @action(detail=False, methods=["POST"])
-    def get_average_final_running_order(self, request):
-        lst = self.get_average_running_order(
+    def get_average_running_order(self, request):
+        lst = self.calculate_average_running_order(
             {
                 "start_year": request.data["start_year"],
                 "end_year": request.data["end_year"],
-                "mode": "final",
-                "proportional": False,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_average_final_running_order_proportion(self, request):
-        lst = self.get_average_running_order(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "mode": "final",
-                "proportional": True,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_average_semi_running_order(self, request):
-        lst = self.get_average_running_order(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "mode": "semi",
-                "proportional": False,
-            }
-        )
-
-        return JsonResponse(lst, safe=False)
-
-    @action(detail=False, methods=["POST"])
-    def get_average_semi_running_order_proportion(self, request):
-        lst = self.get_average_running_order(
-            {
-                "start_year": request.data["start_year"],
-                "end_year": request.data["end_year"],
-                "mode": "semi",
-                "proportional": True,
+                "mode": request.data["shows"],
+                "proportional": request.data["proportional"],
             }
         )
 

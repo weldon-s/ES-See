@@ -55,7 +55,7 @@ export class View {
         this.link = title
             .toLowerCase()
             .replace(/[^\w\s]/g, '') //remove non-alphanumeric characters that aren't spaces
-            .replace(/\s/, '-') //replace spaces with hyphens
+            .replace(/\s/g, '-') //replace spaces with hyphens
 
         this.element = <AnalysisTemplate
             title={title}
@@ -89,12 +89,12 @@ const getViews = (countries: any[]) => {
             "Average Performance",
             "See various metrics relating to how a country has performed on average in Eurovision",
             [
-                voteTypeYearsConstructor("Average Grand Final Points", "average/get_average_final_points/")
+                voteTypeYearsConstructor("Average Final Points", "average/get_average_final_points/")
+                    .addParameter(Parameter.getBooleanParameter("proportional", "Proportional?"))
                     .addParameter(INCLUDE_NQ_PARAM),
-                voteTypeYearsConstructor("Average Grand Final Proportion", "average/get_average_final_proportion/")
-                    .addParameter(INCLUDE_NQ_PARAM),
-                voteTypeYearsConstructor("Average Semi-Final Points", "average/get_average_semi_points/"),
-                voteTypeYearsConstructor("Average Semi-Final Proportion", "average/get_average_semi_proportion/"),
+                voteTypeYearsConstructor("Average Semi-Final Points", "average/get_average_semi_points/")
+                    .addParameter(Parameter.getBooleanParameter("proportional", "Proportional?")),
+
                 voteTypeYearsConstructor("Average Overall Place", "average/get_average_place/")
                     .addParameter(INCLUDE_NQ_PARAM),
                 voteTypeYearsConstructor("Average Semi-Final Place", "average/get_average_semi_place/"),
@@ -120,10 +120,9 @@ const getViews = (countries: any[]) => {
             "See country's average running order position",
 
             [
-                yearsConstructor("Average Grand Final Running Order", "running_order/get_average_final_running_order/"),
-                yearsConstructor("Average Grand Final Running Order Proportion", "running_order/get_average_final_running_order_proportion/"),
-                yearsConstructor("Average Semi-Final Running Order", "running_order/get_average_semi_running_order/"),
-                yearsConstructor("Average Semi-Final Running Order Proportion", "running_order/get_average_semi_running_order_proportion/")
+                yearsConstructor("Average Running Order", "running_order/get_average_running_order/")
+                    .addParameter(Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]))
+                    .addParameter(Parameter.getBooleanParameter("proportional", "Proportional?")),
             ],
             COUNTRY
         ),
@@ -133,22 +132,14 @@ const getViews = (countries: any[]) => {
             "See how a country has given points to other countries in the past",
 
             [
-                voteTypeYearsConstructor("Grand Final Points Given", "exchanges/get_final_points_from/", 0)
-                    .addParameter(COUNTRY_PARAM),
-                voteTypeYearsConstructor("Average Grand Final Points Given", "exchanges/get_average_final_points_from/")
-                    .addParameter(COUNTRY_PARAM),
-                voteTypeYearsConstructor("Semi-Final Points Given", "exchanges/get_semi_points_from/", 0)
-                    .addParameter(COUNTRY_PARAM),
-                voteTypeYearsConstructor("Average Semi-Final Points Given", "exchanges/get_average_semi_points_from/")
-                    .addParameter(COUNTRY_PARAM),
-                voteTypeYearsConstructor("Grand Final Points Received", "exchanges/get_final_points_to/", 0)
-                    .addParameter(COUNTRY_PARAM),
-                voteTypeYearsConstructor("Average Grand Final Points Received", "exchanges/get_average_final_points_to/")
-                    .addParameter(COUNTRY_PARAM),
-                voteTypeYearsConstructor("Semi-Final Points Received", "exchanges/get_semi_points_to/", 0)
-                    .addParameter(COUNTRY_PARAM),
-                voteTypeYearsConstructor("Average Semi-Final Points Received", "exchanges/get_average_semi_points_to/")
-                    .addParameter(COUNTRY_PARAM),
+                voteTypeYearsConstructor("Points Given", "exchanges/get_points_from/", 0)
+                    .addParameter(COUNTRY_PARAM)
+                    .addParameter(Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]))
+                    .addParameter(Parameter.getBooleanParameter("average", "Average?")),
+                voteTypeYearsConstructor("Points Received", "exchanges/get_points_to/", 0)
+                    .addParameter(COUNTRY_PARAM)
+                    .addParameter(Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]))
+                    .addParameter(Parameter.getBooleanParameter("average", "Average?")),
             ],
             COUNTRY
         ),
@@ -182,8 +173,9 @@ const getViews = (countries: any[]) => {
                     .addParameter(Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]))
                     .addParameter(Parameter.getBooleanParameter("average", "Average?"))
                 ,
-                yearsConstructor("Average Final Jury vs. Televote Proportion", "votetypes/get_final_points_proportion/"),
-                yearsConstructor("Average Semi-Final Jury vs. Televote Proportion", "votetypes/get_semi_points_proportion/"),
+                yearsConstructor("Average Jury vs. Televote Proportion", "votetypes/get_points_proportion/")
+                    .addParameter(Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]))
+                ,
             ],
             COUNTRY
         )
