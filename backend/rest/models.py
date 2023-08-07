@@ -70,6 +70,17 @@ class Edition(BaseModel):
 
         return {"qualifiers": qualifiers, "non_qualifiers": non_qualifiers}
 
+    def get_automatic_qualifiers(self):
+        lst = list(
+            self.show_set.get(show_type=ShowType.GRAND_FINAL)
+            .performance_set.filter(
+                models.Q(country__is_big_five=True) | models.Q(country=self.host)
+            )
+            .values_list("country", flat=True)
+        )
+
+        return lst
+
 
 # Shows represent a specific semi-final or final in an edition.
 # They are associated with a given voting system, which is an array of the types of points given out in said show.

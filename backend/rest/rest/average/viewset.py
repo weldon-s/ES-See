@@ -111,6 +111,139 @@ class AverageViewset(viewsets.GenericViewSet):
 
         return lst
 
+    # TODO make this less unwieldy
+    @action(detail=False, methods=["POST"])
+    def get_average_performance(self, request):
+        """
+        This function calculates the average performance of a country in a way that is adjusted
+        for automatic qualifiers and the number of participants in a given year.
+        We start by finding the place of every country (Qs and NQs), and then we calculate the amount of
+        countries that placed below them (so 0% for last, and 100% for first). All of the automatic qualifiers
+        that did not place above any non-automatic qualifiers in the final also have their percentages start from 0%.
+        """
+
+        vote_type = request.data.get("vote_type", get_vote_label(VoteType.COMBINED))
+
+        # begin by getting all of our editions
+        editions = Edition.objects.filter(
+            year__gte=request.data["start_year"], year__lte=request.data["end_year"]
+        )
+
+        # keys are countries, values are [sum of proportions, number of appearances]
+        averages = {}
+
+        for edition in editions:
+            final = edition.show_set.get(show_type=ShowType.GRAND_FINAL)
+
+            # find the key for the points given the voting system
+            if vote_type == get_vote_label(VoteType.COMBINED):
+                place_key = VoteType.COMBINED
+            else:
+                if get_vote_index(vote_type) not in final.voting_system:
+                    continue
+
+                place_key = get_vote_index(vote_type)
+
+            # we need to make sure the semis have the vote type as well
+            if vote_type != get_vote_label(VoteType.COMBINED):
+                semis = edition.show_set.exclude(show_type=ShowType.GRAND_FINAL)
+
+                exit = False
+
+                for semi in semis:
+                    if get_vote_index(vote_type) not in semi.voting_system:
+                        exit = True
+
+                if exit:
+                    continue
+
+            performances = final.performance_set.all()
+
+            q_performances = performances.filter(running_order__gt=0)
+            gf_results = Result.objects.filter(performance__in=q_performances)
+            # result_set?
+
+            # array elements have form [country, bad_aq]
+            # bad_aq is true iff the AQ did not place above any non-AQs
+            # indices are place - 1
+            places = [None] * gf_results.count()
+
+            for result in gf_results:
+                place = result.get_place(place_key)
+                places[place - 1] = [result.performance.country, False]
+
+            #  get the NQing countries from the final
+            nq_countries = performances.filter(running_order__lte=0).values_list(
+                "country", flat=True
+            )
+
+            # then, get their performances
+            nqs = Performance.objects.filter(
+                show__edition=edition, country__in=nq_countries, running_order__gt=0
+            )
+
+            # then, get the results of those performances
+            nq_results = Result.objects.filter(performance__in=nqs)
+
+            # get proportion of maximum points for each NQ
+            nq_data = [
+                [
+                    result.performance.country,
+                    getattr(
+                        result,
+                        get_vote_label(result.performance.show.get_primary_vote_type())
+                        if place_key == VoteType.COMBINED
+                        else get_vote_label(place_key),
+                    )
+                    / result.performance.show.get_maximum_possible(),
+                ]
+                for result in nq_results
+            ]
+
+            # order our NQs by proportion of maximum points
+            nq_data = sorted(nq_data, key=lambda x: x[1], reverse=True)
+
+            for i in range(len(nq_data)):
+                country = nq_data[i][0]
+                places.append([country, False])
+
+            # now, we need to find what denominator to use for each country
+            # for almost all, this is just total number of participants
+            # for poorly performing AQs, it is number of finalists
+
+            aq_index = gf_results.count() - 1
+            auto_qualifiers = edition.get_automatic_qualifiers()
+
+            # get all the AQs that did not place above any NQs and mark them as "bad" AQs
+            while places[aq_index][0].id in auto_qualifiers:
+                places[aq_index][1] = True
+                aq_index -= 1
+
+            # this is the total number of participants
+            total_participants = edition.entry_set.count()
+
+            # add our data from this edition to the dict
+            for i in range(len(places)):
+                denominator = gf_results.count() if places[i][1] else total_participants
+
+                if not places[i][0] in averages:
+                    averages[places[i][0]] = [0, 0]
+
+                averages[places[i][0]][0] += 1 - (i / (denominator - 1))
+                averages[places[i][0]][1] += 1
+
+        lst = [
+            {
+                "country": CountrySerializer(country).data,
+                "result": averages[country][0] / averages[country][1],
+            }
+            for country in averages
+        ]
+
+        lst = sorted(lst, key=lambda x: x["result"], reverse=True)
+
+        return JsonResponse(lst, safe=False)
+
     # TODO see if we can unify include_nq
     @action(detail=False, methods=["POST"])
     def get_average_final_points(self, request):

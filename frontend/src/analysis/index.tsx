@@ -102,6 +102,7 @@ const getViews = (countries: any[]) => {
                 voteTypeYearsConstructor("Average Overall Place", "average/get_average_place/")
                     .addParameter(INCLUDE_NQ_PARAM),
                 voteTypeYearsConstructor("Average Semi-Final Place", "average/get_average_semi_place/"),
+                voteTypeYearsConstructor("Average Proportion", "average/get_average_performance/"),
             ],
             COUNTRY
         ),
