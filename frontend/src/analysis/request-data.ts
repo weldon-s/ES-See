@@ -1,7 +1,10 @@
+import { type } from "os";
 import Client from "../api/client";
 
 //we define these classes to make API calls and their parameters easier
 //TODO make labels infer from capitalized version
+//TODO functions for decimals
+
 export class RequestData {
     label: any;
     url: string;
@@ -92,16 +95,23 @@ export class Parameter {
         this.type = type;
     }
 
-    static getParameter(name: string, label: any, array: [any, string][]) {
-        let choices = array.map((info) => {
+    static getParameter(name: string, label: any, array: ([any, string] | string)[]) {
+        const choices = array.map((info) => {
+            if (typeof info === "string") {
+                const label = info.charAt(0).toUpperCase() + info.slice(1);
+                return new ParameterChoice(info, label);
+            }
+
             return new ParameterChoice(info[0], info[1]);
         })
 
         return new Parameter(name, label, choices);
     }
 
-    static getBooleanParameter(name: string, label: any) {
-        return new Parameter(name, label,
+    static getBooleanParameter(name: string, label?: any) {
+        const defaultLabel = name.charAt(0).toUpperCase() + name.slice(1) + "?";
+
+        return new Parameter(name, typeof label === "undefined" ? defaultLabel : label,
             [
                 new ParameterChoice(true, "true"),
                 new ParameterChoice(false, "false")

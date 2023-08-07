@@ -8,7 +8,12 @@ import { Parameter, RequestData } from "./request-data"
 const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
 const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);
 const INCLUDE_NQ_PARAM = Parameter.getBooleanParameter("include_nq", "Include NQs?");
-const VOTE_TYPE_PARAM = Parameter.getParameter("vote_type", "Vote Type", [["combined", "Combined"], ["jury", "Jury"], ["televote", "Televote"]]);
+const VOTE_TYPE_PARAM = Parameter.getParameter("vote_type", "Vote Type", ["combined", "jury", "televote"]);
+const PROPORTIONAL_PARAM = Parameter.getBooleanParameter("proportional");
+const SHOW_TYPE_PARAM = Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]);
+const AVERAGE_PARAM = Parameter.getBooleanParameter("average");
+const WEIGHTED_PARAM = Parameter.getBooleanParameter("weighted");
+const METRIC_PARAM = Parameter.getParameter("metric", "Metric", ["points", "places"]);
 
 const yearsConstructor = RequestData.getPresetParameters([START_YEAR_PARAM, END_YEAR_PARAM]);
 const voteTypeYearsConstructor = RequestData.getPresetParameters([START_YEAR_PARAM, END_YEAR_PARAM, VOTE_TYPE_PARAM]);
@@ -90,11 +95,10 @@ const getViews = (countries: any[]) => {
             "See various metrics relating to how a country has performed on average in Eurovision",
             [
                 voteTypeYearsConstructor("Average Final Points", "average/get_average_final_points/")
-                    .addParameter(Parameter.getBooleanParameter("proportional", "Proportional?"))
+                    .addParameter(PROPORTIONAL_PARAM)
                     .addParameter(INCLUDE_NQ_PARAM),
                 voteTypeYearsConstructor("Average Semi-Final Points", "average/get_average_semi_points/")
-                    .addParameter(Parameter.getBooleanParameter("proportional", "Proportional?")),
-
+                    .addParameter(PROPORTIONAL_PARAM),
                 voteTypeYearsConstructor("Average Overall Place", "average/get_average_place/")
                     .addParameter(INCLUDE_NQ_PARAM),
                 voteTypeYearsConstructor("Average Semi-Final Place", "average/get_average_semi_place/"),
@@ -105,7 +109,6 @@ const getViews = (countries: any[]) => {
         new View(
             "Qualifying History",
             "See the history of a country's qualification for the grand final",
-
             [
                 yearsConstructor("Qualifying Count", "qualify/get_qualify_count/", 0),
                 yearsConstructor("Qualifying Rate", "qualify/get_qualify_rate/"),
@@ -118,11 +121,10 @@ const getViews = (countries: any[]) => {
         new View(
             "Running Order",
             "See country's average running order position",
-
             [
                 yearsConstructor("Average Running Order", "running_order/get_average_running_order/")
-                    .addParameter(Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]))
-                    .addParameter(Parameter.getBooleanParameter("proportional", "Proportional?")),
+                    .addParameter(SHOW_TYPE_PARAM)
+                    .addParameter(PROPORTIONAL_PARAM),
             ],
             COUNTRY
         ),
@@ -130,16 +132,15 @@ const getViews = (countries: any[]) => {
         new View(
             "Voting History",
             "See how a country has given points to other countries in the past",
-
             [
                 voteTypeYearsConstructor("Points Given", "exchanges/get_points_from/", 0)
                     .addParameter(COUNTRY_PARAM)
-                    .addParameter(Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]))
-                    .addParameter(Parameter.getBooleanParameter("average", "Average?")),
+                    .addParameter(SHOW_TYPE_PARAM)
+                    .addParameter(AVERAGE_PARAM),
                 voteTypeYearsConstructor("Points Received", "exchanges/get_points_to/", 0)
                     .addParameter(COUNTRY_PARAM)
-                    .addParameter(Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]))
-                    .addParameter(Parameter.getBooleanParameter("average", "Average?")),
+                    .addParameter(SHOW_TYPE_PARAM)
+                    .addParameter(AVERAGE_PARAM),
             ],
             COUNTRY
         ),
@@ -147,13 +148,12 @@ const getViews = (countries: any[]) => {
         new View(
             "Languages",
             "See the languages used in Eurovision",
-
             [
                 yearsConstructor("Number of Entries", "languages/get_language_count/", 2)
-                    .addParameter(Parameter.getBooleanParameter("weighted", "Weighted?")),
+                    .addParameter(WEIGHTED_PARAM),
                 yearsConstructor("Number of Entries by Country", "languages/get_language_count_by_country/", 2)
                     .addParameter(COUNTRY_PARAM)
-                    .addParameter(Parameter.getBooleanParameter("weighted", "Weighted?")),
+                    .addParameter(WEIGHTED_PARAM),
                 yearsConstructor("Number of Countries", "languages/get_country_count/", 0),
                 yearsConstructor("Longest Use Streak", "languages/get_use_streak/", 0),
                 yearsConstructor("Qualification Rate", "languages/get_qualification_rate/"),
@@ -166,16 +166,13 @@ const getViews = (countries: any[]) => {
         new View(
             "Jury vs. Televote",
             "See how a country's jury and televote results compare",
-
             [
                 yearsConstructor("Jury vs. Televote Discrepancy", "votetypes/get_discrepancy/")
-                    .addParameter(Parameter.getParameter("metric", "Metric", [["points", "Points"], ["places", "Places"]]))
-                    .addParameter(Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]))
-                    .addParameter(Parameter.getBooleanParameter("average", "Average?"))
-                ,
+                    .addParameter(METRIC_PARAM)
+                    .addParameter(SHOW_TYPE_PARAM)
+                    .addParameter(AVERAGE_PARAM),
                 yearsConstructor("Average Jury vs. Televote Proportion", "votetypes/get_points_proportion/")
-                    .addParameter(Parameter.getParameter("shows", "Show Types", [["final", "Grand Finals"], ["semi", "Semi-Finals"]]))
-                ,
+                    .addParameter(SHOW_TYPE_PARAM),
             ],
             COUNTRY
         )
