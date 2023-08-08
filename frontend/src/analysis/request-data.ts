@@ -1,21 +1,33 @@
-import { type } from "os";
 import Client from "../api/client";
 
 //we define these classes to make API calls and their parameters easier
 //TODO functions for decimals
 //TODO reset button for parameters
+
+type choicesToNumber = (choices: { [key: string]: any }) => number;
+
 export class RequestData {
     label: any;
     url: string;
     parameters: Parameter[];
-    decimalPlaces: number = 3;
+    decimalPlaces: choicesToNumber;
     private choices: { [key: string]: any } = {}; //TODO make other fields private?
 
-    constructor(label: any, url: string, parameters?: Parameter[], decimalPlaces?: number) {
+    constructor(label: any, url: string, parameters?: Parameter[], decimalPlaces?: choicesToNumber | number) {
         this.label = label;
         this.url = url;
-        this.parameters = typeof parameters === 'undefined' ? [] : parameters;
-        this.decimalPlaces = typeof decimalPlaces === 'undefined' ? 3 : decimalPlaces;
+        this.parameters = typeof parameters === "undefined" ? [] : parameters;
+
+        if (typeof decimalPlaces === "undefined") {
+            this.decimalPlaces = () => 3;
+        }
+        else if (typeof decimalPlaces === "number") {
+            this.decimalPlaces = () => decimalPlaces;
+        }
+        else {
+            this.decimalPlaces = decimalPlaces;
+        }
+
         this.choices = this.getValueObject();
     }
 
@@ -62,6 +74,10 @@ export class RequestData {
         }
     }
 
+    getDecimalPlaces() {
+        return this.decimalPlaces(this.choices);
+    }
+
     request() {
         //we return a promise so that the caller can do something with the response
         return new Promise((resolve, reject) => {
@@ -76,7 +92,7 @@ export class RequestData {
     }
 
     static getPresetParameters(params: Parameter[]) {
-        return (label: any, url: string, decimalPlaces?: number) => {
+        return (label: any, url: string, decimalPlaces?: choicesToNumber | number) => {
             return new RequestData(label, url, params, decimalPlaces);
         }
     }

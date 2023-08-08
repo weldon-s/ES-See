@@ -43,7 +43,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                 }
             }>
                 {target.render(payload[0].payload)}
-                <Typography > {payload[0].payload.result.toFixed(metrics[metricId]?.decimalPlaces)}</Typography>
+                <Typography > {payload[0].payload.result.toFixed(metrics[metricId]?.getDecimalPlaces())}</Typography>
             </Box>
         }
     }
@@ -73,7 +73,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                         {
                             field: "result",
                             headerName: metrics[metricId].label,
-                            valueGetter: (params: any) => params.row.result.toFixed(metrics[metricId].decimalPlaces),
+                            valueGetter: (params: any) => params.row.result.toFixed(metrics[metricId].getDecimalPlaces()),
                             flex: 2,
                         }
                     ];

@@ -137,11 +137,15 @@ const getViews = (countries: any[]) => {
             "Voting History",
             "See how a country has given points to other countries in the past",
             [
-                voteTypeYearsConstructor("Points Given", "exchanges/get_points_from/", 0)
+                voteTypeYearsConstructor("Points Given", "exchanges/get_points_from/",
+                    (choices: { [key: string]: any }) => choices.average ? 3 : 0
+                )
                     .addParameter(COUNTRY_PARAM)
                     .addParameter(SHOW_TYPE_PARAM)
                     .addParameter(AVERAGE_PARAM),
-                voteTypeYearsConstructor("Points Received", "exchanges/get_points_to/", 0)
+                voteTypeYearsConstructor("Points Received", "exchanges/get_points_to/",
+                    (choices: { [key: string]: any }) => choices.average ? 3 : 0
+                )
                     .addParameter(COUNTRY_PARAM)
                     .addParameter(SHOW_TYPE_PARAM)
                     .addParameter(AVERAGE_PARAM),
@@ -153,9 +157,13 @@ const getViews = (countries: any[]) => {
             "Languages",
             "See the languages used in Eurovision",
             [
-                yearsConstructor("Number of Entries", "languages/get_language_count/", 2)
+                yearsConstructor("Number of Entries", "languages/get_language_count/",
+                    (choices: { [key: string]: any }) => choices.weighted ? 2 : 0
+                )
                     .addParameter(WEIGHTED_PARAM),
-                yearsConstructor("Number of Entries by Country", "languages/get_language_count_by_country/", 2)
+                yearsConstructor("Number of Entries by Country", "languages/get_language_count_by_country/",
+                    (choices: { [key: string]: any }) => choices.weighted ? 2 : 0
+                )
                     .addParameter(COUNTRY_PARAM)
                     .addParameter(WEIGHTED_PARAM),
                 yearsConstructor("Number of Countries", "languages/get_country_count/", 0),
@@ -171,7 +179,9 @@ const getViews = (countries: any[]) => {
             "Jury vs. Televote",
             "See how a country's jury and televote results compare",
             [
-                yearsConstructor("Jury vs. Televote Discrepancy", "votetypes/get_discrepancy/")
+                yearsConstructor("Jury vs. Televote Discrepancy", "votetypes/get_discrepancy/",
+                    (choices: { [key: string]: any }) => choices.average ? 3 : 0
+                )
                     .addParameter(METRIC_PARAM)
                     .addParameter(SHOW_TYPE_PARAM)
                     .addParameter(AVERAGE_PARAM),
