@@ -100,7 +100,6 @@ const CountryInfo = ({ country }) => {
 
             //otherwise, find their best semi-final place
             else {
-                console.log(entries)
                 setBestPlace(entries
                     .filter(elem => "semi-final" in elem.results)
                     .map(elem => elem.results["semi-final"].place)

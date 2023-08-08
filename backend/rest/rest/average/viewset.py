@@ -4,13 +4,16 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 
 from models import (
+    Country,
     Edition,
     get_vote_index,
     get_vote_label,
     Performance,
+    POINTS_PER_PLACE,
     Result,
     Show,
     ShowType,
+    Vote,
     VoteType,
 )
 
@@ -20,7 +23,7 @@ from rest.countries.viewset import CountrySerializer
 # TODO ignore noncompeting countries
 # TODO tiebreaking
 # TODO median
-# TODO adjusted places (e.g. for AQs)
+# TODO total points
 class AverageViewset(viewsets.GenericViewSet):
     # This is the main workhorse function for calculating average points/proportions
     def calculate_average_points(self, data):
@@ -110,6 +113,94 @@ class AverageViewset(viewsets.GenericViewSet):
         ]
 
         return lst
+
+    def calculate_average_point_giver_count(self, data):
+        """
+        Returns the average number of countries that gave points to each other country.
+        """
+
+        editions = Edition.objects.filter(
+            year__gte=data["start_year"], year__lte=data["end_year"]
+        )
+
+        # keys are countries, values are [total number of countries that gave them points in a year, number of appearances]
+        averages = {}
+
+        for edition in editions:
+            shows = edition.show_set.all()
+
+            if data["mode"] == "final":
+                shows = shows.filter(show_type=ShowType.GRAND_FINAL)
+            elif data["mode"] == "semi":
+                shows = shows.exclude(show_type=ShowType.GRAND_FINAL)
+
+            for show in shows:
+                # we make a dict with countries as keys and sets of countries that gave them points as values
+                show_dict = {}
+                performances = show.performance_set.all()
+
+                # add all competitors here in case some don't get points
+                competitors = performances.filter(running_order__gt=0)
+
+                for competitor in competitors:
+                    show_dict[competitor.country.code] = set()
+
+                votes = Vote.objects.filter(performance__in=performances)
+
+                # filter votes by vote type if needed
+                if data["vote_type"] != get_vote_label(VoteType.COMBINED):
+                    index = get_vote_index(data["vote_type"])
+                    votes = votes.filter(vote_type=index)
+
+                for vote in votes:
+                    voter = vote.performance.country
+
+                    for i in range(min(len(vote.ranking), len(POINTS_PER_PLACE))):
+                        votee = vote.ranking[i]
+                        show_dict[votee].add(voter)
+
+                # now, we add the data from this edition to the averages dict
+                max_voters = performances.count() - 1
+
+                for country in show_dict:
+                    if country not in averages:
+                        averages[country] = [0, 0]
+
+                    toAdd = (
+                        len(show_dict[country]) / max_voters
+                        if data["proportional"]
+                        else len(show_dict[country])
+                    )
+
+                    averages[country][0] += toAdd
+                    averages[country][1] += 1
+
+        # calculate the average number of countries that gave points to each country
+        lst = [
+            {
+                "country": CountrySerializer(Country.objects.get(code=country)).data,
+                "result": averages[country][0] / averages[country][1],
+            }
+            for country in averages
+        ]
+
+        lst = sorted(lst, key=lambda x: x["result"], reverse=True)
+
+        return lst
+
+    @action(detail=False, methods=["POST"])
+    def get_average_point_giver_count(self, request):
+        lst = self.calculate_average_point_giver_count(
+            {
+                "start_year": request.data["start_year"],
+                "end_year": request.data["end_year"],
+                "mode": request.data["shows"],
+                "vote_type": request.data["vote_type"],
+                "proportional": request.data["proportional"],
+            }
+        )
+
+        return JsonResponse(lst, safe=False)
 
     # TODO make this less unwieldy
     @action(detail=False, methods=["POST"])
