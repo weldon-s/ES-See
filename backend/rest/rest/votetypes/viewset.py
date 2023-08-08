@@ -90,8 +90,6 @@ class VoteTypeViewSet(viewsets.GenericViewSet):
             ):
                 continue
 
-            print("notcont")
-
             country = performance.country
 
             if country not in dict:

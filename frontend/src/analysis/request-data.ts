@@ -2,9 +2,8 @@ import { type } from "os";
 import Client from "../api/client";
 
 //we define these classes to make API calls and their parameters easier
-//TODO make labels infer from capitalized version
 //TODO functions for decimals
-
+//TODO reset button for parameters
 export class RequestData {
     label: any;
     url: string;

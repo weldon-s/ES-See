@@ -54,6 +54,9 @@ class Edition(BaseModel):
     city = models.CharField(max_length=25)
 
     def get_qualifier_data(self):
+        if self.show_set.count() == 0:
+            return None
+
         final = self.show_set.get(show_type=ShowType.GRAND_FINAL)
         qualifiers = list(
             final.performance_set.filter(running_order__gt=0)

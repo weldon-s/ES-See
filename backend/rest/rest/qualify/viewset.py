@@ -21,6 +21,10 @@ class QualifyViewSet(viewsets.GenericViewSet):
             # get qualifier data for this edition and make an array: qualify_count is 1 if qualifier, 0 if non-qualifier
             # TODO make this not error when year is missing
             qualifier_obj = edition.get_qualifier_data()
+
+            if qualifier_obj is None:
+                continue
+
             qualifier_lst = [
                 {"country": x, "qualify_count": 1} for x in qualifier_obj["qualifiers"]
             ]
@@ -89,12 +93,11 @@ class QualifyViewSet(viewsets.GenericViewSet):
         duration = data["end_year"] - data["start_year"] + 1
 
         for year in range(data["start_year"], data["end_year"] + 1):
-            # skip 2020
-            if year == 2020:
-                continue
-
             # get qualifier data for this year
             qualifier_obj = Edition.objects.get(year=year).get_qualifier_data()
+
+            if qualifier_obj is None:
+                continue
 
             # 1 extends streak, -1 breaks streak, 0 maintains streak
             for key, lst in qualifier_obj.items():
@@ -140,6 +143,8 @@ class QualifyViewSet(viewsets.GenericViewSet):
                     "result": longest,
                 }
             )
+
+        streaks = sorted(streaks, key=lambda x: x["result"], reverse=True)
 
         return streaks
 

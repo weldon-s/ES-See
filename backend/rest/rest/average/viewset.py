@@ -133,6 +133,9 @@ class AverageViewset(viewsets.GenericViewSet):
         averages = {}
 
         for edition in editions:
+            if edition.show_set.count() == 0:
+                continue
+
             final = edition.show_set.get(show_type=ShowType.GRAND_FINAL)
 
             # find the key for the points given the voting system
@@ -302,6 +305,9 @@ class AverageViewset(viewsets.GenericViewSet):
         averages = {}
 
         for edition in editions:
+            if edition.show_set.count() == 0:
+                continue
+
             final = edition.show_set.get(show_type=ShowType.GRAND_FINAL)
 
             # find the key for the points given the voting system

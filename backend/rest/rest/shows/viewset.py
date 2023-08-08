@@ -124,9 +124,9 @@ class ShowViewSet(viewsets.ModelViewSet):
                 place=lst[i]["place"],
                 jury_place=lst[i].get("jury_place", None),
                 televote_place=lst[i].get("televote_place", None),
-                total_points=lst[i].get("combined", None),
-                jury_points=lst[i].get("jury", None),
-                televote_points=lst[i].get("televote", None),
+                combined=lst[i].get("combined", None),
+                jury=lst[i].get("jury", None),
+                televote=lst[i].get("televote", None),
                 running_order=lst[i]["running_order"],
             )
 
