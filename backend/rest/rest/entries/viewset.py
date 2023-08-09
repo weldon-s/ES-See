@@ -117,6 +117,7 @@ class EntryViewSet(viewsets.ModelViewSet):
 
         return JsonResponse(ret, safe=False)
 
+    # This does not work for 2020
     @action(detail=False, methods=["POST"])
     def get_entries(self, request):
         data = loads(request.body)
