@@ -11,6 +11,7 @@ import CountryInfo from "./main/country-info";
 import getAnalysisRoute from "./analysis";
 
 import Contexts from "./contexts";
+import RankingsView from "./rankings";
 
 function App() {
     const theme = createTheme({
@@ -76,7 +77,7 @@ function App() {
 
                             {getAnalysisRoute(countries)}
 
-
+                            <Route path="rank" element={<RankingsView />} />
                         </Routes>
                     </BrowserRouter>
                 </Contexts>

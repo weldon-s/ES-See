@@ -116,3 +116,23 @@ class EntryViewSet(viewsets.ModelViewSet):
                 ret[show_type][vote_type][points] = [country.id]
 
         return JsonResponse(ret, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_entries(self, request):
+        data = loads(request.body)
+        edition = data.get("edition")
+        show_type = data.get("show_type", None)
+
+        if show_type is not None:
+            countries = Performance.objects.filter(
+                show__edition=edition, show__show_type=show_type, running_order__gt=0
+            ).values_list("country")
+
+        else:
+            countries = Performance.objects.filter(show__edition=edition).values_list(
+                "country"
+            )
+
+        entries = Entry.objects.filter(year=edition, country__in=countries)
+
+        return JsonResponse(EntrySerializer(entries, many=True).data, safe=False)
