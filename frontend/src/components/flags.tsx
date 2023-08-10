@@ -5,7 +5,7 @@ export const CountryFlagCell = forwardRef(
     //TODO make this not any
     (props: any, ref) =>
     (<Typography {...props} ref={ref}>
-        <Flag code={props?.country?.code} round style={{ marginRight: "5px" }} />
+        <Flag code={props?.country?.code} round="true" style={{ marginRight: "5px" }} />
         {props?.country?.name}
     </Typography>
     )
@@ -44,7 +44,7 @@ export const EntryFlagCell = forwardRef(
                     alignItems="center"
                 >
                     {/* TODO fix how these are passed */}
-                    <Flag code={props?.code} round style={{ marginRight: "10px" }} />
+                    <Flag code={props?.code} round={"true"} style={{ marginRight: "10px" }} />
                 </Box>
                 <Box
                     display="flex"
