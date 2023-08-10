@@ -3,7 +3,7 @@ import { Box, Button, Container, FormControl, Grid, InputLabel, MenuItem, Select
 
 import { CountryContext, EditionContext } from "../contexts";
 import Client from "../api/client";
-import { EntryFlagCell } from "../components/flags.tsx";
+import { EntryFlagCell, Flag } from "../components/flags.tsx";
 
 //TODO multiple selections
 const RankingsView = () => {
@@ -16,54 +16,83 @@ const RankingsView = () => {
     const [entries, setEntries] = useState(undefined);
     const [sortedEntries, setSortedEntries] = useState(undefined);
 
+    //The two entries we are currently comparing
+    const [choices, setChoices] = useState(undefined);
+
+    /*
+    array of booleans, each corresponding to a comparison between two entries in the sorting algoritm
+    true if left entry is better than right entry
+    this will expand as we go through the sorting algorithm
+    */
+    const [bools, setBools] = useState([]);
+
     const editions = useContext(EditionContext);
     const countries = useContext(CountryContext);
 
-    //We need to sort the entries based on the user's input
-    //We use Merge Sort for this because it has few comparisons on average (i.e. faster for users)
-    //This whole process is a mess right now but it does sort
-    const mergeSort = (arr) => {
+    useEffect(() => {
+        if (editions) {
+            const year = new Date().getFullYear();
+            const current = editions.find(elem => elem.year === year);
+            setYear(current?.id ?? "");
+        }
+    }, [editions])
+
+    useEffect(() => {
+        setBools([]);
+        setChoices(undefined);
+        setSortedEntries(undefined);
+    }, [entries])
+
+    /*We need to sort the entries based on the user's input
+    We use Merge Sort for this because it has few comparisons on average (i.e. faster for users)
+    this will return undefined if we don't have enough comparisons and will then set choices to 
+    the two entries we need to compare
+    */
+    const mergeSort = (arr, bools) => {
         if (arr.length <= 1) {
             return arr;
         }
 
         const mid = Math.floor(arr.length / 2);
 
-        const left = mergeSort(arr.slice(0, mid));
-        const right = mergeSort(arr.slice(mid));
+        const left = mergeSort(arr.slice(0, mid), bools);
 
-        return merge(left, right);
+        if (!left) {
+            return;
+        }
+
+        const right = mergeSort(arr.slice(mid), bools);
+
+        if (!right) {
+            return;
+        }
+
+        return merge(left, right, bools);
     }
 
-    const merge = (left, right) => {
+    const merge = (left, right, bools) => {
         let result = [];
 
         while (left.length && right.length) {
-            const choice = prompt(`Which entry is better: ${left[0].title} (l) or ${right[0].title} (r) ?`);
+            const bool = bools.shift();
 
-            if (choice === "l") {
+            //if we don't have enough comparisons, set choices to the two entries we need to compare
+            //then return undefined to stop the sorting algorithm
+            if (bool === undefined) {
+                setChoices([left[0], right[0]]);
+                return;
+            }
+
+            if (bool) {
                 result.push(left.shift());
-            } else if (choice === "r") {
+            }
+            else {
                 result.push(right.shift());
             }
         }
 
         return [...result, ...left, ...right];
     }
-
-    useEffect(() => {
-        if (sortedEntries) {
-            console.log("sorted entries is");
-            console.log(sortedEntries);
-        }
-    }, [sortedEntries])
-
-    useEffect(() => {
-        if (editions) {
-            const current = editions.find(elem => elem.year === 2023);
-            setYear(current?.id ?? "");
-        }
-    }, [editions])
 
     const handleSubmit = () => {
         // if our year is empty, don't do anything
@@ -82,8 +111,23 @@ const RankingsView = () => {
 
         Client.post("entries/get_entries/", data)
             .then(res => {
-                setEntries(res.data);
+                setEntries(res.data.sort((a, b) => a.title.localeCompare(b.title)));
             })
+    }
+
+    const startSort = () => {
+        setChoices(undefined);
+        setSortedEntries(mergeSort(entries, [...bools]));
+    }
+
+    const getNextChoice = (currentBool) => {
+        setSortedEntries(mergeSort(entries, [...bools, currentBool]));
+        setBools(bools => [...bools, currentBool]);
+    }
+
+    const undoLastChoice = () => {
+        setSortedEntries(mergeSort(entries, [...bools.slice(0, bools.length - 1)]));
+        setBools(bools => bools.slice(0, bools.length - 1));
     }
 
     return (
@@ -156,7 +200,14 @@ const RankingsView = () => {
                     <Button onClick={handleSubmit}>Submit</Button>
                 </Box>
 
-                {entries &&
+                <Button
+                    onClick={startSort}
+                    disabled={!entries}
+                >
+                    Sort
+                </Button>
+
+                {(entries && !choices) &&
 
                     <Grid container>
                         <Grid item xs={12}>
@@ -187,12 +238,90 @@ const RankingsView = () => {
                     </Grid>
                 }
 
-                <Button
-                    onClick={() => setSortedEntries(mergeSort(entries))}
-                    disabled={!entries}
-                >
-                    Sort
-                </Button>
+                {
+                    (choices && !sortedEntries) &&
+                    <Grid container justifyContent="center" width="50%">
+                        <Grid item xs={12}>
+                            <Typography variant="h5" align="center">Which entry do you like better?</Typography>
+                        </Grid>
+
+                        <Grid
+                            item
+                            xs={6}
+                        >
+                            <Box
+                                bgcolor="#eee"
+                                p={0.5}
+                                m={0.5}
+                                borderRadius="10px"
+                                onClick={() => getNextChoice(true)}
+                            >
+                                <EntryFlagCell
+                                    entry={choices[0]}
+                                    code={countries.find(country => country.id === choices[0].country).code}
+                                />
+                            </Box>
+                        </Grid>
+
+                        <Grid
+                            item
+                            xs={6}
+                        >
+                            <Box
+                                bgcolor="#eee"
+                                p={0.5}
+                                m={0.5}
+                                borderRadius="10px"
+                                onClick={() => getNextChoice(false)}
+                            >
+                                <EntryFlagCell
+                                    entry={choices[1]}
+                                    code={countries.find(country => country.id === choices[1].country).code}
+                                />
+                            </Box>
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Typography align="center">Comparisons made: {bools.length}</Typography>
+
+                            {bools.length > 0 &&
+                                <Box
+                                    display="flex"
+                                    justifyContent="end"
+                                >
+                                    <Button onClick={undoLastChoice}>
+                                        Undo
+                                    </Button>
+                                </Box>
+
+                            }
+                        </Grid>
+                    </Grid>
+                }
+
+                {
+                    sortedEntries &&
+                    <>
+                        <Typography variant="h5">Your Ranking</Typography>
+                        {sortedEntries.map((entry, index) => (
+                            <Box
+                                display="flex"
+                                alignItems="center"
+                                width="50%"
+                                m={1}
+                            >
+                                <Typography align="center" mr={1}>{index + 1}. </Typography>
+                                <Flag
+                                    round
+                                    code={countries.find(country => country.id === entry.country).code}
+                                />
+                                <Typography ml={1}>{entry.title}</Typography>
+                            </Box>
+
+                        ))
+                        }
+                    </>
+                }
             </Box>
         </Container>
     );
