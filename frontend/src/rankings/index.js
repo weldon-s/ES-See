@@ -1,17 +1,21 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, Container, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { Box, Button, Container, FormControl, Grid, InputLabel, MenuItem, Select, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 
 import { CountryContext, EditionContext } from "../contexts";
 import Client from "../api/client";
 import { EntryFlagCell, Flag } from "../components/flags.tsx";
 
-//TODO multiple selections
+//TODO unify stylings
 const RankingsView = () => {
-    //TODO get year from edition context
     const [year, setYear] = useState("");
 
     const [show, setShow] = useState(0);
+
+    const [isSingleYear, setIsSingleYear] = useState(true);
+
+    const [startYear, setStartYear] = useState(new Date().getFullYear());
+    const [endYear, setEndYear] = useState(new Date().getFullYear());
 
     //Our selected entries to sort
     const [entries, setEntries] = useState(undefined);
@@ -29,6 +33,7 @@ const RankingsView = () => {
 
     const editions = useContext(EditionContext);
     const countries = useContext(CountryContext);
+
 
     const navigate = useNavigate();
 
@@ -97,7 +102,7 @@ const RankingsView = () => {
         return [...result, ...left, ...right];
     }
 
-    const handleSubmit = () => {
+    const handleSingleYearSubmit = () => {
         // if our year is empty, don't do anything
         if (year === "") {
             return;
@@ -116,6 +121,25 @@ const RankingsView = () => {
             .then(res => {
                 setEntries(res.data.sort((a, b) => a.title.localeCompare(b.title)));
             })
+    }
+
+    const handleMultipleYearSubmit = () => {
+        Client.post("entries/get_entries_in_years/", {
+            start_year: startYear,
+            end_year: endYear,
+        })
+            .then(res => {
+                setEntries(res.data.sort((a, b) => a.title.localeCompare(b.title)));
+            })
+    }
+
+    const handleSubmit = () => {
+        if (isSingleYear) {
+            handleSingleYearSubmit();
+        }
+        else {
+            handleMultipleYearSubmit();
+        }
     }
 
     const startSort = () => {
@@ -144,64 +168,149 @@ const RankingsView = () => {
 
                 <Typography align="center">Choose which entries you would like to view below.</Typography>
 
-                <Box
-                    display="inline-flex"
-                    bgcolor="#eee"
-                    p={1}
-                    m={1}
-                    borderRadius="10px"
-                    flexDirection="column"
-                    alignItems="center"
-                    width="40%"
-                >
-                    <FormControl
-                        sx={{
-                            m: 1,
-                            width: "90%",
+                <Box sx={{
+                    backgroundColor: "#eee",
+                    p: 1,
+                    m: 1,
+                    borderRadius: "10px",
+                }}>
+                    <ToggleButtonGroup
+                        exclusive
+                        value={isSingleYear}
+                        onChange={(e, value) => {
+                            setIsSingleYear(value)
                         }}
                     >
-                        <InputLabel id="year-label">Year</InputLabel>
-                        <Select
-                            labelId="year-label"
-                            label="Year"
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                        >
-                            {editions &&
-                                editions.map(elem =>
-                                    <MenuItem
-                                        key={elem.id}
-                                        value={elem.id}>
-                                        {elem.city} {elem.year}
-                                    </MenuItem>
-                                )
-                            }
-                        </Select>
-                    </FormControl>
+                        <ToggleButton value={true}> Single Year </ToggleButton>
+                        <ToggleButton value={false} > Multiple Years </ToggleButton>
+                    </ToggleButtonGroup>
 
-                    <FormControl
-                        sx={{
-                            m: 1,
-                            width: "90%",
-                        }}
-                    >
-                        <InputLabel id="show-label">Show</InputLabel>
-
-                        <Select
-                            labelId="show-label"
-                            label="Show"
-                            value={show}
-                            onChange={(e) => setShow(e.target.value)}
-                        >
-                            <MenuItem value={0}>All</MenuItem>
-                            <MenuItem value={1}>Semi-Final 1</MenuItem>
-                            <MenuItem value={2}>Semi-Final 2</MenuItem>
-                            <MenuItem value={3}>Grand Final</MenuItem>
-                        </Select>
-                    </FormControl>
-
-                    <Button onClick={handleSubmit}>Submit</Button>
                 </Box>
+
+                {isSingleYear ?
+                    <Box
+                        display="inline-flex"
+                        bgcolor="#eee"
+                        p={1}
+                        m={1}
+                        borderRadius="10px"
+                        flexDirection="column"
+                        alignItems="center"
+                        width="40%"
+                    >
+                        <FormControl
+                            sx={{
+                                m: 1,
+                                width: "90%",
+                            }}
+                        >
+                            <InputLabel id="year-label">Year</InputLabel>
+                            <Select
+                                labelId="year-label"
+                                label="Year"
+                                value={year}
+                                onChange={(e) => setYear(e.target.value)}
+                            >
+                                {editions &&
+                                    editions.map(elem =>
+                                        <MenuItem
+                                            key={elem.id}
+                                            value={elem.id}>
+                                            {elem.city} {elem.year}
+                                        </MenuItem>
+                                    )
+                                }
+                            </Select>
+                        </FormControl>
+
+                        <FormControl
+                            sx={{
+                                m: 1,
+                                width: "90%",
+                            }}
+                        >
+                            <InputLabel id="show-label">Show</InputLabel>
+
+                            <Select
+                                labelId="show-label"
+                                label="Show"
+                                value={show}
+                                onChange={(e) => setShow(e.target.value)}
+                            >
+                                <MenuItem value={0}>All</MenuItem>
+                                <MenuItem value={1}>Semi-Final 1</MenuItem>
+                                <MenuItem value={2}>Semi-Final 2</MenuItem>
+                                <MenuItem value={3}>Grand Final</MenuItem>
+                            </Select>
+                        </FormControl>
+
+                        <Button onClick={handleSubmit}>Submit</Button>
+                    </Box>
+
+                    :
+                    <Box
+                        display="inline-flex"
+                        bgcolor="#eee"
+                        p={1}
+                        m={1}
+                        borderRadius="10px"
+                        flexDirection="column"
+                        alignItems="center"
+                        width="40%"
+                    >
+                        <FormControl
+                            sx={{
+                                m: 1,
+                                width: "90%",
+                            }}
+                        >
+                            <InputLabel id="year-label">Start Year</InputLabel>
+                            <Select
+                                labelId="start-year-label"
+                                label="Start Year"
+                                value={startYear}
+                                onChange={(e) => setStartYear(e.target.value)}
+                            >
+                                {editions &&
+                                    editions.map(elem =>
+                                        <MenuItem
+                                            key={elem.id}
+                                            value={elem.year}>
+                                            {elem.city} {elem.year}
+                                        </MenuItem>
+                                    )
+                                }
+                            </Select>
+                        </FormControl>
+
+                        <FormControl
+                            sx={{
+                                m: 1,
+                                width: "90%",
+                            }}
+                        >
+                            <InputLabel id="year-label">End Year</InputLabel>
+                            <Select
+                                labelId="end-year-label"
+                                label="End Year"
+                                value={endYear}
+                                onChange={(e) => setEndYear(e.target.value)}
+                            >
+                                {editions &&
+                                    editions.map(elem =>
+                                        <MenuItem
+                                            key={elem.id}
+                                            value={elem.year}>
+                                            {elem.city} {elem.year}
+                                        </MenuItem>
+                                    )
+                                }
+                            </Select>
+                        </FormControl>
+
+                        <Button onClick={handleSubmit}>Submit</Button>
+                    </Box>
+                }
 
                 <Button
                     onClick={startSort}

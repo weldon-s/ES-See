@@ -117,7 +117,6 @@ class EntryViewSet(viewsets.ModelViewSet):
 
         return JsonResponse(ret, safe=False)
 
-    # This does not work for 2020
     @action(detail=False, methods=["POST"])
     def get_entries(self, request):
         data = loads(request.body)
@@ -129,11 +128,24 @@ class EntryViewSet(viewsets.ModelViewSet):
                 show__edition=edition, show__show_type=show_type, running_order__gt=0
             ).values_list("country")
 
-        else:
-            countries = Performance.objects.filter(show__edition=edition).values_list(
-                "country"
-            )
+            entries = Entry.objects.filter(year=edition, country__in=countries)
 
-        entries = Entry.objects.filter(year=edition, country__in=countries)
+        else:
+            entries = Entry.objects.filter(year=edition)
 
         return JsonResponse(EntrySerializer(entries, many=True).data, safe=False)
+
+    @action(detail=False, methods=["POST"])
+    def get_entries_in_years(self, request):
+        data = loads(request.body)
+        start_year = data.get("start_year")
+        end_year = data.get("end_year")
+
+        entries = Entry.objects.filter(
+            year__year__gte=start_year, year__year__lte=end_year
+        )
+
+        return JsonResponse(EntrySerializer(entries, many=True).data, safe=False)
+
+    # TODO all entries from a country over a time period
+    # could also do categories like big 5, hosts, geographical regions, etc.

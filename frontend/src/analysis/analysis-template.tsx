@@ -188,7 +188,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
 
                     )}
 
-                <Grid item xs={12} display="flex" justifyContent="end" >
+                <Grid item xs={12} display="flex" justifyContent="end" mt={1}>
                     <Button onClick={handleUpdate}> Update </Button>
                 </Grid>
             </Grid>
