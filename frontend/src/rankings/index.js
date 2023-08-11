@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Button, Container, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 
 import { CountryContext, EditionContext } from "../contexts";
@@ -28,6 +29,8 @@ const RankingsView = () => {
 
     const editions = useContext(EditionContext);
     const countries = useContext(CountryContext);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (editions) {
@@ -305,10 +308,12 @@ const RankingsView = () => {
                         <Typography variant="h5">Your Ranking</Typography>
                         {sortedEntries.map((entry, index) => (
                             <Box
+                                key={index}
                                 display="flex"
                                 alignItems="center"
                                 width="50%"
                                 m={1}
+                                onClick={() => navigate(`/${entry.year}/${countries.find(country => country.id === entry.country).code}`)}
                             >
                                 <Typography align="center" mr={1}>{index + 1}. </Typography>
                                 <Flag
@@ -322,6 +327,10 @@ const RankingsView = () => {
                         }
                     </>
                 }
+
+                <Box display="flex" justifyContent="start" width="100%">
+                    <Button onClick={() => navigate("/")}>Back</Button>
+                </Box>
             </Box>
         </Container>
     );

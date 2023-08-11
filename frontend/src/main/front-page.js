@@ -18,7 +18,7 @@ import {
     Typography,
     styled
 } from "@mui/material";
-import { Analytics, LibraryMusic } from "@mui/icons-material";
+import { Analytics, LibraryMusic, ThumbsUpDown } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 
 import React, { useContext, useEffect, useMemo, useState } from "react";
@@ -151,7 +151,12 @@ const FrontPage = ({ year }) => {
                     <AccordionSummary expandIcon={<Analytics />} onClick={() => navigate('../analysis')}>
                         <Typography textAlign="center" sx={{ m: 0, p: 0 }}>Analysis</Typography>
                     </AccordionSummary>
+                </Accordion>
 
+                <Accordion elevation={0} disableGutters>
+                    <AccordionSummary expandIcon={<ThumbsUpDown />} onClick={() => navigate('../rank')}>
+                        <Typography textAlign="center" sx={{ m: 0, p: 0 }}>Rankings</Typography>
+                    </AccordionSummary>
                 </Accordion>
             </Drawer>
             <Container sx={{ flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
