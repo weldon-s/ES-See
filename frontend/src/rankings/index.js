@@ -8,14 +8,14 @@ import { EntryFlagCell, Flag } from "../components/flags.tsx";
 
 //TODO unify stylings
 const RankingsView = () => {
-    const [year, setYear] = useState("");
-
-    const [show, setShow] = useState(0);
-
     const [isSingleYear, setIsSingleYear] = useState(true);
+
+    const [year, setYear] = useState("");
+    const [show, setShow] = useState(0);
 
     const [startYear, setStartYear] = useState(new Date().getFullYear());
     const [endYear, setEndYear] = useState(new Date().getFullYear());
+    const [country, setCountry] = useState(-1);
 
     //Our selected entries to sort
     const [entries, setEntries] = useState(undefined);
@@ -124,10 +124,16 @@ const RankingsView = () => {
     }
 
     const handleMultipleYearSubmit = () => {
-        Client.post("entries/get_entries_in_years/", {
+        const params = {
             start_year: startYear,
             end_year: endYear,
-        })
+        }
+
+        if (country >= 0) {
+            params.country = country;
+        }
+
+        Client.post("entries/get_entries_in_years/", params)
             .then(res => {
                 setEntries(res.data.sort((a, b) => a.title.localeCompare(b.title)));
             })
@@ -302,6 +308,34 @@ const RankingsView = () => {
                                             key={elem.id}
                                             value={elem.year}>
                                             {elem.city} {elem.year}
+                                        </MenuItem>
+                                    )
+                                }
+                            </Select>
+                        </FormControl>
+
+                        <FormControl
+                            sx={{
+                                m: 1,
+                                width: "90%",
+                            }}
+                        >
+                            <InputLabel id="country-label">Country</InputLabel>
+                            <Select
+                                labelId="country-label"
+                                label="Country"
+                                value={country}
+                                onChange={(e) => setCountry(e.target.value)}
+                            >
+                                <MenuItem value={-1}>All</MenuItem>
+
+                                {
+                                    countries &&
+                                    countries.map(elem =>
+                                        <MenuItem
+                                            key={elem.id}
+                                            value={elem.id}>
+                                            {elem.name}
                                         </MenuItem>
                                     )
                                 }

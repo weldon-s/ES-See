@@ -140,10 +140,14 @@ class EntryViewSet(viewsets.ModelViewSet):
         data = loads(request.body)
         start_year = data.get("start_year")
         end_year = data.get("end_year")
+        country = data.get("country", None)
 
         entries = Entry.objects.filter(
             year__year__gte=start_year, year__year__lte=end_year
         )
+
+        if country is not None:
+            entries = entries.filter(country=country)
 
         return JsonResponse(EntrySerializer(entries, many=True).data, safe=False)
 
