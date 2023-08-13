@@ -3,8 +3,9 @@ from django.contrib.postgres.fields import ArrayField
 from functools import reduce
 
 
-# Base model class to put all models in data app
 class BaseModel(models.Model):
+    """Base model class to put all models in data app"""
+
     class Meta:
         abstract = True
         app_label = "data"
@@ -30,8 +31,9 @@ def get_vote_index(vote_label):
 POINTS_PER_PLACE = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1]
 
 
-# Model for countries that have participated in Eurovision
 class Country(BaseModel):
+    """Model for countries that have participated in Eurovision"""
+
     name = models.CharField(max_length=50)
     adjective = models.CharField(max_length=50)
 
@@ -45,8 +47,16 @@ class Country(BaseModel):
         return self.name
 
 
-# Represents an edition of the contest
+class Group(BaseModel):
+    """Represents a group of countries, e.g. Nordics, Big Five, Romance-speaking, etc."""
+
+    name = models.CharField(max_length=50)
+    countries = models.ManyToManyField(Country)
+
+
 class Edition(BaseModel):
+    """Represents an edition of the contest"""
+
     year = models.IntegerField()
     host = models.ForeignKey(
         Country, on_delete=models.CASCADE
@@ -85,9 +95,12 @@ class Edition(BaseModel):
         return lst
 
 
-# Shows represent a specific semi-final or final in an edition.
-# They are associated with a given voting system, which is an array of the types of points given out in said show.
 class Show(BaseModel):
+    """
+    Shows represent a specific semi-final or final in an edition.
+    They are associated with a given voting system, which is an array of the types of points given out in said show.
+    """
+
     edition = models.ForeignKey(Edition, on_delete=models.CASCADE)
     show_type = models.IntegerField(
         choices=ShowType.choices, default=ShowType.GRAND_FINAL
@@ -113,15 +126,21 @@ class Show(BaseModel):
         return (num_countries - 1) * num_votes * POINTS_PER_PLACE[0]
 
 
-# Languages represent, well... languages
-# TODO add countries where a language is official?
 class Language(BaseModel):
+    """
+    Languages represent, well... languages
+    TODO add countries where a language is official?
+    """
+
     name = models.CharField(max_length=25)
 
 
-# Entries represent a song sent by a country in a given year
-# e.g. Portugal 2023, Serbia 2022, France 2021
 class Entry(BaseModel):
+    """
+    Entries represent a song sent by a country in a given year
+    e.g. Portugal 2023, Serbia 2022, France 2021
+    """
+
     # We can leave these two blank when a country does not perform
     # e.g. in the case of Rest of the World (not a country but close enough) and Serbia and Montenegro 2006
     title = models.CharField(max_length=50, null=True, blank=True)
@@ -136,9 +155,12 @@ class Entry(BaseModel):
         return f"{self.title} by {self.artist}"
 
 
-# Performances represent a specific instance of a song being sung in a show (or of a non-performing country voting)
-# e.g. Portugal in Semi 1 in 2023, Serbia in Semi 2 in 2022, France in the Grand Final in 2021
 class Performance(BaseModel):
+    """
+    Performances represent a specific instance of a song being sung in a show (or of a non-performing country voting)
+    e.g. Portugal in Semi 1 in 2023, Serbia in Semi 2 in 2022, France in the Grand Final in 2021
+    """
+
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     show = models.ForeignKey(Show, on_delete=models.CASCADE)
     running_order = (
@@ -146,16 +168,20 @@ class Performance(BaseModel):
     )  # nonpositive indicates not competing, only voting
 
 
-# Votes are the results of a country's jury or televote (or combined vote) in a given show
 class Vote(BaseModel):
+    """Votes are the results of a country's jury or televote (or combined vote) in a given show"""
+
     vote_type = models.IntegerField(choices=VoteType.choices, default=VoteType.COMBINED)
     performance = models.ForeignKey(Performance, on_delete=models.CASCADE)
     ranking = ArrayField(models.CharField(max_length=2))
 
 
-# Results are the results of a performance in a given show
-# They are used to prevent the need to calculate the results every time they are requested
 class Result(BaseModel):
+    """
+    Results are the results of a performance in a given show
+    They are used to prevent the need to calculate the results every time they are requested
+    """
+
     performance = models.ForeignKey(Performance, on_delete=models.CASCADE)
     place = models.IntegerField()
     jury_place = models.IntegerField(null=True, blank=True)

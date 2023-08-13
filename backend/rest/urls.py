@@ -29,6 +29,7 @@ from rest.running_order.viewset import RunningOrderViewset
 from rest.exchanges.viewset import ExchangeViewSet
 from rest.languages.viewset import LanguageViewSet
 from rest.votetypes.viewset import VoteTypeViewSet
+from rest.groups.viewset import GroupViewSet
 
 router = DefaultRouter()
 
@@ -39,10 +40,11 @@ router.register(r"entries", EntryViewSet, "data-entries")
 router.register(r"results", ResultViewSet, "data-results")
 router.register(r"average", AverageViewset, "data-average")
 router.register(r"qualify", QualifyViewSet, "data-qualify")
-router.register(r"running_order", RunningOrderViewset, "data-running_order")
+router.register(r"running_order", RunningOrderViewset, "data-running-order")
 router.register(r"exchanges", ExchangeViewSet, "data-exchanges")
 router.register(r"languages", LanguageViewSet, "data-languages")
 router.register(r"votetypes", VoteTypeViewSet, "data-votetypes")
+router.register(r"groups", GroupViewSet, "data-groups")
 
 # urlpatterns = [
 #   path('', include('data.urls')),
