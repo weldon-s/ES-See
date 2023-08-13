@@ -141,6 +141,7 @@ class EntryViewSet(viewsets.ModelViewSet):
         start_year = data.get("start_year")
         end_year = data.get("end_year")
         country = data.get("country", None)
+        group = data.get("group", None)
 
         entries = Entry.objects.filter(
             year__year__gte=start_year, year__year__lte=end_year
@@ -149,7 +150,7 @@ class EntryViewSet(viewsets.ModelViewSet):
         if country is not None:
             entries = entries.filter(country=country)
 
-        return JsonResponse(EntrySerializer(entries, many=True).data, safe=False)
+        if group is not None:
+            entries = entries.filter(country__group=group)
 
-    # TODO all entries from a country over a time period
-    # could also do categories like big 5, hosts, geographical regions, etc.
+        return JsonResponse(EntrySerializer(entries, many=True).data, safe=False)

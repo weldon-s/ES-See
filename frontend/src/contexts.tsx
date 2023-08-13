@@ -44,14 +44,10 @@ const Contexts = (props: { children: any }) => {
             })
     }, [countries])
 
-    useEffect(() => {
-        console.log(groups)
-    }, [groups])
-
     return (
         <EditionContext.Provider value={years}>
             <CountryContext.Provider value={countries}>
-                <GroupContext.Provider value={[]}>
+                <GroupContext.Provider value={groups}>
                     {props.children}
                 </GroupContext.Provider>
             </CountryContext.Provider>

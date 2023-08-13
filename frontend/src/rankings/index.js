@@ -2,13 +2,17 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, Container, FormControl, Grid, InputLabel, MenuItem, Select, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 
-import { CountryContext, EditionContext } from "../contexts";
+import { CountryContext, EditionContext, GroupContext } from "../contexts";
 import Client from "../api/client";
 import { EntryFlagCell, Flag } from "../components/flags.tsx";
 
 //TODO unify stylings
 const RankingsView = () => {
+    // whether we are sorting by single year or multiple years
     const [isSingleYear, setIsSingleYear] = useState(true);
+
+    //if multiple, whether we are sorting by country or group
+    const [isCountries, setIsCountries] = useState(true);
 
     const [year, setYear] = useState("");
     const [show, setShow] = useState(0);
@@ -16,6 +20,7 @@ const RankingsView = () => {
     const [startYear, setStartYear] = useState(new Date().getFullYear());
     const [endYear, setEndYear] = useState(new Date().getFullYear());
     const [country, setCountry] = useState(-1);
+    const [group, setGroup] = useState(-1);
 
     //Our selected entries to sort
     const [entries, setEntries] = useState(undefined);
@@ -33,6 +38,7 @@ const RankingsView = () => {
 
     const editions = useContext(EditionContext);
     const countries = useContext(CountryContext);
+    const groups = useContext(GroupContext);
 
 
     const navigate = useNavigate();
@@ -129,8 +135,12 @@ const RankingsView = () => {
             end_year: endYear,
         }
 
-        if (country >= 0) {
+        if (isCountries && country >= 0) {
             params.country = country;
+        }
+
+        if (!isCountries && group >= 0) {
+            params.group = group;
         }
 
         Client.post("entries/get_entries_in_years/", params)
@@ -320,27 +330,80 @@ const RankingsView = () => {
                                 width: "90%",
                             }}
                         >
-                            <InputLabel id="country-label">Country</InputLabel>
+                            <InputLabel id="selection-label">Selection Method</InputLabel>
                             <Select
-                                labelId="country-label"
-                                label="Country"
-                                value={country}
-                                onChange={(e) => setCountry(e.target.value)}
+                                labelId="selection-label"
+                                label="Selection Method"
+                                value={isCountries}
+                                onChange={(e) => setIsCountries(e.target.value)}
                             >
-                                <MenuItem value={-1}>All</MenuItem>
-
-                                {
-                                    countries &&
-                                    countries.map(elem =>
-                                        <MenuItem
-                                            key={elem.id}
-                                            value={elem.id}>
-                                            {elem.name}
-                                        </MenuItem>
-                                    )
-                                }
+                                <MenuItem value={true}>Countries</MenuItem>
+                                <MenuItem value={false}>Groups</MenuItem>
                             </Select>
                         </FormControl>
+
+                        {isCountries ?
+                            <FormControl
+                                sx={{
+                                    m: 1,
+                                    width: "90%",
+                                }}
+                            >
+                                <InputLabel id="country-label">Country</InputLabel>
+                                <Select
+                                    labelId="country-label"
+                                    label="Country"
+                                    value={country}
+                                    onChange={(e) => setCountry(e.target.value)}
+                                >
+                                    <MenuItem value={-1}>All</MenuItem>
+
+                                    {
+                                        countries &&
+                                        countries.map(elem =>
+                                            <MenuItem
+                                                key={elem.id}
+                                                value={elem.id}
+                                            >
+                                                {elem.name}
+                                            </MenuItem>
+                                        )
+                                    }
+                                </Select>
+                            </FormControl>
+
+                            :
+
+                            <FormControl
+                                sx={{
+                                    m: 1,
+                                    width: "90%",
+                                }}
+                            >
+                                <InputLabel id="group-label">Group</InputLabel>
+                                <Select
+                                    labelId="group-label"
+                                    label="Group"
+                                    value={group}
+                                    onChange={(e) => setGroup(e.target.value)}
+                                >
+                                    <MenuItem value={-1}>All</MenuItem>
+
+                                    {
+                                        groups &&
+                                        groups.map(elem =>
+                                            <MenuItem
+                                                key={elem.id}
+                                                value={elem.id}
+                                            >
+                                                {elem.name}
+                                            </MenuItem>
+                                        )
+                                    }
+                                </Select>
+                            </FormControl>
+                        }
+
 
                         <Button onClick={handleSubmit}>Submit</Button>
                     </Box>
