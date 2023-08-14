@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, Container, FormControl, Grid, InputLabel, MenuItem, Select, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Container, FormControl, Grid, InputLabel, MenuItem, Select, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 
 import { CountryContext, EditionContext, GroupContext } from "../contexts";
 import Client from "../api/client";
@@ -17,8 +17,8 @@ const RankingsView = () => {
     const [year, setYear] = useState("");
     const [show, setShow] = useState(0);
 
-    const [startYear, setStartYear] = useState(new Date().getFullYear());
-    const [endYear, setEndYear] = useState(new Date().getFullYear());
+    const [startYear, setStartYear] = useState(1);
+    const [endYear, setEndYear] = useState(1);
     const [country, setCountry] = useState(-1);
     const [group, setGroup] = useState(-1);
 
@@ -47,7 +47,10 @@ const RankingsView = () => {
         if (editions) {
             const year = new Date().getFullYear();
             const current = editions.find(elem => elem.year === year);
+
             setYear(current?.id ?? "");
+            setStartYear(current?.id ?? "");
+            setEndYear(current?.id ?? "");
         }
     }, [editions])
 
@@ -220,23 +223,14 @@ const RankingsView = () => {
                                 width: "90%",
                             }}
                         >
-                            <InputLabel id="year-label">Year</InputLabel>
-                            <Select
-                                labelId="year-label"
-                                label="Year"
-                                value={year}
-                                onChange={(e) => setYear(e.target.value)}
-                            >
-                                {editions &&
-                                    editions.map(elem =>
-                                        <MenuItem
-                                            key={elem.id}
-                                            value={elem.id}>
-                                            {elem.city} {elem.year}
-                                        </MenuItem>
-                                    )
-                                }
-                            </Select>
+                            <Autocomplete
+                                id="country"
+                                options={editions}
+                                getOptionLabel={(option) => `${option.city} ${option.year}`}
+                                onChange={(e, value) => setYear(value?.id ?? undefined)}
+                                value={editions.find(elem => elem.id === year) ?? null}
+                                renderInput={(params) => <TextField {...params} label="Year" />}
+                            />
                         </FormControl>
 
                         <FormControl
@@ -280,23 +274,14 @@ const RankingsView = () => {
                                 width: "90%",
                             }}
                         >
-                            <InputLabel id="year-label">Start Year</InputLabel>
-                            <Select
-                                labelId="start-year-label"
-                                label="Start Year"
-                                value={startYear}
-                                onChange={(e) => setStartYear(e.target.value)}
-                            >
-                                {editions &&
-                                    editions.map(elem =>
-                                        <MenuItem
-                                            key={elem.id}
-                                            value={elem.year}>
-                                            {elem.city} {elem.year}
-                                        </MenuItem>
-                                    )
-                                }
-                            </Select>
+                            <Autocomplete
+                                id="start-year"
+                                options={editions}
+                                getOptionLabel={(option) => `${option.city} ${option.year}`}
+                                onChange={(e, value) => setStartYear(value?.id ?? undefined)}
+                                value={editions.find(elem => elem.id === startYear) ?? null}
+                                renderInput={(params) => <TextField {...params} label="Start Year" />}
+                            />
                         </FormControl>
 
                         <FormControl
@@ -305,23 +290,14 @@ const RankingsView = () => {
                                 width: "90%",
                             }}
                         >
-                            <InputLabel id="year-label">End Year</InputLabel>
-                            <Select
-                                labelId="end-year-label"
-                                label="End Year"
-                                value={endYear}
-                                onChange={(e) => setEndYear(e.target.value)}
-                            >
-                                {editions &&
-                                    editions.map(elem =>
-                                        <MenuItem
-                                            key={elem.id}
-                                            value={elem.year}>
-                                            {elem.city} {elem.year}
-                                        </MenuItem>
-                                    )
-                                }
-                            </Select>
+                            <Autocomplete
+                                id="end-year"
+                                options={editions}
+                                getOptionLabel={(option) => `${option.city} ${option.year}`}
+                                onChange={(e, value) => setEndYear(value?.id ?? undefined)}
+                                value={editions.find(elem => elem.id === endYear) ?? null}
+                                renderInput={(params) => <TextField {...params} label="End Year" />}
+                            />
                         </FormControl>
 
                         <FormControl
@@ -349,58 +325,29 @@ const RankingsView = () => {
                                     width: "90%",
                                 }}
                             >
-                                <InputLabel id="country-label">Country</InputLabel>
-                                <Select
-                                    labelId="country-label"
-                                    label="Country"
-                                    value={country}
-                                    onChange={(e) => setCountry(e.target.value)}
-                                >
-                                    <MenuItem value={-1}>All</MenuItem>
-
-                                    {
-                                        countries &&
-                                        countries.map(elem =>
-                                            <MenuItem
-                                                key={elem.id}
-                                                value={elem.id}
-                                            >
-                                                {elem.name}
-                                            </MenuItem>
-                                        )
-                                    }
-                                </Select>
+                                <Autocomplete
+                                    id="country"
+                                    options={countries}
+                                    getOptionLabel={(option) => `${option.name}`}
+                                    onChange={(e, value) => setCountry(value?.id ?? undefined)}
+                                    value={countries.find(elem => elem.id === country) ?? null}
+                                    renderInput={(params) => <TextField {...params} label="Country" />}
+                                />
                             </FormControl>
 
                             :
-
-                            <FormControl
-                                sx={{
-                                    m: 1,
-                                    width: "90%",
-                                }}
-                            >
-                                <InputLabel id="group-label">Group</InputLabel>
-                                <Select
-                                    labelId="group-label"
-                                    label="Group"
-                                    value={group}
-                                    onChange={(e) => setGroup(e.target.value)}
-                                >
-                                    <MenuItem value={-1}>All</MenuItem>
-
-                                    {
-                                        groups &&
-                                        groups.map(elem =>
-                                            <MenuItem
-                                                key={elem.id}
-                                                value={elem.id}
-                                            >
-                                                {elem.name}
-                                            </MenuItem>
-                                        )
-                                    }
-                                </Select>
+                            <FormControl sx={{
+                                m: 1,
+                                width: "90%",
+                            }}>
+                                <Autocomplete
+                                    id="group"
+                                    options={groups}
+                                    getOptionLabel={(option) => `${option.name}`}
+                                    onChange={(e, value) => setGroup(value?.id ?? undefined)}
+                                    value={groups.find(elem => elem.id === group) ?? null}
+                                    renderInput={(params) => <TextField {...params} label="Group" />}
+                                />
                             </FormControl>
                         }
 

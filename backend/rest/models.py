@@ -143,7 +143,7 @@ class Entry(BaseModel):
 
     # We can leave these two blank when a country does not perform
     # e.g. in the case of Rest of the World (not a country but close enough) and Serbia and Montenegro 2006
-    title = models.CharField(max_length=50, null=True, blank=True)
+    title = models.CharField(max_length=75, null=True, blank=True)
     artist = models.CharField(max_length=100, null=True, blank=True)
 
     country = models.ForeignKey(Country, on_delete=models.CASCADE)

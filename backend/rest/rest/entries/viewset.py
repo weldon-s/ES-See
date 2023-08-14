@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 
 from models import (
     Country,
+    Edition,
     Entry,
     get_vote_label,
     Performance,
@@ -138,13 +139,13 @@ class EntryViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["POST"])
     def get_entries_in_years(self, request):
         data = loads(request.body)
-        start_year = data.get("start_year")
-        end_year = data.get("end_year")
+        start_year = Edition.objects.get(id=data.get("start_year"))
+        end_year = Edition.objects.get(id=data.get("end_year"))
         country = data.get("country", None)
         group = data.get("group", None)
 
         entries = Entry.objects.filter(
-            year__year__gte=start_year, year__year__lte=end_year
+            year__year__gte=start_year.year, year__year__lte=end_year.year
         )
 
         if country is not None:

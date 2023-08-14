@@ -1,7 +1,6 @@
 import Client from "../api/client";
 
 //we define these classes to make API calls and their parameters easier
-//TODO functions for decimals
 //TODO reset button for parameters
 
 type choicesToNumber = (choices: { [key: string]: any }) => number;

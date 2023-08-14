@@ -1,11 +1,26 @@
 import React, { ReactNode, useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, Container, FormControl, Grid, InputLabel, MenuItem, Select, Skeleton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import {
+    Autocomplete,
+    Box,
+    Button,
+    Checkbox,
+    Container,
+    FormControl,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Select,
+    Skeleton,
+    TextField,
+    ToggleButton,
+    ToggleButtonGroup,
+    Typography
+} from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { Form, useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import { TooltipProps } from 'recharts';
 
-import Client from '../api/client';
 import { CountryContext } from '../contexts';
 import { CountryFlagCell } from '../components/flags';
 import { RequestData } from './request-data';
@@ -162,24 +177,38 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                                     </>
 
                                     :
-                                    <FormControl sx={{ width: "70%" }}>
-                                        <InputLabel id={`${param.name}-label`}> {param.label} </InputLabel>
-                                        {/**TODO fix default value not appearing */}
-                                        <Select
-                                            labelId={`${param.name}-label`}
-                                            label={param.label}
-                                            value={metrics[metricId].getChoice(param.name)}
-                                            onChange={(e) => {
-                                                setRerender(n => n + 1);
-                                                metrics[metricId].setChoice(param.name, e.target.value)
-                                            }}>
-                                            {
-                                                param.choices.map(choice => (
-                                                    <MenuItem key={choice.value} value={choice.value} > {choice.label} </MenuItem>
-                                                ))
-                                            }
-                                        </Select>
-                                    </FormControl>
+
+                                    param.name === "country" ?
+                                        <FormControl sx={{ width: "70%" }}>
+                                            <Autocomplete
+                                                id="country"
+                                                options={countries}
+                                                getOptionLabel={(option: any) => option.name}
+                                                renderInput={(params) => <TextField {...params} label="Country" />}
+                                                onChange={(e, value) => {
+                                                    setRerender(n => n + 1);
+                                                    metrics[metricId].setChoice(param.name, value.id)
+                                                }}
+                                            />
+                                        </FormControl>
+                                        :
+                                        <FormControl sx={{ width: "70%" }}>
+                                            <InputLabel id={`${param.name}-label`}> {param.label} </InputLabel>
+                                            <Select
+                                                labelId={`${param.name}-label`}
+                                                label={param.label}
+                                                value={metrics[metricId].getChoice(param.name)}
+                                                onChange={(e) => {
+                                                    setRerender(n => n + 1);
+                                                    metrics[metricId].setChoice(param.name, e.target.value)
+                                                }}>
+                                                {
+                                                    param.choices.map(choice => (
+                                                        <MenuItem key={choice.value} value={choice.value} > {choice.label} </MenuItem>
+                                                    ))
+                                                }
+                                            </Select>
+                                        </FormControl>
 
                             }
 
