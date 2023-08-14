@@ -25,6 +25,7 @@ import Client from '../api/client';
 import { CountryContext } from '../contexts';
 import { CountryFlagCell } from '../components/flags';
 import { RequestData } from './request-data';
+import { StyledBox } from '../components/layout';
 
 interface AnalysisTemplateProps {
     title: string;
@@ -127,122 +128,111 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
         }>
             <Typography variant="h3" align="center" > {title} </Typography>
 
-            <Grid
-                container
-                borderRadius="10px"
-                width="50%"
-                p={1}
-                m={1}
-                sx={{
-                    backgroundColor: "#eee",
-                }}>
-                <Grid item xs={12} >
-                    <Typography variant="h6" align="center" mb={1} > Settings </Typography>
-                </Grid>
+            <StyledBox width="50%">
+                <Grid container>
+                    <Grid item xs={12} >
+                        <Typography variant="h6" align="center" mb={1} > Settings </Typography>
+                    </Grid>
 
 
-                <Grid item xs={12} display="flex" justifyContent="center" mb={2} >
-                    <FormControl>
-                        <InputLabel id="metric-label" > Metric </InputLabel>
-                        <Select
-                            labelId="metric-label"
-                            label="Metric"
-                            value={metricId}
-                            onChange={(e: any) => {
-                                //setChoices(choices => metrics[e.target.value].getValueObject(choices));
-                                setMetricId(e.target.value);
-                            }}
-                            sx={{
-                                minWidth: "200px",
-                            }}
-                        >
-                            {
-                                metrics.map((metric, index) => (
-                                    <MenuItem key={metric.url} value={index} > {metric.label} </MenuItem>
-                                ))
-                            }
-                        </Select>
-                    </FormControl>
-                </Grid>
+                    <Grid item xs={12} display="flex" justifyContent="center" mb={2} >
+                        <FormControl>
+                            <InputLabel id="metric-label" > Metric </InputLabel>
+                            <Select
+                                labelId="metric-label"
+                                label="Metric"
+                                value={metricId}
+                                onChange={(e: any) => {
+                                    //setChoices(choices => metrics[e.target.value].getValueObject(choices));
+                                    setMetricId(e.target.value);
+                                }}
+                                sx={{
+                                    minWidth: "200px",
+                                }}
+                            >
+                                {
+                                    metrics.map((metric, index) => (
+                                        <MenuItem key={metric.url} value={index} > {metric.label} </MenuItem>
+                                    ))
+                                }
+                            </Select>
+                        </FormControl>
+                    </Grid>
 
-                {
-                    metrics[metricId].parameters.map(param =>
-                        <Grid
-                            key={param.name}
-                            item
-                            xs={6}
-                            display="flex"
-                            flexDirection="column"
-                            alignItems="center"
-                            justifyContent="center"
-                            mt={1}
-                        >
-                            {
-                                param.type === "boolean" ?
-                                    <>
-                                        <InputLabel id={`${param.name}-label`}> {param.label} </InputLabel>
-                                        <Checkbox
-                                            checked={metrics[metricId].getChoice(param.name)}
-                                            onChange={(e) => {
-                                                setRerender(n => n + 1);
-                                                metrics[metricId].setChoice(param.name, e.target.checked)
-                                            }}
-                                        />
-                                    </>
-
-                                    :
-
-                                    param.name === "country" ?
-                                        <FormControl sx={{ width: "70%" }}>
-                                            <Autocomplete
-                                                id="country"
-                                                options={countries}
-                                                getOptionLabel={(option: any) => option.name}
-                                                renderInput={(params) => <TextField {...params} label="Country" />}
-                                                onChange={(e, value) => {
-                                                    setRerender(n => n + 1);
-                                                    metrics[metricId].setChoice(param.name, value.id)
-                                                }}
-                                            />
-                                        </FormControl>
-                                        :
-                                        <FormControl sx={{ width: "70%" }}>
+                    {
+                        metrics[metricId].parameters.map(param =>
+                            <Grid
+                                key={param.name}
+                                item
+                                xs={6}
+                                display="flex"
+                                flexDirection="column"
+                                alignItems="center"
+                                justifyContent="center"
+                                mt={1}
+                            >
+                                {
+                                    param.type === "boolean" ?
+                                        <>
                                             <InputLabel id={`${param.name}-label`}> {param.label} </InputLabel>
-                                            <Select
-                                                labelId={`${param.name}-label`}
-                                                label={param.label}
-                                                value={metrics[metricId].getChoice(param.name)}
+                                            <Checkbox
+                                                checked={metrics[metricId].getChoice(param.name)}
                                                 onChange={(e) => {
                                                     setRerender(n => n + 1);
-                                                    metrics[metricId].setChoice(param.name, e.target.value)
-                                                }}>
-                                                {
-                                                    param.choices.map(choice => (
-                                                        <MenuItem key={choice.value} value={choice.value} > {choice.label} </MenuItem>
-                                                    ))
-                                                }
-                                            </Select>
-                                        </FormControl>
+                                                    metrics[metricId].setChoice(param.name, e.target.checked)
+                                                }}
+                                            />
+                                        </>
 
-                            }
+                                        :
 
-                        </Grid>
+                                        param.name === "country" ?
+                                            <FormControl sx={{ width: "70%" }}>
+                                                <Autocomplete
+                                                    id="country"
+                                                    options={countries}
+                                                    getOptionLabel={(option: any) => option.name}
+                                                    renderInput={(params) => <TextField {...params} label="Country" />}
+                                                    onChange={(e, value) => {
+                                                        setRerender(n => n + 1);
+                                                        metrics[metricId].setChoice(param.name, value.id)
+                                                    }}
+                                                />
+                                            </FormControl>
+                                            :
+                                            <FormControl sx={{ width: "70%" }}>
+                                                <InputLabel id={`${param.name}-label`}> {param.label} </InputLabel>
+                                                <Select
+                                                    labelId={`${param.name}-label`}
+                                                    label={param.label}
+                                                    value={metrics[metricId].getChoice(param.name)}
+                                                    onChange={(e) => {
+                                                        setRerender(n => n + 1);
+                                                        metrics[metricId].setChoice(param.name, e.target.value)
+                                                    }}>
+                                                    {
+                                                        param.choices.map(choice => (
+                                                            <MenuItem key={choice.value} value={choice.value} > {choice.label} </MenuItem>
+                                                        ))
+                                                    }
+                                                </Select>
+                                            </FormControl>
+
+                                }
+
+                            </Grid>
 
 
-                    )}
+                        )}
 
-                <Grid item xs={12} display="flex" justifyContent="end" mt={1}>
-                    <Button onClick={handleUpdate}> Update </Button>
+                    <Grid item xs={12} display="flex" justifyContent="end" mt={1}>
+                        <Button onClick={handleUpdate}> Update </Button>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </StyledBox>
 
 
-            <Box sx={{
-                backgroundColor: "#eee",
-                p: 1,
-                m: 1,
-                borderRadius: "10px",
-            }}>
+            <StyledBox>
                 <ToggleButtonGroup
                     exclusive
                     value={table}
@@ -253,8 +243,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                     <ToggleButton value={true}> Table </ToggleButton>
                     <ToggleButton value={false} > Chart </ToggleButton>
                 </ToggleButtonGroup>
-
-            </Box>
+            </StyledBox>
 
             {
                 updateCount > 0 ?

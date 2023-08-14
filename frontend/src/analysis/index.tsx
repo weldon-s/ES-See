@@ -39,6 +39,7 @@ export class View {
                     p: 1,
                     m: 1,
                     borderRadius: "10px",
+                    height: "100px",
                     "&:hover": {
                         backgroundColor: "#ddd"
                     }
@@ -193,13 +194,14 @@ const getViews = (countries: any[]) => {
     ]
 }
 
+//since the routes need to be children, they need to be created in a function as opposed to a component
+//this means we can't use hooks, so we need to pass in the countries
 const getAnalysisRoute = (countries: any) => {
     const views = getViews(countries);
 
     return (
         <Route path="/analysis">
             <Route index element={<AnalysisMenu views={views} />} />
-
             {
                 views.map(view => view.route)
             }

@@ -5,6 +5,7 @@ import { Autocomplete, Box, Button, Container, FormControl, Grid, InputLabel, Me
 import { CountryContext, EditionContext, GroupContext } from "../contexts";
 import Client from "../api/client";
 import { EntryFlagCell, Flag } from "../components/flags.tsx";
+import { StyledBox } from "../components/layout";
 
 //TODO unify stylings
 const RankingsView = () => {
@@ -187,12 +188,7 @@ const RankingsView = () => {
 
                 <Typography align="center">Choose which entries you would like to view below.</Typography>
 
-                <Box sx={{
-                    backgroundColor: "#eee",
-                    p: 1,
-                    m: 1,
-                    borderRadius: "10px",
-                }}>
+                <StyledBox>
                     <ToggleButtonGroup
                         exclusive
                         value={isSingleYear}
@@ -204,15 +200,11 @@ const RankingsView = () => {
                         <ToggleButton value={false} > Multiple Years </ToggleButton>
                     </ToggleButtonGroup>
 
-                </Box>
+                </StyledBox>
 
                 {isSingleYear ?
-                    <Box
+                    <StyledBox
                         display="inline-flex"
-                        bgcolor="#eee"
-                        p={1}
-                        m={1}
-                        borderRadius="10px"
                         flexDirection="column"
                         alignItems="center"
                         width="40%"
@@ -255,15 +247,11 @@ const RankingsView = () => {
                         </FormControl>
 
                         <Button onClick={handleSubmit}>Submit</Button>
-                    </Box>
+                    </StyledBox>
 
                     :
-                    <Box
+                    <StyledBox
                         display="inline-flex"
-                        bgcolor="#eee"
-                        p={1}
-                        m={1}
-                        borderRadius="10px"
                         flexDirection="column"
                         alignItems="center"
                         width="40%"
@@ -334,7 +322,6 @@ const RankingsView = () => {
                                     renderInput={(params) => <TextField {...params} label="Country" />}
                                 />
                             </FormControl>
-
                             :
                             <FormControl sx={{
                                 m: 1,
@@ -350,10 +337,8 @@ const RankingsView = () => {
                                 />
                             </FormControl>
                         }
-
-
                         <Button onClick={handleSubmit}>Submit</Button>
-                    </Box>
+                    </StyledBox>
                 }
 
                 <Button
@@ -374,19 +359,17 @@ const RankingsView = () => {
                             entries.map(elem => {
                                 return (
                                     <Grid item xs={2} key={elem.id}>
-
-                                        <Box
-                                            bgcolor="#eee"
-                                            p={0.5}
-                                            m={0.5}
-                                            borderRadius="10px"
+                                        <StyledBox
+                                            height="70px"
+                                            display="flex"
+                                            alignItems="center"
                                         >
+
                                             <EntryFlagCell
                                                 entry={elem}
                                                 code={countries.find(country => country.id === elem.country).code}
                                             />
-                                        </Box>
-
+                                        </StyledBox>
                                     </Grid>
                                 )
                             })
@@ -405,36 +388,29 @@ const RankingsView = () => {
                             item
                             xs={6}
                         >
-                            <Box
-                                bgcolor="#eee"
-                                p={0.5}
-                                m={0.5}
-                                borderRadius="10px"
+                            <StyledBox
                                 onClick={() => getNextChoice(true)}
                             >
+
                                 <EntryFlagCell
                                     entry={choices[0]}
                                     code={countries.find(country => country.id === choices[0].country).code}
                                 />
-                            </Box>
+                            </StyledBox>
                         </Grid>
 
                         <Grid
                             item
                             xs={6}
                         >
-                            <Box
-                                bgcolor="#eee"
-                                p={0.5}
-                                m={0.5}
-                                borderRadius="10px"
+                            <StyledBox
                                 onClick={() => getNextChoice(false)}
                             >
                                 <EntryFlagCell
                                     entry={choices[1]}
                                     code={countries.find(country => country.id === choices[1].country).code}
                                 />
-                            </Box>
+                            </StyledBox>
                         </Grid>
 
                         <Grid item xs={12}>
