@@ -107,7 +107,6 @@ class AverageViewset(viewsets.GenericViewSet):
             {
                 "country": CountrySerializer(x[0]).data,
                 "result": x[1],
-                "place": lst.index(x) + 1,
             }
             for x in lst
         ]
@@ -494,7 +493,6 @@ class AverageViewset(viewsets.GenericViewSet):
             {
                 "country": CountrySerializer(x[0]).data,
                 "result": x[1],
-                "place": lst.index(x) + 1,
             }
             for x in lst
         ]
@@ -558,7 +556,6 @@ class AverageViewset(viewsets.GenericViewSet):
             {
                 "country": CountrySerializer(x[0]).data,
                 "result": x[1],
-                "place": lst.index(x) + 1,
             }
             for x in lst
         ]

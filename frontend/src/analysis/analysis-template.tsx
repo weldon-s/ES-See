@@ -21,6 +21,7 @@ import { Form, useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import { TooltipProps } from 'recharts';
 
+import Client from '../api/client';
 import { CountryContext } from '../contexts';
 import { CountryFlagCell } from '../components/flags';
 import { RequestData } from './request-data';
@@ -67,17 +68,31 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
         if (countries && updateCount > 0) {
             metrics[metricId].request()
                 .then((res: any) => {
-                    const newData = res.data.map((elem: any, index: number) => {
-                        return {
-                            ...elem,
-                            id: index
+                    const newData = res.data;
+
+                    //set the rank and id of each result
+                    newData.forEach((elem: any, index: number) => {
+                        //if this result is equal to the previous result, set the rank to the same as the previous result
+                        if (index > 0 && Math.abs(elem.result - newData[index - 1].result) < 0.0001) {
+                            elem.rank = newData[index - 1].rank;
                         }
+                        //otherwise, set the rank to the index + 1
+                        else {
+                            elem.rank = index + 1;
+                        }
+
+                        elem.id = index;
                     })
 
                     setData(newData);
 
                     //TODO places
                     let newColumns = [
+                        {
+                            field: "rank",
+                            headerName: "Rank",
+                            flex: 1,
+                        },
                         {
                             field: target.name,
                             headerName: target.name,
@@ -118,7 +133,6 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                 width="50%"
                 p={1}
                 m={1}
-                justifyContent="center"
                 sx={{
                     backgroundColor: "#eee",
                 }}>
