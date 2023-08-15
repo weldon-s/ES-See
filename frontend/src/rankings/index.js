@@ -6,9 +6,12 @@ import { CountryContext, EditionContext, GroupContext } from "../contexts";
 import Client from "../api/client";
 import { EntryFlagCell, Flag } from "../components/flags.tsx";
 import { StyledBox } from "../components/layout";
+import { useTheme } from "@emotion/react";
 
 //TODO unify stylings
 const RankingsView = () => {
+    const theme = useTheme();
+
     // whether we are sorting by single year or multiple years
     const [isSingleYear, setIsSingleYear] = useState(true);
 
@@ -26,6 +29,10 @@ const RankingsView = () => {
     //Our selected entries to sort
     const [entries, setEntries] = useState(undefined);
     const [sortedEntries, setSortedEntries] = useState(undefined);
+
+    //If we are sorting all, we pull in the semi-final entries as well
+    //This way, we can highlight qualifiers
+    const [semiEntries, setSemiEntries] = useState(undefined);
 
     //The two entries we are currently comparing
     const [choices, setChoices] = useState(undefined);
@@ -60,6 +67,42 @@ const RankingsView = () => {
         setChoices(undefined);
         setSortedEntries(undefined);
     }, [entries])
+
+    const isFinalist = useMemo(() => {
+        if (!sortedEntries) {
+            return undefined;
+        }
+
+        //if we are sorting the final, this doesn't really apply
+        if (show === 3) {
+            return Array(sortedEntries.length).fill(false);
+        }
+
+        //if we are sorting a semi-final, we just check if the entry is in the top 10
+        if (show === 1 || show === 2) {
+            return Array(sortedEntries.length).fill(true).map((elem, index) => index < 10)
+        }
+
+        //if we are sorting all, we need to check if the entry is in the top 10 of either semi-final
+        const fromSemi1 = sortedEntries.filter(elem => semiEntries[1].find(entry => entry.id === elem.id)).slice(0, 10);
+        const fromSemi2 = sortedEntries.filter(elem => semiEntries[2].find(entry => entry.id === elem.id)).slice(0, 10);
+
+        const a = Array(sortedEntries.length).fill(true).map((elem, index) => {
+            if (semiEntries[1].find(elem => elem.id === sortedEntries[index].id)) {
+                return fromSemi1.find(elem => elem.id === sortedEntries[index].id);
+            }
+
+            if (semiEntries[2].find(elem => elem.id === sortedEntries[index].id)) {
+                return fromSemi2.find(elem => elem.id === sortedEntries[index].id);
+            }
+
+            //we are an automatic qualifier and therefore finalist
+            return true;
+        })
+
+        return a;
+
+    }, [sortedEntries, semiEntries])
 
     /*We need to sort the entries based on the user's input
     We use Merge Sort for this because it has few comparisons on average (i.e. faster for users)
@@ -131,6 +174,23 @@ const RankingsView = () => {
             .then(res => {
                 setEntries(res.data.sort((a, b) => a.title.localeCompare(b.title)));
             })
+
+        // if we are sorting all, we get the semi-final entries as well to highlight qualifiers
+        if (show <= 0) {
+            Client.post("entries/get_entries/", { edition: year, show_type: 1 })
+                .then(res => {
+                    setSemiEntries(entries => {
+                        return { ...entries, 1: res.data }
+                    });
+                })
+
+            Client.post("entries/get_entries/", { edition: year, show_type: 2 })
+                .then(res => {
+                    setSemiEntries(entries => {
+                        return { ...entries, 2: res.data }
+                    });
+                })
+        }
     }
 
     const handleMultipleYearSubmit = () => {
@@ -442,8 +502,12 @@ const RankingsView = () => {
                                 alignItems="center"
                                 width="50%"
                                 m={1}
-                                onClick={() => navigate(`/${entry.year}/${countries.find(country => country.id === entry.country).code}`)}
+                                p={1}
+                                borderRadius="5px"
+                                bgcolor={isFinalist?.[index] ? theme.palette.success.main : "#eee"}
                             >
+                                {/*onClick={() => navigate(`/${entry.year}/${countries.find(country => country.id === entry.country).code}`)}*/}
+
                                 <Typography align="center" mr={1}>{index + 1}. </Typography>
                                 <Flag
                                     round
@@ -451,8 +515,11 @@ const RankingsView = () => {
                                 />
                                 <Typography ml={1}>{entry.title}</Typography>
                             </Box>
-
                         ))
+                        }
+
+                        {isSingleYear && show !== 3 &&
+                            <Typography align="center">*Your finalists are highlighted</Typography>
                         }
                     </>
                 }
