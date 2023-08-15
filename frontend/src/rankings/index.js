@@ -44,6 +44,9 @@ const RankingsView = () => {
     */
     const [bools, setBools] = useState([]);
 
+    //colours for the editions
+    const [colours, setColours] = useState({});
+
     const editions = useContext(EditionContext);
     const countries = useContext(CountryContext);
     const groups = useContext(GroupContext);
@@ -63,13 +66,27 @@ const RankingsView = () => {
     }, [editions])
 
     useEffect(() => {
+        if (!editions) {
+            return;
+        }
+
+        const promises = editions.map(edition => Client.post(`editions/${edition.id}/get_color/`));
+
+        Promise.all(promises)
+            .then(values => {
+                setColours(values.map(elem => elem.data.color));
+            })
+
+    }, [editions])
+
+    useEffect(() => {
         setBools([]);
         setChoices(undefined);
         setSortedEntries(undefined);
     }, [entries])
 
     const isFinalist = useMemo(() => {
-        if (!sortedEntries) {
+        if (!sortedEntries || !isSingleYear) {
             return undefined;
         }
 
@@ -504,7 +521,12 @@ const RankingsView = () => {
                                 m={1}
                                 p={1}
                                 borderRadius="5px"
-                                bgcolor={isFinalist?.[index] ? theme.palette.success.main : "#eee"}
+                                bgcolor={
+                                    isSingleYear ?
+                                        (isFinalist?.[index] ? theme.palette.success.main : "#eee")
+                                        :
+                                        colours[entry.year]
+                                }
                             >
                                 {/*onClick={() => navigate(`/${entry.year}/${countries.find(country => country.id === entry.country).code}`)}*/}
 
@@ -513,7 +535,7 @@ const RankingsView = () => {
                                     round
                                     code={countries.find(country => country.id === entry.country).code}
                                 />
-                                <Typography ml={1}>{entry.title}</Typography>
+                                <Typography ml={1}>{entry.title} {!isSingleYear && `(${editions.find(edition => edition.id === entry.year).year})`}</Typography>
                             </Box>
                         ))
                         }
