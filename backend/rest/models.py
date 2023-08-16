@@ -175,6 +175,10 @@ class Vote(BaseModel):
     performance = models.ForeignKey(Performance, on_delete=models.CASCADE)
     ranking = ArrayField(models.CharField(max_length=2))
 
+    @property
+    def edition(self):
+        return self.performance.show.edition
+
 
 class Result(BaseModel):
     """
