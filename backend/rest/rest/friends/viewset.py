@@ -45,7 +45,7 @@ class FriendViewSet(viewsets.GenericViewSet):
 
         return matrix
 
-    def get_jury_televote_difference(self, year: int):
+    def get_jury_televote_similarity(self, year: int):
         """
         Gets a quantification of the difference between the jury and televote results for each country
         We'll use cosine similarity for this
@@ -88,6 +88,85 @@ class FriendViewSet(viewsets.GenericViewSet):
                 "similarity": v,
             }
             for k, v in result_dict.items()
+        ]
+
+        lst = sorted(lst, key=lambda x: x["similarity"], reverse=True)
+
+        return lst
+
+    def get_similarity_matrix(self, year: int):
+        """
+        Gets a "matrix" of the similarity between each pair of countries' voting.
+        We'll use cosine similarity to quantify this.
+        The actual data structure will be a dict of dicts.
+        Since similarity does not depend on the order of the countries, we will only store the upper triangle.
+        """
+
+        # Get our matrices
+        jury_matrix = self.get_ranking_matrix(year, VoteType.JURY)
+        televote_matrix = self.get_ranking_matrix(year, VoteType.TELEVOTE)
+
+        # Sum them
+        sum = {
+            voter: {
+                votee: jury_matrix[voter][votee] + televote_matrix[voter][votee]
+                for votee in jury_matrix[voter]
+            }
+            for voter in jury_matrix
+        }
+
+        matrix = {}
+
+        # For each pair of countries, calculate the cosine similarity
+        for country_a in sum:
+            for country_b in sum:
+                # Let's skip this scenario to speed things up
+                if country_a >= country_b:
+                    continue
+
+                # Get vectors of scores (making sure to have them in the same order!)
+                a_scores = [
+                    sum[country_a][country]
+                    for country in sum[country_a]
+                    if country != country_b
+                ]
+
+                b_scores = [
+                    sum[country_b][country]
+                    for country in sum[country_a]
+                    if country != country_b
+                ]
+
+                # Calculate cosine similarity
+                dot_product = np.dot(a_scores, b_scores)
+
+                a_norm = np.linalg.norm(a_scores)
+                b_norm = np.linalg.norm(b_scores)
+
+                similarity = dot_product / (a_norm * b_norm)
+
+                if country_a not in matrix:
+                    matrix[country_a] = {}
+
+                matrix[country_a][country_b] = similarity
+
+        return matrix
+
+    def get_ranked_similarities(self, year: int):
+        """
+        Get all country pairs ranked by similarity in voting
+        """
+
+        # Get the similarity matrix
+        matrix = self.get_similarity_matrix(year)
+
+        lst = [
+            {
+                "countries": [country_a, country_b],
+                "similarity": matrix[country_a][country_b],
+            }
+            for country_a in matrix
+            for country_b in matrix[country_a]
         ]
 
         lst = sorted(lst, key=lambda x: x["similarity"], reverse=True)
