@@ -1,8 +1,9 @@
 import { Autocomplete, Box, Button, Checkbox, Container, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { StyledBox } from "../components/layout";
 import { RequestData, Parameter } from "./request-data";
 import { Flag } from "../components/flags";
+import { gridFilteredSortedTopLevelRowEntriesSelector } from "@mui/x-data-grid";
 
 const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
 const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);
@@ -16,24 +17,83 @@ const METRICS = [
 
 //TODO unify with other analysis template
 const GridTemplate = () => {
-    const [data, setData] = useState<undefined | any[]>(undefined);
+    const [data, setData] = useState<undefined | any>(undefined);
+
+    const [countries, setCountries] = useState<undefined | any[]>(undefined);
 
     const [updateCount, setUpdateCount] = useState(0);
     const [rerender, setRerender] = useState(0);
 
     useEffect(() => {
         if (updateCount > 0) {
+            //we need to reverse the data because we want the columns to go reverse alphabetically
+            //this way our triangle is widest at the top
+
             METRICS[0].request()
                 .then((res: any) => {
-                    console.log(res.data);
-                    setData(res.data);
+                    console.log(res.data.data);
+                    console.log(res.data.countries);
+                    setData(res.data.data);
+                    setCountries(res.data.countries);
+
                 })
         }
-    }, [updateCount])
+    }, [updateCount]);
+
+    //TODO make this flexible
+    const lowest = useMemo(() => {
+        if (!data) {
+            return undefined;
+        }
+
+        let lowest = 1;
+
+        Object.keys(data).forEach(col => {
+            Object.keys(data[col]).forEach((row: any) => {
+                if (data[col][row] < lowest) {
+                    lowest = data[col][row];
+                }
+            })
+        })
+
+        return lowest;
+    }, [data]);
+
+    const highest = useMemo(() => {
+        if (!data) {
+            return undefined;
+        }
+
+        let highest = 0;
+
+        Object.keys(data).forEach(col => {
+            Object.keys(data[col]).forEach((row: any) => {
+                if (data[col][row] > highest) {
+                    highest = data[col][row];
+                }
+            })
+        })
+
+        return highest;
+    }, [data])
+
+    const getColor = useMemo(() => {
+        return (similarity: number) => {
+            if (lowest === undefined || highest === undefined) {
+                return "#aaa"
+            }
+
+            const r = Math.round(255 * (similarity - highest) / (lowest - highest));
+            const g = 255 - r;
+
+            return `rgb(${r}, ${g}, 0)`;
+        }
+    }, [lowest, highest])
 
     const handleUpdate = () => {
         setUpdateCount(n => n + 1);
         setData(undefined);
+        setCountries(undefined);
     }
 
     return (
@@ -107,27 +167,40 @@ const GridTemplate = () => {
                 <Box>
                     <Box height="20px" />
                     {
-                        data && data[0].reverse().map((cell: any) =>
-                            <Box height="20px">
-                                <Flag key={cell.countries[1].code} code={cell.countries[1].code} round="true" />
+                        countries && countries.slice(1).reverse().map((country: string) =>
+                            <Box key={country} height="20px" mr="3px">
+                                <Flag code={country} round="true" />
                             </Box>
-                        )}
+                        )
+                    }
                 </Box>
 
-                {/*TODO issue w multiple years */}
                 {
-                    data &&
-                    data.map((col: any) =>
-                        <Box>
+                    countries && countries.slice(0, -1).map((column: string) =>
+                        <Box key={column} display="flex" flexDirection="column" alignItems="center">
                             <Box height="20px">
-                                <Flag key={col[0].countries[1].code} code={col[0].countries[0].code} round="true" />
+                                <Flag
+                                    code={column}
+                                    round="true" />
                             </Box>
 
                             {
-                                col.reverse().map((cell: any) =>
-                                    <Typography height="20px" variant="body2" m="1px" bgcolor="#aaa" borderRadius="2px">
-                                        {cell.similarity.toFixed(METRICS[0].getDecimalPlaces()).substring(1)}
-                                    </Typography>
+                                countries.slice(1).reverse().map((row: string) => {
+                                    const cell = data?.[column]?.[row];
+
+                                    return cell ?
+                                        <Typography
+                                            key={row}
+                                            height="20px"
+                                            variant="body2"
+                                            bgcolor={getColor(cell)}
+                                            width="100%"
+                                        >
+                                            {cell.toFixed(METRICS[0].getDecimalPlaces()).substring(1)}
+                                        </Typography>
+                                        :
+                                        <Box key={row} height="20px" />
+                                }
                                 )
                             }
                         </Box>

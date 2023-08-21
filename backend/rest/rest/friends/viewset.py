@@ -182,6 +182,7 @@ class FriendViewSet(viewsets.GenericViewSet):
                     continue
 
                 # Get vectors of scores (making sure to have them in the same order!)
+                # TODO account for the ranking of the other country since there will be a hole there
                 a_scores = [
                     sum[country_a][country]
                     for country in sum[country_a]
@@ -303,6 +304,7 @@ class FriendViewSet(viewsets.GenericViewSet):
 
         # dict of dicts: key 1 is country A, key 2 is country B, value is [sum, count]
         result_dict = {}
+        countries = set()
 
         for year in range(start_year, end_year + 1):
             if year == 2020:
@@ -313,29 +315,27 @@ class FriendViewSet(viewsets.GenericViewSet):
             for country_a in matrix:
                 if country_a not in result_dict:
                     result_dict[country_a] = {}
+                    countries.add(country_a)
 
                 for country_b in matrix[country_a]:
                     if country_b not in result_dict[country_a]:
                         result_dict[country_a][country_b] = [0, 0]
+                        countries.add(country_b)
 
                     similarity = matrix[country_a][country_b]
                     result_dict[country_a][country_b][0] += similarity
                     result_dict[country_a][country_b][1] += 1
 
         # Now we'll calculate the average similarity for each pair
-        averaged = [
-            [
-                {
-                    "countries": [
-                        CountrySerializer(Country.objects.get(code=country_a)).data,
-                        CountrySerializer(Country.objects.get(code=country_b)).data,
-                    ],
-                    "similarity": result_dict[country_a][country_b][0]
-                    / result_dict[country_a][country_b][1],
-                }
+        averaged = {
+            country_a: {
+                country_b: result_dict[country_a][country_b][0]
+                / result_dict[country_a][country_b][1]
                 for country_b in sorted(result_dict[country_a])
-            ]
+            }
             for country_a in sorted(result_dict)
-        ]
+        }
 
-        return JsonResponse(averaged, safe=False)
+        return JsonResponse(
+            {"data": averaged, "countries": sorted(list(countries))}, safe=False
+        )
