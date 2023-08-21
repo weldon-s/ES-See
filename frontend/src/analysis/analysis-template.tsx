@@ -87,7 +87,6 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
 
                     setData(newData);
 
-                    //TODO places
                     let newColumns = [
                         {
                             field: "rank",

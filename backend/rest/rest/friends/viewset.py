@@ -1,6 +1,8 @@
+from django.http import JsonResponse
 from enum import Enum
 import numpy as np
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from scipy.stats import spearmanr
 
 from rest.countries.viewset import CountrySerializer
@@ -16,7 +18,7 @@ class FriendViewSet(viewsets.GenericViewSet):
         self, year: int, vote_type: VoteType, rank_type: RankType = RankType.PROPORTION
     ):
         """
-        Returns a "matrix" containing the points given to each entry by each voting country.
+        Returns a "matrix" containing the rank given to each entry by each voting country.
         The actual data structure will be a dict of dicts.
         The outer dict will be keyed by the voting countries
         The inner dicts will be keyed by the receiving countries (i.e. the participants)
@@ -149,7 +151,7 @@ class FriendViewSet(viewsets.GenericViewSet):
 
         return lst
 
-    def get_cosine_similarity_matrix(self, year: int):
+    def calculate_cosine_similarity_matrix(self, year: int):
         """
         Gets a "matrix" of the similarity between each pair of countries' voting.
         We'll use cosine similarity to quantify this.
@@ -259,13 +261,13 @@ class FriendViewSet(viewsets.GenericViewSet):
         """
 
         # Get the similarity matrix
-        matrix = self.get_cosine_similarity_matrix(year)
+        matrix = self.calculate_cosine_similarity_matrix(year)
 
         lst = [
             {
                 "countries": [
-                    CountrySerializer(Country.objects.get(code=country_a)).data,
-                    CountrySerializer(Country.objects.get(code=country_b)).data,
+                    country_a,
+                    country_b,
                 ],
                 "similarity": matrix[country_a][country_b],
             }
@@ -293,3 +295,47 @@ class FriendViewSet(viewsets.GenericViewSet):
         lst = sorted(lst, key=lambda x: x["similarity"], reverse=True)
 
         return lst
+
+    @action(detail=False, methods=["POST"])
+    def get_cosine_similarity(self, request):
+        start_year = request.data["start_year"]
+        end_year = request.data["end_year"]
+
+        # dict of dicts: key 1 is country A, key 2 is country B, value is [sum, count]
+        result_dict = {}
+
+        for year in range(start_year, end_year + 1):
+            if year == 2020:
+                continue
+
+            matrix = self.calculate_cosine_similarity_matrix(year)
+
+            for country_a in matrix:
+                if country_a not in result_dict:
+                    result_dict[country_a] = {}
+
+                for country_b in matrix[country_a]:
+                    if country_b not in result_dict[country_a]:
+                        result_dict[country_a][country_b] = [0, 0]
+
+                    similarity = matrix[country_a][country_b]
+                    result_dict[country_a][country_b][0] += similarity
+                    result_dict[country_a][country_b][1] += 1
+
+        # Now we'll calculate the average similarity for each pair
+        averaged = [
+            [
+                {
+                    "countries": [
+                        CountrySerializer(Country.objects.get(code=country_a)).data,
+                        CountrySerializer(Country.objects.get(code=country_b)).data,
+                    ],
+                    "similarity": result_dict[country_a][country_b][0]
+                    / result_dict[country_a][country_b][1],
+                }
+                for country_b in sorted(result_dict[country_a])
+            ]
+            for country_a in sorted(result_dict)
+        ]
+
+        return JsonResponse(averaged, safe=False)

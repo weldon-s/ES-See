@@ -12,6 +12,7 @@ import getAnalysisRoute from "./analysis";
 
 import Contexts from "./contexts";
 import RankingsView from "./rankings";
+import GridTemplate from "./analysis/grid";
 
 function App() {
     const theme = createTheme({
@@ -78,6 +79,7 @@ function App() {
                             {getAnalysisRoute(countries)}
 
                             <Route path="rank" element={<RankingsView />} />
+                            <Route path="tempstat" element={<GridTemplate />} />
                         </Routes>
                     </BrowserRouter>
                 </Contexts>
