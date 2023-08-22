@@ -298,9 +298,10 @@ class FriendViewSet(viewsets.GenericViewSet):
         return lst
 
     @action(detail=False, methods=["POST"])
-    def get_cosine_similarity(self, request):
+    def get_similarity(self, request):
         start_year = request.data["start_year"]
         end_year = request.data["end_year"]
+        mode = request.data["mode"]
 
         # dict of dicts: key 1 is country A, key 2 is country B, value is [sum, count]
         result_dict = {}
@@ -310,7 +311,10 @@ class FriendViewSet(viewsets.GenericViewSet):
             if year == 2020:
                 continue
 
-            matrix = self.calculate_cosine_similarity_matrix(year)
+            if mode == "cosine":
+                matrix = self.calculate_cosine_similarity_matrix(year)
+            elif mode == "rank":
+                matrix = self.get_rank_similarity_matrix(year)
 
             for country_a in matrix:
                 if country_a not in result_dict:
@@ -336,6 +340,9 @@ class FriendViewSet(viewsets.GenericViewSet):
             for country_a in sorted(result_dict)
         }
 
-        return JsonResponse(
-            {"data": averaged, "countries": sorted(list(countries))}, safe=False
-        )
+        countries_lst = [
+            CountrySerializer(Country.objects.get(code=country)).data
+            for country in sorted(countries)
+        ]
+
+        return JsonResponse({"data": averaged, "countries": countries_lst}, safe=False)

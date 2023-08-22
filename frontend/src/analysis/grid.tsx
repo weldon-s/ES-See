@@ -1,9 +1,9 @@
-import { Autocomplete, Box, Button, Checkbox, Container, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, Container, FormControl, Grid, InputLabel, MenuItem, Select, Skeleton, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { StyledBox } from "../components/layout";
 import { RequestData, Parameter } from "./request-data";
-import { Flag } from "../components/flags";
-import { gridFilteredSortedTopLevelRowEntriesSelector } from "@mui/x-data-grid";
+import { CountryFlagCell, Flag } from "../components/flags";
+import { DataGrid } from "@mui/x-data-grid";
 
 const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
 const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);
@@ -11,8 +11,9 @@ const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023,
 const yearsConstructor = RequestData.getPresetParameters([START_YEAR_PARAM, END_YEAR_PARAM]);
 
 const METRICS = [
-    yearsConstructor("Cosine Similarity", "friends/get_cosine_similarity/"),
-    // yearsConstructor("Spearman Correlation", "friends/"),
+    yearsConstructor("Similarity", "friends/get_similarity/")
+        .addParameter(Parameter.getParameter("mode", "Mode", ["cosine", "rank"]))
+    ,
 ];
 
 //TODO unify with other analysis template
@@ -24,6 +25,10 @@ const GridTemplate = () => {
     const [updateCount, setUpdateCount] = useState(0);
     const [rerender, setRerender] = useState(0);
 
+    const [isGrid, setIsGrid] = useState<boolean>(true);
+
+    const [highlights, setHighlights] = useState<undefined | any[]>(undefined);
+
     useEffect(() => {
         if (updateCount > 0) {
             //we need to reverse the data because we want the columns to go reverse alphabetically
@@ -31,11 +36,54 @@ const GridTemplate = () => {
 
             METRICS[0].request()
                 .then((res: any) => {
-                    console.log(res.data.data);
-                    console.log(res.data.countries);
-                    setData(res.data.data);
-                    setCountries(res.data.countries);
+                    const data = res.data.data;
+                    const countries = res.data.countries;
 
+                    //get the most and least similar countries for each country
+                    const highlights = countries.map((country: any) => {
+                        let highestIndex = -1;
+                        let highest = -1;
+                        let lowestIndex = -1;
+                        let lowest = 1;
+
+                        countries.forEach((otherCountry: any, index: number) => {
+                            if (country.code === otherCountry.code) {
+                                return;
+                            }
+
+                            //let's first figure out which country goes first
+                            const first = country.code < otherCountry.code ? country.code : otherCountry.code;
+                            const second = country.code < otherCountry.code ? otherCountry.code : country.code;
+
+                            //then we can get the similarity and compare it to the highest and lowest we've seen
+                            const similarity = data[first][second];
+
+                            if (highestIndex < 0 || similarity > highest) {
+                                highest = similarity;
+                                highestIndex = index;
+                            }
+
+                            if (lowestIndex < 0 || similarity < lowest) {
+                                lowest = similarity;
+                                lowestIndex = index;
+                            }
+                        });
+
+                        return {
+                            id: country.code,
+                            country,
+                            highest,
+                            lowest,
+                            highestCountry: countries[highestIndex],
+                            lowestCountry: countries[lowestIndex],
+                        }
+                    })
+
+                    setData(data);
+                    setCountries(countries);
+                    console.log(highlights);
+
+                    setHighlights(highlights);
                 })
         }
     }, [updateCount]);
@@ -46,11 +94,11 @@ const GridTemplate = () => {
             return undefined;
         }
 
-        let lowest = 1;
+        let lowest: number = NaN;
 
         Object.keys(data).forEach(col => {
             Object.keys(data[col]).forEach((row: any) => {
-                if (data[col][row] < lowest) {
+                if (isNaN(lowest) || data[col][row] < lowest) {
                     lowest = data[col][row];
                 }
             })
@@ -64,11 +112,11 @@ const GridTemplate = () => {
             return undefined;
         }
 
-        let highest = 0;
+        let highest = NaN;
 
         Object.keys(data).forEach(col => {
             Object.keys(data[col]).forEach((row: any) => {
-                if (data[col][row] > highest) {
+                if (isNaN(highest) || data[col][row] > highest) {
                     highest = data[col][row];
                 }
             })
@@ -163,52 +211,128 @@ const GridTemplate = () => {
                 </Grid>
             </StyledBox>
 
-            <Box display="flex">
-                <Box>
-                    <Box height="20px" />
-                    {
-                        countries && countries.slice(1).reverse().map((country: string) =>
-                            <Box key={country} height="20px" mr="3px">
-                                <Flag code={country} round="true" />
-                            </Box>
-                        )
-                    }
-                </Box>
+            <StyledBox>
+                <ToggleButtonGroup
+                    exclusive
+                    value={isGrid}
+                    onChange={(e, value) => {
+                        setIsGrid(value)
+                    }}
+                >
+                    <ToggleButton value={true}> Grid </ToggleButton>
+                    <ToggleButton value={false} > Highlight </ToggleButton>
+                </ToggleButtonGroup>
+            </StyledBox>
 
-                {
-                    countries && countries.slice(0, -1).map((column: string) =>
-                        <Box key={column} display="flex" flexDirection="column" alignItems="center">
-                            <Box height="20px">
-                                <Flag
-                                    code={column}
-                                    round="true" />
-                            </Box>
-
+            {countries && highlights ?
+                isGrid ?
+                    <Box display="flex">
+                        <Box>
+                            <Box height="20px" />
                             {
-                                countries.slice(1).reverse().map((row: string) => {
-                                    const cell = data?.[column]?.[row];
-
-                                    return cell ?
-                                        <Typography
-                                            key={row}
-                                            height="20px"
-                                            variant="body2"
-                                            bgcolor={getColor(cell)}
-                                            width="100%"
-                                        >
-                                            {cell.toFixed(METRICS[0].getDecimalPlaces()).substring(1)}
-                                        </Typography>
-                                        :
-                                        <Box key={row} height="20px" />
-                                }
+                                countries && countries.slice(1).reverse().map((country: any) =>
+                                    <Box key={country.code} height="20px" mr="3px">
+                                        <Flag code={country.code} round="true" />
+                                    </Box>
                                 )
                             }
                         </Box>
-                    )
-                }
-            </Box>
+
+                        {
+                            countries.slice(0, -1).map((column: any) =>
+                                <Box key={column.code} display="flex" flexDirection="column" alignItems="center">
+                                    <Box height="20px">
+                                        <Flag
+                                            code={column.code}
+                                            round="true" />
+                                    </Box>
+
+                                    {
+                                        countries.slice(1).reverse().map((row: any) => {
+                                            const cell = data?.[column.code]?.[row.code];
+
+                                            return cell ?
+                                                <Typography
+                                                    key={row.code}
+                                                    height="20px"
+                                                    variant="body2"
+                                                    bgcolor={getColor(cell)}
+                                                    width="100%"
+                                                    pl="2px"
+                                                    pr="2px"
+                                                >
+                                                    {cell.toFixed(METRICS[0].getDecimalPlaces())}
+                                                </Typography>
+                                                :
+                                                <Box key={row.code} height="20px" />
+                                        }
+                                        )
+                                    }
+                                </Box>
+                            )
+                        }
+                    </Box>
+                    :
+                    <DataGrid
+                        autoHeight
+                        rows={highlights}
+                        columns={COLUMNS}
+                        density="compact"
+                        hideFooter
+                        sx={{
+                            width: "80%",
+                            mb: 1
+                        }}
+
+                    />
+                :
+                updateCount === 0 ?
+                    <Typography variant="h6" > Choose your desired configuration and press "Update" to view your data.</Typography>
+                    :
+                    <Skeleton height="200px" width="500px" />
+            }
         </Container>
     );
 }
 
 export default GridTemplate;
+
+const COLUMNS = [
+    {
+        field: "country",
+        headerName: "Country",
+        valueGetter: (params: any) => params.row.country.name,
+        renderCell: (params: any) => <CountryFlagCell country={params.row.country} />,
+        flex: 2,
+    },
+
+    {
+        field: "highestCountry",
+        headerName: "Most Similar Country",
+        valueGetter: (params: any) => params.row.highestCountry.name,
+        renderCell: (params: any) => <CountryFlagCell country={params.row.highestCountry} />,
+        flex: 2,
+    },
+
+    {
+        field: "highest",
+        headerName: "Value",
+        renderCell: (params: any) => params.row.highest.toFixed(METRICS[0].getDecimalPlaces()),
+        flex: 1,
+    },
+
+    {
+        field: "lowestCountry",
+        headerName: "Least Similar Country",
+        valueGetter: (params: any) => params.row.lowestCountry.name,
+        renderCell: (params: any) => <CountryFlagCell country={params.row.lowestCountry} />,
+        flex: 2,
+    },
+
+    {
+        field: "lowest",
+        headerName: "Value",
+        renderCell: (params: any) => params.row.lowest.toFixed(METRICS[0].getDecimalPlaces()),
+        flex: 1,
+    },
+]
