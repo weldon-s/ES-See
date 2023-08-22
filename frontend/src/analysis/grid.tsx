@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { StyledBox } from "../components/layout";
 import { RequestData, Parameter } from "./request-data";
 import { CountryFlagCell, Flag } from "../components/flags";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
 const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
 const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);
@@ -376,24 +376,30 @@ const HIGHLIGHT_COLUMNS = [
     },
 ]
 
-const FILTER_COLUMNS = [
+const FILTER_COLUMNS: GridColDef[] = [
     {
-        field: "first",
-        headerName: "First Country",
-        valueGetter: (params: any) => params.row.first.name,
-        renderCell: (params: any) => <CountryFlagCell country={params.row.first} />,
-        flex: 1,
-    },
-    {
-        field: "second",
-        headerName: "Second Country",
-        valueGetter: (params: any) => params.row.second.name,
-        renderCell: (params: any) => <CountryFlagCell country={params.row.second} />,
-        flex: 1,
+        field: "countries",
+        headerName: "Countries",
+        valueGetter: (params: any) => `${params.row.first.name} and ${params.row.second.name}`,
+        renderCell: (params: any) => (
+            <Box
+                display="flex"
+                flexDirection="row"
+                justifyContent="space-between"
+                alignItems="center"
+            >
+                <CountryFlagCell country={params.row.first} mr={1} />
+                <Typography> and </Typography>
+                <CountryFlagCell country={params.row.second} ml={1} />
+            </Box>
+        ),
+        flex: 2,
     },
     {
         field: "similarity",
         headerName: "Similarity",
+        headerAlign: "left",
+        align: "left",
         renderCell: (params: any) => params.row.similarity.toFixed(METRICS[0].getDecimalPlaces()),
         type: "number",
         flex: 1,
