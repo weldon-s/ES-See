@@ -25,9 +25,11 @@ const GridTemplate = () => {
     const [updateCount, setUpdateCount] = useState(0);
     const [rerender, setRerender] = useState(0);
 
-    const [isGrid, setIsGrid] = useState<boolean>(true);
+    const [viewType, setViewType] = useState<number>(0);
 
     const [highlights, setHighlights] = useState<undefined | any[]>(undefined);
+
+    const [filtered, setFiltered] = useState<undefined | any[]>(undefined);
 
     useEffect(() => {
         if (updateCount > 0) {
@@ -79,11 +81,28 @@ const GridTemplate = () => {
                         }
                     })
 
+                    const filtered = Object.keys(data).reduce((acc: any, key: string) => {
+                        const col = data[key];
+                        const firstCountry = countries.find((country: any) => country.code === key);
+
+                        const subarray = Object.keys(col).map((rowKey: string) => {
+                            return {
+                                id: `${key}-${rowKey}`,
+                                first: firstCountry,
+                                second: countries.find((country: any) => country.code === rowKey),
+                                similarity: data[key][rowKey],
+                            }
+                        })
+
+                        return [...acc, ...subarray];
+                    }, [])
+
                     setData(data);
                     setCountries(countries);
-                    console.log(highlights);
-
                     setHighlights(highlights);
+                    setFiltered(filtered);
+                    console.log(filtered);
+
                 })
         }
     }, [updateCount]);
@@ -214,19 +233,20 @@ const GridTemplate = () => {
             <StyledBox>
                 <ToggleButtonGroup
                     exclusive
-                    value={isGrid}
+                    value={viewType}
                     onChange={(e, value) => {
-                        setIsGrid(value)
+                        setViewType(value)
                     }}
                 >
-                    <ToggleButton value={true}> Grid </ToggleButton>
-                    <ToggleButton value={false} > Highlight </ToggleButton>
+                    <ToggleButton value={0}> Grid </ToggleButton>
+                    <ToggleButton value={1} > Highlights </ToggleButton>
+                    <ToggleButton value={2} > Filter </ToggleButton>
                 </ToggleButtonGroup>
             </StyledBox>
 
-            {countries && highlights ?
-                isGrid ?
-                    <Box display="flex">
+            {countries && highlights && filtered ?
+                viewType === 0 ?
+                    <StyledBox display="flex">
                         <Box>
                             <Box height="20px" />
                             {
@@ -252,17 +272,24 @@ const GridTemplate = () => {
                                             const cell = data?.[column.code]?.[row.code];
 
                                             return cell ?
-                                                <Typography
+                                                <Box
                                                     key={row.code}
                                                     height="20px"
-                                                    variant="body2"
-                                                    bgcolor={getColor(cell)}
                                                     width="100%"
-                                                    pl="2px"
-                                                    pr="2px"
+                                                    bgcolor={getColor(cell)}
+                                                    display="flex"
+                                                    alignItems="center"
+                                                    justifyContent="center"
                                                 >
-                                                    {cell.toFixed(METRICS[0].getDecimalPlaces())}
-                                                </Typography>
+                                                    <Typography
+                                                        variant="body2"
+                                                        fontSize="10px"
+                                                        pl="2px"
+                                                        pr="2px"
+                                                    >
+                                                        {cell.toFixed(METRICS[0].getDecimalPlaces())}
+                                                    </Typography>
+                                                </Box>
                                                 :
                                                 <Box key={row.code} height="20px" />
                                         }
@@ -271,20 +298,32 @@ const GridTemplate = () => {
                                 </Box>
                             )
                         }
-                    </Box>
+                    </StyledBox>
                     :
-                    <DataGrid
-                        autoHeight
-                        rows={highlights}
-                        columns={COLUMNS}
-                        density="compact"
-                        hideFooter
-                        sx={{
-                            width: "80%",
-                            mb: 1
-                        }}
+                    viewType === 1 ?
+                        <DataGrid
+                            autoHeight
+                            rows={highlights}
+                            columns={HIGHLIGHT_COLUMNS}
+                            density="compact"
+                            hideFooter
+                            sx={{
+                                width: "80%",
+                                mb: 1
+                            }}
 
-                    />
+                        />
+                        :
+                        <DataGrid
+                            autoHeight
+                            rows={filtered}
+                            columns={FILTER_COLUMNS}
+                            density="compact"
+                            sx={{
+                                width: "80%",
+                                mb: 1
+                            }}
+                        />
                 :
                 updateCount === 0 ?
                     <Typography variant="h6" > Choose your desired configuration and press "Update" to view your data.</Typography>
@@ -297,7 +336,7 @@ const GridTemplate = () => {
 
 export default GridTemplate;
 
-const COLUMNS = [
+const HIGHLIGHT_COLUMNS = [
     {
         field: "country",
         headerName: "Country",
@@ -335,4 +374,28 @@ const COLUMNS = [
         renderCell: (params: any) => params.row.lowest.toFixed(METRICS[0].getDecimalPlaces()),
         flex: 1,
     },
+]
+
+const FILTER_COLUMNS = [
+    {
+        field: "first",
+        headerName: "First Country",
+        valueGetter: (params: any) => params.row.first.name,
+        renderCell: (params: any) => <CountryFlagCell country={params.row.first} />,
+        flex: 1,
+    },
+    {
+        field: "second",
+        headerName: "Second Country",
+        valueGetter: (params: any) => params.row.second.name,
+        renderCell: (params: any) => <CountryFlagCell country={params.row.second} />,
+        flex: 1,
+    },
+    {
+        field: "similarity",
+        headerName: "Similarity",
+        renderCell: (params: any) => params.row.similarity.toFixed(METRICS[0].getDecimalPlaces()),
+        type: "number",
+        flex: 1,
+    }
 ]
