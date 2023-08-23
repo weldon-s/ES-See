@@ -117,18 +117,36 @@ class ShowViewSet(viewsets.ModelViewSet):
         for i in range(len(lst)):
             lst[i]["place"] = i + 1
 
-            Result.objects.get_or_create(
-                performance=Performance.objects.get(
-                    show=self.get_object(), country__id=lst[i]["country"]
-                ),
-                place=lst[i]["place"],
-                jury_place=lst[i].get("jury_place", None),
-                televote_place=lst[i].get("televote_place", None),
-                combined=lst[i].get("combined", None),
-                jury=lst[i].get("jury", None),
-                televote=lst[i].get("televote", None),
-                running_order=lst[i]["running_order"],
+            performance = Performance.objects.get(
+                show=self.get_object(), country__id=lst[i]["country"]
             )
+
+            if Result.objects.filter(performance=performance).exists():
+                # update the existing result
+                result = Result.objects.get(performance=performance)
+                result.place = lst[i]["place"]
+                result.jury_place = lst[i].get("jury_place", None)
+                result.televote_place = lst[i].get("televote_place", None)
+                result.combined = lst[i].get("combined", None)
+                result.jury = lst[i].get("jury", None)
+                result.televote = lst[i].get("televote", None)
+                result.running_order = lst[i]["running_order"]
+                result.save()
+
+            else:
+                # create a new result
+                Result.objects.create(
+                    performance=Performance.objects.get(
+                        show=self.get_object(), country__id=lst[i]["country"]
+                    ),
+                    place=lst[i]["place"],
+                    jury_place=lst[i].get("jury_place", None),
+                    televote_place=lst[i].get("televote_place", None),
+                    combined=lst[i].get("combined", None),
+                    jury=lst[i].get("jury", None),
+                    televote=lst[i].get("televote", None),
+                    running_order=lst[i]["running_order"],
+                )
 
         return JsonResponse(lst, safe=False)
 
