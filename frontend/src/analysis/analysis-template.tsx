@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext, useEffect, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useLayoutEffect, useState } from 'react';
 import {
     Autocomplete,
     Box,
@@ -18,10 +18,13 @@ import {
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { Form, useNavigate } from 'react-router-dom';
-import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
-import { TooltipProps } from 'recharts';
 
-import Client from '../api/client';
+import { Bar, BarChart, CartesianGrid, Tooltip, TooltipProps, XAxis, YAxis } from "recharts";
+
+import * as am5 from "@amcharts/amcharts5";
+import * as am5map from "@amcharts/amcharts5/map";
+import am5geodata_worldHigh from "@amcharts/amcharts5-geodata/worldLow";
+
 import { CountryContext } from '../contexts';
 import { CountryFlagCell } from '../components/flags';
 import { RequestData } from './request-data';
@@ -37,7 +40,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
     const { title, metrics, target } = props;
 
     const [data, setData] = useState<any>([]);
-    const [table, setTable] = useState(true);
+    const [view, setView] = useState<number>(0);
 
     const countries: any[] = useContext(CountryContext);
 
@@ -47,6 +50,33 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
     const [updateCount, setUpdateCount] = useState(0);
     const [rerender, setRerender] = useState(0);
     const [columns, setColumns] = useState<any[]>([]);
+
+    useLayoutEffect(() => {
+        //This makes sure the conditions for the map div to actually be rendered are met
+        if (view !== 2 || updateCount <= 0 || !data) {
+            return;
+        }
+
+        let root = am5.Root.new("mapdiv");
+        let chart = root.container.children.push(
+            am5map.MapChart.new(root, {
+                panX: "rotateX",
+                projection: am5map.geoNaturalEarth1()
+            })
+        );
+
+        // Create polygon series
+        let polygonSeries = chart.series.push(
+            am5map.MapPolygonSeries.new(root, {
+                geoJSON: am5geodata_worldHigh,
+                include: data.map((elem: any) => elem.country.code.toUpperCase()),
+            })
+        );
+
+        return () => {
+            root.dispose();
+        }
+    }, [view, updateCount, data])
 
     const CustomTooltip = (props: TooltipProps<string, string>) => {
         const { active, payload, label } = props;
@@ -216,12 +246,9 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                                                     }
                                                 </Select>
                                             </FormControl>
-
                                 }
 
                             </Grid>
-
-
                         )}
 
                     <Grid item xs={12} display="flex" justifyContent="end" mt={1}>
@@ -234,13 +261,18 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
             <StyledBox>
                 <ToggleButtonGroup
                     exclusive
-                    value={table}
+                    value={view}
                     onChange={(e, value) => {
-                        setTable(value)
+                        setView(value)
                     }}
                 >
-                    <ToggleButton value={true}> Table </ToggleButton>
-                    <ToggleButton value={false} > Chart </ToggleButton>
+                    <ToggleButton value={0}> Table </ToggleButton>
+                    <ToggleButton value={1} > Chart </ToggleButton>
+
+                    {
+                        target === COUNTRY &&
+                        <ToggleButton value={2} > Map </ToggleButton>
+                    }
                 </ToggleButtonGroup>
             </StyledBox>
 
@@ -251,7 +283,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                             (
                                 data.length > 0 ?
                                     (
-                                        table ?
+                                        view === 0 ?
                                             <DataGrid
                                                 autoHeight
                                                 rows={data}
@@ -265,16 +297,20 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                                                 }}
                                             />
                                             :
-                                            <BarChart data={data} width={600} height={500} style={{
-                                                fontFamily: "Inter, sans-serif"
-                                            }}>
-                                                {/*TODO fix axes when years are y-values*/}
-                                                <CartesianGrid />
-                                                <Bar dataKey="result" />
-                                                <XAxis hide />
-                                                <YAxis />
-                                                <Tooltip content={CustomTooltip} />
-                                            </BarChart>
+                                            view === 1 ?
+                                                <BarChart data={data} width={600} height={500} style={{
+                                                    fontFamily: "Inter, sans-serif"
+                                                }}>
+                                                    {/*TODO fix axes when years are y-values*/}
+                                                    <CartesianGrid />
+                                                    <Bar dataKey="result" />
+                                                    <XAxis hide />
+                                                    <YAxis />
+                                                    <Tooltip content={CustomTooltip} />
+                                                </BarChart>
+                                                :
+                                                <div id="mapdiv" style={{ height: "400px", width: "400px" }}></div>
+
                                     )
                                     :
                                     <Typography variant="h6" > No data found for the selected configuration. Make sure your start year isn't after your end year</Typography>

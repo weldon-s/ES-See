@@ -23,6 +23,8 @@
     "webpack-dev-server": "^4.15.0"
   },
   "dependencies": {
+    "@amcharts/amcharts5": "^5.4.6",
+    "@amcharts/amcharts5-geodata": "^5.1.1",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.11.16",
