@@ -30,6 +30,9 @@ import { CountryFlagCell } from '../components/flags';
 import { RequestData } from './request-data';
 import { StyledBox } from '../components/layout';
 
+import am4geodata_usaLow from "@amcharts/amcharts5-geodata/usaLow";
+import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+
 interface AnalysisTemplateProps {
     title: string;
     metrics: RequestData[];
@@ -58,20 +61,46 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
         }
 
         let root = am5.Root.new("mapdiv");
-        let chart = root.container.children.push(
-            am5map.MapChart.new(root, {
-                panX: "rotateX",
-                projection: am5map.geoNaturalEarth1()
-            })
-        );
 
-        // Create polygon series
-        let polygonSeries = chart.series.push(
-            am5map.MapPolygonSeries.new(root, {
-                geoJSON: am5geodata_worldHigh,
-                include: data.map((elem: any) => elem.country.code.toUpperCase()),
+        root.setThemes([
+            am5themes_Animated.new(root)
+        ]);
+
+        let chart = root.container.children.push(am5map.MapChart.new(root, {
+            projection: am5map.geoEquirectangular(),
+            layout: root.horizontalLayout
+        }));
+
+        let polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
+            geoJSON: am5geodata_worldHigh,
+            include: data.map((elem: any) => elem.country.code.toUpperCase()),
+            valueField: "value",
+            calculateAggregates: true
+        }));
+
+        //TODO font
+        polygonSeries.mapPolygons.template.setAll({
+            tooltipHTML: "{name}: {value}",
+        });
+
+        polygonSeries.set("heatRules", [{
+            target: polygonSeries.mapPolygons.template,
+            dataField: "value",
+            min: am5.color(0xff0000),
+            max: am5.color(0x00ff00),
+            key: "fill"
+        }]);
+
+        //TODO make this more general to remove all countries that don't exist
+        const polygonData = data
+            .map((elem: any) => {
+                return {
+                    id: elem.country.code.toUpperCase(),
+                    value: elem.result
+                }
             })
-        );
+
+        polygonSeries.data.setAll(polygonData);
 
         return () => {
             root.dispose();
