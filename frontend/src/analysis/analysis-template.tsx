@@ -56,6 +56,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
 
     useLayoutEffect(() => {
         //This makes sure the conditions for the map div to actually be rendered are met
+        //TODO fix bug with reclicking map button
         if (view !== 2 || updateCount <= 0 || !data) {
             return;
         }
@@ -74,6 +75,11 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                 longitude: 13
             },
             homeZoomLevel: 4.8,
+            minZoomLevel: 4.8,
+            maxZoomLevel: 4.8,
+
+            panX: "none",
+            panY: "none",
         }));
 
         let backgroundSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
@@ -102,7 +108,6 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
             key: "fill"
         }]);
 
-        //TODO make this more general to remove all countries that don't exist
         const polygonData = data
             .map((elem: any) => {
                 return {
@@ -116,6 +121,63 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
         polygonSeries.events.on("datavalidated", function () {
             chart.goHome(0);
         });
+
+        //now we check for Australia
+        if (data.some((elem: any) => elem.country.code === "au")) {
+            let root = am5.Root.new("ausdiv");
+
+            root.setThemes([
+                am5themes_Animated.new(root)
+            ]);
+
+            let chart = root.container.children.push(am5map.MapChart.new(root, {
+                projection: am5map.geoEquirectangular(),
+                layout: root.horizontalLayout,
+                homeGeoPoint: {
+                    latitude: -32.5,
+                    longitude: 135
+                },
+                homeZoomLevel: 7.75,
+                minZoomLevel: 7.75,
+                maxZoomLevel: 7.75,
+
+                panX: "none",
+                panY: "none",
+            }));
+
+            let polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
+                geoJSON: am5geodata_worldHigh,
+                valueField: "value",
+                calculateAggregates: true
+            }));
+
+            //TODO font
+            polygonSeries.mapPolygons.template.setAll({
+                tooltipText: "{name}: {value}",
+            });
+
+            polygonSeries.set("heatRules", [{
+                target: polygonSeries.mapPolygons.template,
+                dataField: "value",
+                min: am5.color(0xff0000),
+                max: am5.color(0x00ff00),
+                key: "fill"
+            }]);
+
+            const polygonData = data
+                .map((elem: any) => {
+                    return {
+                        id: elem.country.code.toUpperCase(),
+                        value: elem.result
+                    }
+                })
+
+            polygonSeries.data.setAll(polygonData);
+
+            polygonSeries.events.on("datavalidated", function () {
+                chart.goHome(0);
+            });
+        }
 
         return () => {
             root.dispose();
@@ -353,10 +415,10 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                                                     <Tooltip content={CustomTooltip} />
                                                 </BarChart>
                                                 :
-                                                <>
+                                                <Box display="flex" alignItems="center">
                                                     <div id="mapdiv" style={{ height: "400px", width: "400px" }}></div>
-                                                    {/*TODO Australia map */}
-                                                </>
+                                                    <div id="ausdiv" style={{ height: "150px", width: "150px", paddingLeft: "10px" }}></div>
+                                                </Box>
 
                                     )
                                     :
