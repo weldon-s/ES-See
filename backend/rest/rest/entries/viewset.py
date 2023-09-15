@@ -35,7 +35,6 @@ class EntryViewSet(viewsets.ModelViewSet):
 
         return JsonResponse(EntrySerializer(entry, many=False).data, safe=False)
 
-    # TODO something is wrong with this
     @action(detail=True, methods=["POST"])
     def get_points_to(self, request, pk=None):
         votes = Vote.objects.filter(performance__show__edition=self.get_object().year)

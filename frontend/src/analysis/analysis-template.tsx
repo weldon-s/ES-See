@@ -68,8 +68,19 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
 
         let chart = root.container.children.push(am5map.MapChart.new(root, {
             projection: am5map.geoEquirectangular(),
-            layout: root.horizontalLayout
+            layout: root.horizontalLayout,
+            homeGeoPoint: {
+                latitude: 50,
+                longitude: 13
+            },
+            homeZoomLevel: 4.8,
         }));
+
+        let backgroundSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
+            geoJSON: am5geodata_worldHigh,
+        }));
+
+        backgroundSeries.set("fill", am5.color(0xdddddd));
 
         let polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
             geoJSON: am5geodata_worldHigh,
@@ -80,7 +91,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
 
         //TODO font
         polygonSeries.mapPolygons.template.setAll({
-            tooltipHTML: "{name}: {value}",
+            tooltipText: "{name}: {value}",
         });
 
         polygonSeries.set("heatRules", [{
@@ -101,6 +112,10 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
             })
 
         polygonSeries.data.setAll(polygonData);
+
+        polygonSeries.events.on("datavalidated", function () {
+            chart.goHome(0);
+        });
 
         return () => {
             root.dispose();
@@ -338,7 +353,10 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                                                     <Tooltip content={CustomTooltip} />
                                                 </BarChart>
                                                 :
-                                                <div id="mapdiv" style={{ height: "400px", width: "400px" }}></div>
+                                                <>
+                                                    <div id="mapdiv" style={{ height: "400px", width: "400px" }}></div>
+                                                    {/*TODO Australia map */}
+                                                </>
 
                                     )
                                     :
