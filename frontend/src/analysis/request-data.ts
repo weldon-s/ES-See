@@ -9,7 +9,7 @@ export class RequestData {
     label: any;
     url: string;
     parameters: Parameter[];
-    decimalPlaces: choicesToNumber;
+    private decimalPlaces: choicesToNumber;
     private choices: { [key: string]: any } = {}; //TODO make other fields private?
 
     constructor(label: any, url: string, parameters?: Parameter[], decimalPlaces?: choicesToNumber | number) {

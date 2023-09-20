@@ -2,25 +2,26 @@ import React, { createContext, useEffect, useState } from "react";
 
 import Client from "./api/client";
 
-//TODO make these not any
-export const EditionContext = React.createContext<any[]>([]);
-export const CountryContext = React.createContext<any[]>([]);
-export const GroupContext = React.createContext<any[]>([]);
+import { Country, Edition, Group } from "./types";
 
-const Contexts = (props: { children: any }) => {
-    const [years, setYears] = useState<any[]>([]);
-    const [countries, setCountries] = useState<any[]>([]);
-    const [groups, setGroups] = useState<any[]>([]);
+export const EditionContext = React.createContext<Edition[]>([]);
+export const CountryContext = React.createContext<Country[]>([]);
+export const GroupContext = React.createContext<Group<Country>[]>([]);
+
+const Contexts = (props: { children: React.ReactNode }) => {
+    const [years, setYears] = useState<Edition[]>([]);
+    const [countries, setCountries] = useState<Country[]>([]);
+    const [groups, setGroups] = useState<Group<Country>[]>([]);
 
     useEffect(() => {
         Client.post("editions/get_all/")
             .then(res => {
-                setYears(res.data.sort((a: any, b: any) => b.year - a.year));
+                setYears(res.data.sort((a: Edition, b: Edition) => b.year - a.year));
             });
 
         Client.post("countries/get_all/")
             .then(res => {
-                setCountries(res.data.sort((a: any, b: any) => a.name.localeCompare(b.name)));
+                setCountries(res.data.sort((a: Country, b: Country) => a.name.localeCompare(b.name)));
             });
     }, [])
 
@@ -33,11 +34,11 @@ const Contexts = (props: { children: any }) => {
 
                 //We'll make the groups have a list of countries instead of ids to make it easier to work with them
                 setGroups(res.data
-                    .sort((a: any, b: any) => a.name.localeCompare(b.name))
-                    .map((group: any) => {
+                    .sort((a: Group<number>, b: Group<number>) => a.name.localeCompare(b.name))
+                    .map((group: Group<number>) => {
                         return {
                             ...group,
-                            countries: countries.filter((country: any) => group.countries.includes(country.id)),
+                            countries: countries.filter((country: Country) => group.countries.includes(country.id)),
                         }
                     })
                 )

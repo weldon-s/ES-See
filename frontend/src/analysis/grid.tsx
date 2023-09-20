@@ -3,7 +3,32 @@ import React, { useEffect, useMemo, useState } from "react";
 import { StyledBox } from "../components/layout";
 import { RequestData, Parameter } from "./request-data";
 import { CountryFlagCell, Flag } from "../components/flags";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRenderCellParams, GridValueGetterParams } from "@mui/x-data-grid";
+import { Country } from "../types";
+
+interface CountryPair {
+    id: string,
+    first: Country,
+    second: Country,
+    similarity: number
+};
+
+interface Highlight {
+    id: string,
+    country: Country,
+    highest: number,
+    lowest: number,
+    highestCountry: Country,
+    lowestCountry: Country,
+}
+
+interface GridRow {
+    [key: string]: number
+}
+
+interface Grid {
+    [key: string]: GridRow
+}
 
 const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
 const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);
@@ -18,18 +43,18 @@ const METRICS = [
 
 //TODO unify with other analysis template
 const GridTemplate = () => {
-    const [data, setData] = useState<undefined | any>(undefined);
+    const [data, setData] = useState<undefined | Grid>(undefined);
 
-    const [countries, setCountries] = useState<undefined | any[]>(undefined);
+    const [countries, setCountries] = useState<undefined | Country[]>(undefined);
 
     const [updateCount, setUpdateCount] = useState(0);
     const [rerender, setRerender] = useState(0);
 
     const [viewType, setViewType] = useState<number>(0);
 
-    const [highlights, setHighlights] = useState<undefined | any[]>(undefined);
+    const [highlights, setHighlights] = useState<undefined | Highlight[]>(undefined);
 
-    const [filtered, setFiltered] = useState<undefined | any[]>(undefined);
+    const [filtered, setFiltered] = useState<undefined | CountryPair[]>(undefined);
 
     useEffect(() => {
         if (updateCount > 0) {
@@ -42,13 +67,13 @@ const GridTemplate = () => {
                     const countries = res.data.countries;
 
                     //get the most and least similar countries for each country
-                    const highlights = countries.map((country: any) => {
+                    const highlights: Highlight[] = countries.map((country: Country) => {
                         let highestIndex = -1;
                         let highest = -1;
                         let lowestIndex = -1;
                         let lowest = 1;
 
-                        countries.forEach((otherCountry: any, index: number) => {
+                        countries.forEach((otherCountry: Country, index: number) => {
                             if (country.code === otherCountry.code) {
                                 return;
                             }
@@ -81,15 +106,15 @@ const GridTemplate = () => {
                         }
                     })
 
-                    const filtered = Object.keys(data).reduce((acc: any, key: string) => {
+                    const filtered: CountryPair[] = Object.keys(data).reduce((acc: CountryPair[], key: string) => {
                         const col = data[key];
-                        const firstCountry = countries.find((country: any) => country.code === key);
+                        const firstCountry = countries.find((country: Country) => country.code === key);
 
                         const subarray = Object.keys(col).map((rowKey: string) => {
                             return {
                                 id: `${key}-${rowKey}`,
                                 first: firstCountry,
-                                second: countries.find((country: any) => country.code === rowKey),
+                                second: countries.find((country: Country) => country.code === rowKey),
                                 similarity: data[key][rowKey],
                             }
                         })
@@ -101,8 +126,6 @@ const GridTemplate = () => {
                     setCountries(countries);
                     setHighlights(highlights);
                     setFiltered(filtered);
-                    console.log(filtered);
-
                 })
         }
     }, [updateCount]);
@@ -115,8 +138,8 @@ const GridTemplate = () => {
 
         let lowest: number = NaN;
 
-        Object.keys(data).forEach(col => {
-            Object.keys(data[col]).forEach((row: any) => {
+        Object.keys(data).forEach((col: string) => {
+            Object.keys(data[col]).forEach((row: string) => {
                 if (isNaN(lowest) || data[col][row] < lowest) {
                     lowest = data[col][row];
                 }
@@ -133,8 +156,8 @@ const GridTemplate = () => {
 
         let highest = NaN;
 
-        Object.keys(data).forEach(col => {
-            Object.keys(data[col]).forEach((row: any) => {
+        Object.keys(data).forEach((col: string) => {
+            Object.keys(data[col]).forEach((row: string) => {
                 if (isNaN(highest) || data[col][row] > highest) {
                     highest = data[col][row];
                 }
@@ -250,7 +273,7 @@ const GridTemplate = () => {
                         <Box>
                             <Box height="20px" />
                             {
-                                countries && countries.slice(1).reverse().map((country: any) =>
+                                countries && countries.slice(1).reverse().map((country: Country) =>
                                     <Box key={country.code} height="20px" mr="3px">
                                         <Flag code={country.code} round="true" />
                                     </Box>
@@ -259,7 +282,7 @@ const GridTemplate = () => {
                         </Box>
 
                         {
-                            countries.slice(0, -1).map((column: any) =>
+                            countries.slice(0, -1).map((column: Country) =>
                                 <Box key={column.code} display="flex" flexDirection="column" alignItems="center">
                                     <Box height="20px">
                                         <Flag
@@ -268,7 +291,7 @@ const GridTemplate = () => {
                                     </Box>
 
                                     {
-                                        countries.slice(1).reverse().map((row: any) => {
+                                        countries.slice(1).reverse().map((row: Country) => {
                                             const cell = data?.[column.code]?.[row.code];
 
                                             return cell ?
@@ -340,38 +363,38 @@ const HIGHLIGHT_COLUMNS = [
     {
         field: "country",
         headerName: "Country",
-        valueGetter: (params: any) => params.row.country.name,
-        renderCell: (params: any) => <CountryFlagCell country={params.row.country} />,
+        valueGetter: (params: GridValueGetterParams) => params.row.country.name,
+        renderCell: (params: GridRenderCellParams) => <CountryFlagCell country={params.row.country} />,
         flex: 2,
     },
 
     {
         field: "highestCountry",
         headerName: "Most Similar Country",
-        valueGetter: (params: any) => params.row.highestCountry.name,
-        renderCell: (params: any) => <CountryFlagCell country={params.row.highestCountry} />,
+        valueGetter: (params: GridValueGetterParams) => params.row.highestCountry.name,
+        renderCell: (params: GridRenderCellParams) => <CountryFlagCell country={params.row.highestCountry} />,
         flex: 2,
     },
 
     {
         field: "highest",
         headerName: "Value",
-        renderCell: (params: any) => params.row.highest.toFixed(METRICS[0].getDecimalPlaces()),
+        renderCell: (params: GridRenderCellParams) => params.row.highest.toFixed(METRICS[0].getDecimalPlaces()),
         flex: 1,
     },
 
     {
         field: "lowestCountry",
         headerName: "Least Similar Country",
-        valueGetter: (params: any) => params.row.lowestCountry.name,
-        renderCell: (params: any) => <CountryFlagCell country={params.row.lowestCountry} />,
+        valueGetter: (params: GridValueGetterParams) => params.row.lowestCountry.name,
+        renderCell: (params: GridRenderCellParams) => <CountryFlagCell country={params.row.lowestCountry} />,
         flex: 2,
     },
 
     {
         field: "lowest",
         headerName: "Value",
-        renderCell: (params: any) => params.row.lowest.toFixed(METRICS[0].getDecimalPlaces()),
+        renderCell: (params: GridRenderCellParams) => params.row.lowest.toFixed(METRICS[0].getDecimalPlaces()),
         flex: 1,
     },
 ]
@@ -380,8 +403,8 @@ const FILTER_COLUMNS: GridColDef[] = [
     {
         field: "countries",
         headerName: "Countries",
-        valueGetter: (params: any) => `${params.row.first.name} and ${params.row.second.name}`,
-        renderCell: (params: any) => (
+        valueGetter: (params: GridValueGetterParams) => `${params.row.first.name} and ${params.row.second.name}`,
+        renderCell: (params: GridRenderCellParams) => (
             <Box
                 display="flex"
                 flexDirection="row"
@@ -400,7 +423,7 @@ const FILTER_COLUMNS: GridColDef[] = [
         headerName: "Similarity",
         headerAlign: "left",
         align: "left",
-        renderCell: (params: any) => params.row.similarity.toFixed(METRICS[0].getDecimalPlaces()),
+        renderCell: (params: GridRenderCellParams) => params.row.similarity.toFixed(METRICS[0].getDecimalPlaces()),
         type: "number",
         flex: 1,
     }

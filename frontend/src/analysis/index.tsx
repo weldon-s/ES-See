@@ -4,6 +4,7 @@ import { Box, Button, Card, Container, Grid, Typography } from "@mui/material";
 
 import AnalysisTemplate, { AnalysisTarget, COUNTRY, LANGUAGE } from "./analysis-template"
 import { Parameter, RequestData } from "./request-data"
+import { Country } from "../types";
 
 const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
 const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);
@@ -52,7 +53,7 @@ export class View {
         );
     }
 
-    constructor(title: string, description: string, metrics: RequestData[], target: any) {
+    constructor(title: string, description: string, metrics: RequestData[], target: AnalysisTarget) {
         this.title = title;
         this.description = description;
         this.metrics = metrics;
@@ -83,7 +84,7 @@ export class View {
     }
 }
 
-const getViews = (countries: any[]) => {
+const getViews = (countries: Country[]) => {
     const COUNTRY_PARAM = Parameter.getParameter(
         "country",
         "Country",
@@ -196,7 +197,7 @@ const getViews = (countries: any[]) => {
 
 //since the routes need to be children, they need to be created in a function as opposed to a component
 //this means we can't use hooks, so we need to pass in the countries
-const getAnalysisRoute = (countries: any) => {
+const getAnalysisRoute = (countries: Country[]) => {
     const views = getViews(countries);
 
     return (

@@ -16,7 +16,7 @@ import {
     ToggleButtonGroup,
     Typography
 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridRenderCellParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { Form, useNavigate } from 'react-router-dom';
 
 import { Bar, BarChart, CartesianGrid, Tooltip, TooltipProps, XAxis, YAxis } from "recharts";
@@ -30,9 +30,10 @@ import { CountryFlagCell } from '../components/flags';
 import { RequestData } from './request-data';
 import { StyledBox } from '../components/layout';
 
-import am4geodata_usaLow from "@amcharts/amcharts5-geodata/usaLow";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+import { Country } from '../types';
 
+//TODO make type for data + standardize data format between targets
 interface AnalysisTemplateProps {
     title: string;
     metrics: RequestData[];
@@ -45,7 +46,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
     const [data, setData] = useState<any>([]);
     const [view, setView] = useState<number>(0);
 
-    const countries: any[] = useContext(CountryContext);
+    const countries: Country[] = useContext(CountryContext);
 
     const navigate = useNavigate();
 
@@ -232,14 +233,14 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                         {
                             field: target.name,
                             headerName: target.name,
-                            valueGetter: (params: any) => target.getValue(params.row),
-                            renderCell: (params: any) => target.render(params.row),
+                            valueGetter: (params: GridValueGetterParams) => target.getValue(params.row),
+                            renderCell: (params: GridRenderCellParams) => target.render(params.row),
                             flex: 2,
                         },
                         {
                             field: "result",
                             headerName: metrics[metricId].label,
-                            valueGetter: (params: any) => params.row.result.toFixed(metrics[metricId].getDecimalPlaces()),
+                            valueGetter: (params: GridValueGetterParams) => params.row.result.toFixed(metrics[metricId].getDecimalPlaces()),
                             flex: 2,
                         }
                     ];
@@ -278,7 +279,6 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                                 label="Metric"
                                 value={metricId}
                                 onChange={(e: any) => {
-                                    //setChoices(choices => metrics[e.target.value].getValueObject(choices));
                                     setMetricId(e.target.value);
                                 }}
                                 sx={{
@@ -330,7 +330,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
                                                     renderInput={(params) => <TextField {...params} label="Country" />}
                                                     onChange={(e, value) => {
                                                         setRerender(n => n + 1);
-                                                        metrics[metricId].setChoice(param.name, value.id)
+                                                        metrics[metricId].setChoice(param.name, value?.id)
                                                     }}
                                                 />
                                             </FormControl>
