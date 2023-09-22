@@ -30,19 +30,15 @@ interface Grid {
     [key: string]: GridRow
 }
 
-const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
-const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);
+interface GridTemplateProps {
+    title: string,
+    metrics: RequestData[],
+}
 
-const yearsConstructor = RequestData.getPresetParameters([START_YEAR_PARAM, END_YEAR_PARAM]);
+//TODO add selection of metrics
+const GridTemplate = (props: GridTemplateProps) => {
+    const { title, metrics } = props;
 
-const METRICS = [
-    yearsConstructor("Similarity", "friends/get_similarity/")
-        .addParameter(Parameter.getParameter("mode", "Mode", ["cosine", "rank"]))
-    ,
-];
-
-//TODO unify with other analysis template
-const GridTemplate = () => {
     const [data, setData] = useState<undefined | Grid>(undefined);
 
     const [countries, setCountries] = useState<undefined | Country[]>(undefined);
@@ -61,7 +57,7 @@ const GridTemplate = () => {
             //we need to reverse the data because we want the columns to go reverse alphabetically
             //this way our triangle is widest at the top
 
-            METRICS[0].request()
+            metrics[0].request()
                 .then((res: any) => {
                     const data = res.data.data;
                     const countries = res.data.countries;
@@ -180,6 +176,76 @@ const GridTemplate = () => {
         }
     }, [lowest, highest])
 
+    const highlightColumns = useMemo(() => [
+        {
+            field: "country",
+            headerName: "Country",
+            valueGetter: (params: GridValueGetterParams) => params.row.country.name,
+            renderCell: (params: GridRenderCellParams) => <CountryFlagCell country={params.row.country} />,
+            flex: 2,
+        },
+
+        {
+            field: "highestCountry",
+            headerName: "Most Similar Country",
+            valueGetter: (params: GridValueGetterParams) => params.row.highestCountry.name,
+            renderCell: (params: GridRenderCellParams) => <CountryFlagCell country={params.row.highestCountry} />,
+            flex: 2,
+        },
+
+        {
+            field: "highest",
+            headerName: "Value",
+            renderCell: (params: GridRenderCellParams) => params.row.highest.toFixed(metrics[0].getDecimalPlaces()),
+            flex: 1,
+        },
+
+        {
+            field: "lowestCountry",
+            headerName: "Least Similar Country",
+            valueGetter: (params: GridValueGetterParams) => params.row.lowestCountry.name,
+            renderCell: (params: GridRenderCellParams) => <CountryFlagCell country={params.row.lowestCountry} />,
+            flex: 2,
+        },
+
+        {
+            field: "lowest",
+            headerName: "Value",
+            renderCell: (params: GridRenderCellParams) => params.row.lowest.toFixed(metrics[0].getDecimalPlaces()),
+            flex: 1,
+        },
+    ], [metrics]);
+
+    const filterColumns: GridColDef[] = useMemo(() => [
+        {
+            field: "countries",
+            headerName: "Countries",
+            valueGetter: (params: GridValueGetterParams) => `${params.row.first.name} and ${params.row.second.name}`,
+            renderCell: (params: GridRenderCellParams) => (
+                <Box
+                    display="flex"
+                    flexDirection="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                >
+                    <CountryFlagCell country={params.row.first} mr={1} />
+                    <Typography> and </Typography>
+                    <CountryFlagCell country={params.row.second} ml={1} />
+                </Box>
+            ),
+            flex: 2,
+        },
+        {
+            field: "similarity",
+            headerName: "Similarity",
+            headerAlign: "left",
+            align: "left",
+            renderCell: (params: GridRenderCellParams) => params.row.similarity.toFixed(metrics[0].getDecimalPlaces()),
+            type: "number",
+            flex: 1,
+        }
+    ], [metrics]);
+
     const handleUpdate = () => {
         setUpdateCount(n => n + 1);
         setData(undefined);
@@ -192,7 +258,7 @@ const GridTemplate = () => {
             flexDirection: "column",
             alignItems: "center",
         }}>
-            <Typography variant="h3" align="center" > Similarity in Voting Patterns </Typography>
+            <Typography variant="h3" align="center" > {title} </Typography>
 
             <StyledBox width="50%">
                 <Grid container>
@@ -201,7 +267,7 @@ const GridTemplate = () => {
                     </Grid>
 
                     {
-                        METRICS[0].parameters.map(param =>
+                        metrics[0].parameters.map(param =>
                             <Grid
                                 key={param.name}
                                 item
@@ -217,10 +283,10 @@ const GridTemplate = () => {
                                         <>
                                             <InputLabel id={`${param.name}-label`}> {param.label} </InputLabel>
                                             <Checkbox
-                                                checked={METRICS[0].getChoice(param.name)}
+                                                checked={metrics[0].getChoice(param.name)}
                                                 onChange={(e) => {
                                                     setRerender(n => n + 1);
-                                                    METRICS[0].setChoice(param.name, e.target.checked)
+                                                    metrics[0].setChoice(param.name, e.target.checked)
                                                 }}
                                             />
                                         </>
@@ -230,10 +296,10 @@ const GridTemplate = () => {
                                             <Select
                                                 labelId={`${param.name}-label`}
                                                 label={param.label}
-                                                value={METRICS[0].getChoice(param.name)}
+                                                value={metrics[0].getChoice(param.name)}
                                                 onChange={(e) => {
                                                     setRerender(n => n + 1);
-                                                    METRICS[0].setChoice(param.name, e.target.value)
+                                                    metrics[0].setChoice(param.name, e.target.value)
                                                 }}>
                                                 {
                                                     param.choices.map(choice => (
@@ -310,7 +376,7 @@ const GridTemplate = () => {
                                                         pl="2px"
                                                         pr="2px"
                                                     >
-                                                        {cell.toFixed(METRICS[0].getDecimalPlaces())}
+                                                        {cell.toFixed(metrics[0].getDecimalPlaces())}
                                                     </Typography>
                                                 </Box>
                                                 :
@@ -327,7 +393,7 @@ const GridTemplate = () => {
                         <DataGrid
                             autoHeight
                             rows={highlights}
-                            columns={HIGHLIGHT_COLUMNS}
+                            columns={highlightColumns}
                             density="compact"
                             hideFooter
                             sx={{
@@ -340,7 +406,7 @@ const GridTemplate = () => {
                         <DataGrid
                             autoHeight
                             rows={filtered}
-                            columns={FILTER_COLUMNS}
+                            columns={filterColumns}
                             density="compact"
                             sx={{
                                 width: "80%",
@@ -358,73 +424,3 @@ const GridTemplate = () => {
 }
 
 export default GridTemplate;
-
-const HIGHLIGHT_COLUMNS = [
-    {
-        field: "country",
-        headerName: "Country",
-        valueGetter: (params: GridValueGetterParams) => params.row.country.name,
-        renderCell: (params: GridRenderCellParams) => <CountryFlagCell country={params.row.country} />,
-        flex: 2,
-    },
-
-    {
-        field: "highestCountry",
-        headerName: "Most Similar Country",
-        valueGetter: (params: GridValueGetterParams) => params.row.highestCountry.name,
-        renderCell: (params: GridRenderCellParams) => <CountryFlagCell country={params.row.highestCountry} />,
-        flex: 2,
-    },
-
-    {
-        field: "highest",
-        headerName: "Value",
-        renderCell: (params: GridRenderCellParams) => params.row.highest.toFixed(METRICS[0].getDecimalPlaces()),
-        flex: 1,
-    },
-
-    {
-        field: "lowestCountry",
-        headerName: "Least Similar Country",
-        valueGetter: (params: GridValueGetterParams) => params.row.lowestCountry.name,
-        renderCell: (params: GridRenderCellParams) => <CountryFlagCell country={params.row.lowestCountry} />,
-        flex: 2,
-    },
-
-    {
-        field: "lowest",
-        headerName: "Value",
-        renderCell: (params: GridRenderCellParams) => params.row.lowest.toFixed(METRICS[0].getDecimalPlaces()),
-        flex: 1,
-    },
-]
-
-const FILTER_COLUMNS: GridColDef[] = [
-    {
-        field: "countries",
-        headerName: "Countries",
-        valueGetter: (params: GridValueGetterParams) => `${params.row.first.name} and ${params.row.second.name}`,
-        renderCell: (params: GridRenderCellParams) => (
-            <Box
-                display="flex"
-                flexDirection="row"
-                justifyContent="space-between"
-                alignItems="center"
-            >
-                <CountryFlagCell country={params.row.first} mr={1} />
-                <Typography> and </Typography>
-                <CountryFlagCell country={params.row.second} ml={1} />
-            </Box>
-        ),
-        flex: 2,
-    },
-    {
-        field: "similarity",
-        headerName: "Similarity",
-        headerAlign: "left",
-        align: "left",
-        renderCell: (params: GridRenderCellParams) => params.row.similarity.toFixed(METRICS[0].getDecimalPlaces()),
-        type: "number",
-        flex: 1,
-    }
-]

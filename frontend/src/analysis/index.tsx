@@ -5,6 +5,7 @@ import { Box, Button, Card, Container, Grid, Typography } from "@mui/material";
 import AnalysisTemplate, { AnalysisTarget, COUNTRY, LANGUAGE } from "./analysis-template"
 import { Parameter, RequestData } from "./request-data"
 import { Country } from "../types";
+import GridTemplate from "./grid";
 
 const START_YEAR_PARAM = Parameter.getRangeParameter("start_year", "Start Year", 2023, 1956, -1);
 const END_YEAR_PARAM = Parameter.getRangeParameter("end_year", "End Year", 2023, 1956, -1);
@@ -23,7 +24,6 @@ export class View {
     private title: string;
     private description: string;
     private metrics: RequestData[];
-    private target: AnalysisTarget;
     private link: string;
     element: JSX.Element;
     route: JSX.Element;
@@ -53,22 +53,31 @@ export class View {
         );
     }
 
-    constructor(title: string, description: string, metrics: RequestData[], target: AnalysisTarget) {
+    // target is optional, if it's not provided, it will be a grid
+    //TODO make this more flexible
+    constructor(title: string, description: string, metrics: RequestData[], target?: AnalysisTarget) {
         this.title = title;
         this.description = description;
         this.metrics = metrics;
-        this.target = target;
 
         this.link = title
             .toLowerCase()
             .replace(/[^\w\s]/g, '') //remove non-alphanumeric characters that aren't spaces
             .replace(/\s/g, '-') //replace spaces with hyphens
 
-        this.element = <AnalysisTemplate
-            title={title}
-            metrics={metrics}
-            target={target}
-        />
+        if (target) {
+            this.element = <AnalysisTemplate
+                title={title}
+                metrics={metrics}
+                target={target}
+            />
+        }
+        else {
+            this.element = <GridTemplate
+                title={title}
+                metrics={metrics}
+            />
+        }
 
         this.route = <Route
             key={this.link}
@@ -191,6 +200,15 @@ const getViews = (countries: Country[]) => {
                     .addParameter(SHOW_TYPE_PARAM),
             ],
             COUNTRY
+        ),
+
+        new View(
+            "Similarity in Voting Patterns",
+            "See how similar a country's voting patterns are to other countries",
+            [
+                yearsConstructor("Similarity", "friends/get_similarity/")
+                    .addParameter(Parameter.getParameter("mode", "Mode", ["cosine", "rank"]))
+            ]
         )
     ]
 }

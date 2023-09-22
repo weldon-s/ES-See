@@ -79,7 +79,6 @@ function App() {
                             {getAnalysisRoute(countries)}
 
                             <Route path="rank" element={<RankingsView />} />
-                            <Route path="tempstat" element={<GridTemplate />} />
                         </Routes>
                     </BrowserRouter>
                 </Contexts>
