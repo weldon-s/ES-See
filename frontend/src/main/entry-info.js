@@ -6,7 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { CountryContext, EditionContext } from "../contexts";
 import Client from "../api/client";
 import { CountryFlagCell, Flag } from "../components/flags";
-import { getOrdinal, getPointsKey, getShowName } from "../utils";
+import { getOrdinal, getPlaceKey, getPointsKey, getShowName } from "../utils";
 
 const EntryInfo = ({ country, year }) => {
     const navigate = useNavigate();
@@ -191,12 +191,14 @@ const ShowView = ({ show, points, results }) => (
 
 const VoteTypeView = ({ voteType, showResults, points }) => (
     <Grid item xs={6} sx={{ padding: "5px" }}>
-        <Typography align="center" textTransform="capitalize">{voteType}</Typography>
+        {voteType !== "combined" &&
+            <Typography align="center" textTransform="capitalize">{voteType}</Typography>
+        }
 
         {showResults &&
             <Typography fontSize="0.8em" align="center" fontStyle="italic">
                 {showResults[voteType]} {showResults[voteType] === 1 ? "point " : "points "}
-                ({getOrdinal(showResults[`${voteType}_place`])} place)
+                ({getOrdinal(showResults[getPlaceKey(voteType)])} place)
             </Typography>
         }
 

@@ -101,6 +101,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
             tooltipText: "{name}: {value}",
         });
 
+        //TODO low vs high
         polygonSeries.set("heatRules", [{
             target: polygonSeries.mapPolygons.template,
             dataField: "value",
@@ -109,6 +110,7 @@ const AnalysisTemplate = (props: AnalysisTemplateProps) => {
             key: "fill"
         }]);
 
+        //TODO decimal places
         const polygonData = data
             .map((elem: any) => {
                 return {

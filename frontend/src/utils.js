@@ -9,6 +9,11 @@ export const getShowName = show =>
         show === "semi-final 2" ? "second semi-final" :
             show === "grand final" ? "Grand Final" : ""
 
+//if we have both or neither, use combined
 export const getPointsKey = results =>
-    results.jury && results.televote ? "combined" :
+    !!results.jury == !!results.televote ? "combined" :
         results.jury ? "jury" : "televote";
+
+export const getPlaceKey = voteType =>
+    voteType === "jury" ? "jury_place" :
+        voteType === "televote" ? "televote_place" : "place";

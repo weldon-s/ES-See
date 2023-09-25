@@ -45,7 +45,7 @@ const CountryInfo = ({ country }) => {
             //then, we wait for all of them to resolve
             Promise.all(promises)
                 .then(values => {
-                    let newEntries =
+                    const newEntries =
                         values.map(res => res.data)
                             .map((elem, index) => {
                                 let ret = { ...rawEntries[index] };
@@ -68,6 +68,8 @@ const CountryInfo = ({ country }) => {
                             //sort chronologically
                             .sort((a, b) => a.edition.year - b.edition.year);
 
+
+                    console.log(newEntries)
                     setEntries(newEntries);
                 });
         }
@@ -155,7 +157,7 @@ const CountryInfo = ({ country }) => {
                         </Typography>
 
                         <Typography variant="body1">
-                            Their best result was {getOrdinal(bestPlace)} place {!hasQualified && "in their semi-final"}, which they achieved in {" "}
+                            Their best result was {getOrdinal(bestPlace)} place{!hasQualified && " in their semi-final"}, which they achieved in {" "}
                             {bestYears.map((elem, index) => <span key={index}>{elem}
                                 {index === bestYears.length - 1 ? "" : index === bestYears.length - 2 ? " and " : ", "}</span>)}
                         </Typography>
