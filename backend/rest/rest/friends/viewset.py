@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from scipy.stats import spearmanr
 
 from rest.countries.viewset import CountrySerializer
-from models import Country, Show, ShowType, Vote, VoteType
+from models import Country, Edition, Show, ShowType, Vote, VoteType
 
 
 class FriendViewSet(viewsets.GenericViewSet):
@@ -151,6 +151,8 @@ class FriendViewSet(viewsets.GenericViewSet):
 
         return lst
 
+    # TODO unify these next two functions
+    # likely with a function param that calculates similarity given two vectors
     def calculate_cosine_similarity_matrix(self, year: int):
         """
         Gets a "matrix" of the similarity between each pair of countries' voting.
@@ -159,24 +161,26 @@ class FriendViewSet(viewsets.GenericViewSet):
         Since similarity does not depend on the order of the countries, we will only store the upper triangle.
         """
 
-        # Get our matrices
-        jury_matrix = self.get_ranking_matrix(year, VoteType.JURY)
-        televote_matrix = self.get_ranking_matrix(year, VoteType.TELEVOTE)
+        # Get the ranking matrices for each voting type
+        voting_systems = Edition.objects.get(year=year).final.voting_system
+        matrices = [self.get_ranking_matrix(year, system) for system in voting_systems]
 
-        # Sum them
-        sum = {
+        # Sum them (assuming all voting types have the same countries)
+        summed = {
             voter: {
-                votee: jury_matrix[voter][votee] + televote_matrix[voter][votee]
-                for votee in jury_matrix[voter]
+                votee: sum(
+                    [matrix[voter][votee] for matrix in matrices if voter in matrix]
+                )
+                for votee in matrices[0][voter]
             }
-            for voter in jury_matrix
+            for voter in matrices[0]
         }
 
         matrix = {}
 
         # For each pair of countries, calculate the cosine similarity
-        for country_a in sum:
-            for country_b in sum:
+        for country_a in summed:
+            for country_b in summed:
                 # Let's skip this scenario to speed things up
                 if country_a >= country_b:
                     continue
@@ -184,14 +188,14 @@ class FriendViewSet(viewsets.GenericViewSet):
                 # Get vectors of scores (making sure to have them in the same order!)
                 # TODO account for the ranking of the other country since there will be a hole there
                 a_scores = [
-                    sum[country_a][country]
-                    for country in sum[country_a]
+                    summed[country_a][country]
+                    for country in summed[country_a]
                     if country != country_b
                 ]
 
                 b_scores = [
-                    sum[country_b][country]
-                    for country in sum[country_a]
+                    summed[country_b][country]
+                    for country in summed[country_a]
                     if country != country_b
                 ]
 
@@ -211,38 +215,40 @@ class FriendViewSet(viewsets.GenericViewSet):
         return matrix
 
     def get_rank_similarity_matrix(self, year: int):
-        # Get our matrices
-        jury_matrix = self.get_ranking_matrix(year, VoteType.JURY)
-        televote_matrix = self.get_ranking_matrix(year, VoteType.TELEVOTE)
+        # Get the ranking matrices for each voting type
+        voting_systems = Edition.objects.get(year=year).final.voting_system
+        matrices = [self.get_ranking_matrix(year, system) for system in voting_systems]
 
-        # Sum them
-        sum = {
+        # Sum them (assuming all voting types have the same countries)
+        summed = {
             voter: {
-                votee: jury_matrix[voter][votee] + televote_matrix[voter][votee]
-                for votee in jury_matrix[voter]
+                votee: sum(
+                    [matrix[voter][votee] for matrix in matrices if voter in matrix]
+                )
+                for votee in matrices[0][voter]
             }
-            for voter in jury_matrix
+            for voter in matrices[0]
         }
 
         matrix = {}
 
-        # For each pair of countries, calculate the similarity
-        for country_a in sum:
-            for country_b in sum:
+        # For each pair of countries, calculate the rank similarity
+        for country_a in summed:
+            for country_b in summed:
                 # Let's skip this scenario to speed things up
                 if country_a >= country_b:
                     continue
 
                 # Get vectors of scores (making sure to have them in the same order!)
                 a_scores = [
-                    sum[country_a][country]
-                    for country in sum[country_a]
+                    summed[country_a][country]
+                    for country in summed[country_a]
                     if country != country_b
                 ]
 
                 b_scores = [
-                    sum[country_b][country]
-                    for country in sum[country_a]
+                    summed[country_b][country]
+                    for country in summed[country_a]
                     if country != country_b
                 ]
 
