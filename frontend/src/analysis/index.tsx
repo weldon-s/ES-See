@@ -212,7 +212,7 @@ const getViews = (countries: Country[]) => {
             "Similarity in Voting Patterns",
             "See how similar a country's voting patterns are to other countries",
             [
-                yearsConstructor("Similarity", "friends/get_similarity/")
+                yearsConstructor("Similarity", "similarities/get_similarity/")
                     .addParameter(Parameter.getParameter("mode", "Mode", ["cosine", "rank"]))
             ]
         )

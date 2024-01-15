@@ -9,7 +9,7 @@ from rest.countries.viewset import CountrySerializer
 from models import Country, Edition, Show, ShowType, Vote, VoteType
 
 
-class FriendViewSet(viewsets.GenericViewSet):
+class SimilarityViewSet(viewsets.GenericViewSet):
     class RankType(Enum):
         RAW_RANK = 0
         PROPORTION = 1

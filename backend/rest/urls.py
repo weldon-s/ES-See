@@ -30,7 +30,7 @@ from rest.exchanges.viewset import ExchangeViewSet
 from rest.languages.viewset import LanguageViewSet
 from rest.votetypes.viewset import VoteTypeViewSet
 from rest.groups.viewset import GroupViewSet
-from rest.friends.viewset import FriendViewSet
+from rest.similarities.viewset import SimilarityViewSet
 
 router = DefaultRouter()
 
@@ -46,7 +46,7 @@ router.register(r"exchanges", ExchangeViewSet, "data-exchanges")
 router.register(r"languages", LanguageViewSet, "data-languages")
 router.register(r"votetypes", VoteTypeViewSet, "data-votetypes")
 router.register(r"groups", GroupViewSet, "data-groups")
-router.register(r"friends", FriendViewSet, "data-friends")
+router.register(r"similarities", SimilarityViewSet, "data-similarities")
 
 # urlpatterns = [
 #   path('', include('data.urls')),
