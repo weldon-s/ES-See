@@ -15,6 +15,7 @@ from rest.countries.viewset import CountrySerializer
 
 
 class ExchangeViewSet(viewsets.GenericViewSet):
+    # TODO make grid view for these?
     def calculate_points_from(self, data):
         country = data["country"]
 
@@ -174,3 +175,43 @@ class ExchangeViewSet(viewsets.GenericViewSet):
         )
 
         return JsonResponse(lst, safe=False)
+
+    """
+    This method calculates the discrepancies between the points given by a country and the points received by it
+    for each other country. This way, we can see which countries have the most unequal voting exchanges.
+    More points received -> positive, more points given -> negative
+    """
+
+    # TODO account for total amount of points given/received?
+
+    @action(detail=False, methods=["POST"])
+    def get_discrepancies(self, request):
+        params = {
+            "start_year": request.data["start_year"],
+            "end_year": request.data["end_year"],
+            "vote_type": request.data["vote_type"],
+            "country": request.data["country"],
+            "mode": request.data["shows"],
+            "average": request.data["average"],
+        }
+
+        points_from = self.calculate_points_from(params)
+        points_to = self.calculate_points_to(params)
+
+        discrepancies = []
+
+        for i in range(len(points_from)):
+            points_to_elem = next(
+                x for x in points_to if x["country"] == points_from[i]["country"]
+            )
+
+            discrepancies.append(
+                {
+                    "country": points_from[i]["country"],
+                    "result": points_to_elem["result"] - points_from[i]["result"],
+                }
+            )
+
+        discrepancies = sorted(discrepancies, key=lambda x: x["result"], reverse=True)
+
+        return JsonResponse(discrepancies, safe=False)

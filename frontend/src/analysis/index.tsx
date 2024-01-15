@@ -160,6 +160,12 @@ const getViews = (countries: Country[]) => {
                     .addParameter(COUNTRY_PARAM)
                     .addParameter(SHOW_TYPE_PARAM)
                     .addParameter(AVERAGE_PARAM),
+                voteTypeYearsConstructor("Point Discrepancy", "exchanges/get_discrepancies/",
+                    (choices: { [key: string]: any }) => choices.average ? 3 : 0
+                )
+                    .addParameter(COUNTRY_PARAM)
+                    .addParameter(SHOW_TYPE_PARAM)
+                    .addParameter(AVERAGE_PARAM),
             ],
             COUNTRY
         ),
