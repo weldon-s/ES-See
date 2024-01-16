@@ -176,13 +176,38 @@ class ExchangeViewSet(viewsets.GenericViewSet):
 
         return JsonResponse(lst, safe=False)
 
+    # TODO account for total amount of points given/received?
+    def calculate_point_metric(self, data):
+        points_from = self.calculate_points_from(data)
+        points_to = self.calculate_points_to(data)
+
+        result = []
+
+        for i in range(len(points_from)):
+            # TODO check Poland 2021-2023 to see if this is a valid fix
+            points_to_elem = next(
+                (x for x in points_to if x["country"] == points_from[i]["country"]),
+                None,
+            )
+
+            result.append(
+                {
+                    "country": points_from[i]["country"],
+                    "result": data["func"](
+                        points_to_elem["result"], points_from[i]["result"]
+                    ),
+                }
+            )
+
+        result = sorted(result, key=lambda x: x["result"], reverse=True)
+
+        return result
+
     """
     This method calculates the discrepancies between the points given by a country and the points received by it
     for each other country. This way, we can see which countries have the most unequal voting exchanges.
     More points received -> positive, more points given -> negative
     """
-
-    # TODO account for total amount of points given/received?
 
     @action(detail=False, methods=["POST"])
     def get_discrepancies(self, request):
@@ -195,23 +220,25 @@ class ExchangeViewSet(viewsets.GenericViewSet):
             "average": request.data["average"],
         }
 
-        points_from = self.calculate_points_from(params)
-        points_to = self.calculate_points_to(params)
+        result = self.calculate_point_metric({"func": lambda x, y: x - y, **params})
 
-        discrepancies = []
+        return JsonResponse(result, safe=False)
 
-        for i in range(len(points_from)):
-            points_to_elem = next(
-                x for x in points_to if x["country"] == points_from[i]["country"]
-            )
+    """
+    This method calculates the countries with the most points exchanged with the country passed in as an argument.
+    """
 
-            discrepancies.append(
-                {
-                    "country": points_from[i]["country"],
-                    "result": points_to_elem["result"] - points_from[i]["result"],
-                }
-            )
+    @action(detail=False, methods=["POST"])
+    def get_friends(self, request):
+        params = {
+            "start_year": request.data["start_year"],
+            "end_year": request.data["end_year"],
+            "vote_type": request.data["vote_type"],
+            "country": request.data["country"],
+            "mode": request.data["shows"],
+            "average": request.data["average"],
+        }
 
-        discrepancies = sorted(discrepancies, key=lambda x: x["result"], reverse=True)
+        result = self.calculate_point_metric({"func": lambda x, y: x + y, **params})
 
-        return JsonResponse(discrepancies, safe=False)
+        return JsonResponse(result, safe=False)
