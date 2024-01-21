@@ -5,7 +5,7 @@ import { Autocomplete, Box, Button, Container, FormControl, Grid, InputLabel, Me
 import { CountryContext, EditionContext, GroupContext } from "../contexts";
 import Client from "../api/client";
 import { EntryFlagCell, Flag } from "../components/flags.tsx";
-import { StyledBox } from "../components/layout";
+import { StyledBox, StyledHoverBox } from "../components/layout";
 import { useTheme } from "@emotion/react";
 
 //TODO unify stylings
@@ -16,7 +16,7 @@ const RankingsView = () => {
     const [isSingleYear, setIsSingleYear] = useState(true);
 
     //if multiple, whether we are sorting by country or group
-    const [isCountries, setIsCountries] = useState(true);
+    const [selectionMethod, setSelectionMethod] = useState(0);
 
     const [year, setYear] = useState("");
     const [show, setShow] = useState(0);
@@ -175,6 +175,7 @@ const RankingsView = () => {
     const handleSingleYearSubmit = () => {
         // if our year is empty, don't do anything
         if (year === "") {
+            alert("Please select a year.");
             return;
         }
 
@@ -211,16 +212,22 @@ const RankingsView = () => {
     }
 
     const handleMultipleYearSubmit = () => {
+        console.log(startYear, endYear);
+        if (startYear === "" || endYear === "") {
+            alert("Please select a start and end year.");
+            return;
+        }
+
         const params = {
             start_year: startYear,
             end_year: endYear,
         }
 
-        if (isCountries && country >= 0) {
+        if (selectionMethod === 1 && country >= 0) {
             params.country = country;
         }
 
-        if (!isCountries && group >= 0) {
+        if (selectionMethod === 2 && group >= 0) {
             params.group = group;
         }
 
@@ -231,6 +238,13 @@ const RankingsView = () => {
     }
 
     const handleSubmit = () => {
+        //If user is already sorting, ask if they want to start over
+        if (!!entries && bools.length > 0) {
+            if (!window.confirm("Are you sure you want to start over?")) {
+                return;
+            }
+        }
+
         if (isSingleYear) {
             handleSingleYearSubmit();
         }
@@ -293,10 +307,10 @@ const RankingsView = () => {
                             }}
                         >
                             <Autocomplete
-                                id="country"
+                                id="year"
                                 options={editions}
                                 getOptionLabel={(option) => `${option.city} ${option.year}`}
-                                onChange={(e, value) => setYear(value?.id ?? undefined)}
+                                onChange={(e, value) => setYear(value?.id ?? "")}
                                 value={editions.find(elem => elem.id === year) ?? null}
                                 renderInput={(params) => <TextField {...params} label="Year" />}
                             />
@@ -343,7 +357,7 @@ const RankingsView = () => {
                                 id="start-year"
                                 options={editions}
                                 getOptionLabel={(option) => `${option.city} ${option.year}`}
-                                onChange={(e, value) => setStartYear(value?.id ?? undefined)}
+                                onChange={(e, value) => setStartYear(value?.id ?? "")}
                                 value={editions.find(elem => elem.id === startYear) ?? null}
                                 renderInput={(params) => <TextField {...params} label="Start Year" />}
                             />
@@ -359,7 +373,7 @@ const RankingsView = () => {
                                 id="end-year"
                                 options={editions}
                                 getOptionLabel={(option) => `${option.city} ${option.year}`}
-                                onChange={(e, value) => setEndYear(value?.id ?? undefined)}
+                                onChange={(e, value) => setEndYear(value?.id ?? "")}
                                 value={editions.find(elem => elem.id === endYear) ?? null}
                                 renderInput={(params) => <TextField {...params} label="End Year" />}
                             />
@@ -375,15 +389,16 @@ const RankingsView = () => {
                             <Select
                                 labelId="selection-label"
                                 label="Selection Method"
-                                value={isCountries}
-                                onChange={(e) => setIsCountries(e.target.value)}
+                                value={selectionMethod}
+                                onChange={(e) => setSelectionMethod(e.target.value)}
                             >
-                                <MenuItem value={true}>Countries</MenuItem>
-                                <MenuItem value={false}>Groups</MenuItem>
+                                <MenuItem value={0}>All Songs</MenuItem>
+                                <MenuItem value={1}>Countries</MenuItem>
+                                <MenuItem value={2}>Groups</MenuItem>
                             </Select>
                         </FormControl>
 
-                        {isCountries ?
+                        {selectionMethod === 1 ?
                             <FormControl
                                 sx={{
                                     m: 1,
@@ -399,20 +414,21 @@ const RankingsView = () => {
                                     renderInput={(params) => <TextField {...params} label="Country" />}
                                 />
                             </FormControl>
-                            :
-                            <FormControl sx={{
-                                m: 1,
-                                width: "90%",
-                            }}>
-                                <Autocomplete
-                                    id="group"
-                                    options={groups}
-                                    getOptionLabel={(option) => `${option.name}`}
-                                    onChange={(e, value) => setGroup(value?.id ?? undefined)}
-                                    value={groups.find(elem => elem.id === group) ?? null}
-                                    renderInput={(params) => <TextField {...params} label="Group" />}
-                                />
-                            </FormControl>
+                            : selectionMethod === 2 ?
+                                <FormControl sx={{
+                                    m: 1,
+                                    width: "90%",
+                                }}>
+                                    <Autocomplete
+                                        id="group"
+                                        options={groups}
+                                        getOptionLabel={(option) => `${option.name}`}
+                                        onChange={(e, value) => setGroup(value?.id ?? undefined)}
+                                        value={groups.find(elem => elem.id === group) ?? null}
+                                        renderInput={(params) => <TextField {...params} label="Group" />}
+                                    />
+                                </FormControl>
+                                : <></>
                         }
                         <Button onClick={handleSubmit}>Submit</Button>
                     </StyledBox>
@@ -422,7 +438,7 @@ const RankingsView = () => {
                     onClick={startSort}
                     disabled={!entries}
                 >
-                    Sort
+                    Start Sorting
                 </Button>
 
                 {(entries && !choices) &&
@@ -465,7 +481,7 @@ const RankingsView = () => {
                             item
                             xs={6}
                         >
-                            <StyledBox
+                            <StyledHoverBox
                                 onClick={() => getNextChoice(true)}
                             >
 
@@ -473,21 +489,21 @@ const RankingsView = () => {
                                     entry={choices[0]}
                                     code={countries.find(country => country.id === choices[0].country).code}
                                 />
-                            </StyledBox>
+                            </StyledHoverBox>
                         </Grid>
 
                         <Grid
                             item
                             xs={6}
                         >
-                            <StyledBox
+                            <StyledHoverBox
                                 onClick={() => getNextChoice(false)}
                             >
                                 <EntryFlagCell
                                     entry={choices[1]}
                                     code={countries.find(country => country.id === choices[1].country).code}
                                 />
-                            </StyledBox>
+                            </StyledHoverBox>
                         </Grid>
 
                         <Grid item xs={12}>
@@ -499,7 +515,7 @@ const RankingsView = () => {
                                     justifyContent="end"
                                 >
                                     <Button onClick={undoLastChoice}>
-                                        Undo
+                                        Undo last comparison
                                     </Button>
                                 </Box>
 
@@ -540,6 +556,10 @@ const RankingsView = () => {
                         ))
                         }
 
+                        {
+                            /* TODO toggling qualifiers? */
+                            /* TODO make end tiles link to entry page */
+                        }
                         {isSingleYear && show !== 3 &&
                             <Typography align="center">*Your finalists are highlighted</Typography>
                         }

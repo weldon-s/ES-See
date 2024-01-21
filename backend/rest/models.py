@@ -57,6 +57,8 @@ class Group(BaseModel):
 class Edition(BaseModel):
     """Represents an edition of the contest"""
 
+    # TODO make year primary key
+
     year = models.IntegerField()
     host = models.ForeignKey(
         Country, on_delete=models.CASCADE

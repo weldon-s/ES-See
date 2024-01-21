@@ -7,3 +7,9 @@ export const StyledBox = styled(Box)({
     margin: "10px",
     borderRadius: "10px",
 });
+
+export const StyledHoverBox = styled(StyledBox)({
+    "&:hover": {
+        backgroundColor: "#ddd",
+    },
+});
