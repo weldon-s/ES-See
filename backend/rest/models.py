@@ -69,6 +69,10 @@ class Edition(BaseModel):
     def final(self):
         return self.show_set.get(show_type=ShowType.GRAND_FINAL)
 
+    @property
+    def semi_finals(self):
+        return self.show_set.exclude(show_type=ShowType.GRAND_FINAL)
+
     def get_qualifier_data(self):
         if self.show_set.count() == 0:
             return None
@@ -207,3 +211,9 @@ class Result(BaseModel):
             return self.televote_place
         else:
             return self.place
+
+    @property
+    def voter_count(self):
+        # get the number of countries voting in the show
+        show = self.performance.show
+        return Country.objects.filter(performance__show=show).count() - 1

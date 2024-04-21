@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
@@ -31,6 +32,7 @@ from rest.languages.viewset import LanguageViewSet
 from rest.votetypes.viewset import VoteTypeViewSet
 from rest.groups.viewset import GroupViewSet
 from rest.similarities.viewset import SimilarityViewSet
+from rest.predict.viewset import PredictViewSet
 
 router = DefaultRouter()
 
@@ -47,6 +49,7 @@ router.register(r"languages", LanguageViewSet, "data-languages")
 router.register(r"votetypes", VoteTypeViewSet, "data-votetypes")
 router.register(r"groups", GroupViewSet, "data-groups")
 router.register(r"similarities", SimilarityViewSet, "data-similarities")
+router.register(r"predict", PredictViewSet, "data-predict")
 
 # urlpatterns = [
 #   path('', include('data.urls')),
